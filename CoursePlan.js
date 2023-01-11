@@ -1,11 +1,11 @@
-/** global: State, PropertiesService, TerseCardService */
+/** global: App, TersePropertiesService, TerseCardService */
 
 const CoursePlan = {
 
   actions: {
-    mockup({ parameters: { state } }) {
-      State.restore(state);
-      State.getSheet().getRange('A1').setValue(`=FILTER('Historical Enrollment'!A:R,'Historical Enrollment'!B:B="${PropertiesService.getUserProperties().getProperty('email')}")`);
+    mockup() {
+      const sheet = SpreadsheetApp.getActive().getSheetByName('Mockup');
+      sheet.getRange('A1').setValue(`=FILTER('Historical Enrollment'!A:R,'Historical Enrollment'!B:B="${TersePropertiesService.getUserProperty('email')}")`);
       return TerseCardService.replaceStack(App.cards.error('mockup()'));
     }
   },

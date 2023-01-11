@@ -1,4 +1,4 @@
-/** global: CardService, State */
+/** global: CardService */
 
 const TerseCardService = {
   replaceStack(card, url = null) {
@@ -55,7 +55,6 @@ const TerseCardService = {
 
   newAction(functionName, stateChange = null) {
     return CardService.newAction()
-      .setFunctionName(functionName)
-      .setParameters({ state: State.toJSON(stateChange) });
+      .setFunctionName(functionName);
   },
 };
