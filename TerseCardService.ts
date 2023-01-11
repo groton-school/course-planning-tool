@@ -1,7 +1,5 @@
-/** global: CardService */
-
-const TerseCardService = {
-  replaceStack(card, url = null) {
+class TerseCardService {
+  public static replaceStack(card: GoogleAppsScript.Card_Service.Card, url: string = null): GoogleAppsScript.Card_Service.ActionResponse {
     var action = CardService.newActionResponseBuilder().setNavigation(
       CardService.newNavigation().popToRoot().updateCard(card)
     );
@@ -11,9 +9,9 @@ const TerseCardService = {
     }
 
     return action.build();
-  },
+  }
 
-  pushCard(card, url = null) {
+  public static pushCard(card: GoogleAppsScript.Card_Service.Card, url = null): GoogleAppsScript.Card_Service.ActionResponse {
     var action = CardService.newActionResponseBuilder()
       .setNavigation(CardService.newNavigation()
         .pushCard(card));
@@ -23,17 +21,17 @@ const TerseCardService = {
     }
 
     return action.build();
-  },
+  }
 
-  newCardHeader(title) {
+  public static newCardHeader(title): GoogleAppsScript.Card_Service.CardHeader {
     return CardService.newCardHeader().setTitle(title);
-  },
+  }
 
-  newTextParagraph(text) {
+  public static newTextParagraph(text: string): GoogleAppsScript.Card_Service.TextParagraph {
     return CardService.newTextParagraph().setText(text);
-  },
+  }
 
-  newDecoratedText(topLabel = null, text, bottomLabel = null, wrap = true) {
+  public static newDecoratedText(topLabel: string = null, text: string, bottomLabel: string = null, wrap: boolean = true): GoogleAppsScript.Card_Service.DecoratedText {
     var decoratedText = CardService.newDecoratedText().setText(text || " ");
     if (topLabel) {
       decoratedText = decoratedText.setTopLabel(topLabel);
@@ -45,16 +43,16 @@ const TerseCardService = {
       decoratedText = decoratedText.setBottomLabel(bottomLabel);
     }
     return decoratedText;
-  },
+  }
 
-  newTextButton(text, functionName) {
+  public static newTextButton(text: string, functionName: string): GoogleAppsScript.Card_Service.TextButton {
     return CardService.newTextButton()
       .setText(text)
       .setOnClickAction(TerseCardService.newAction(functionName));
-  },
+  }
 
-  newAction(functionName, stateChange = null) {
+  public static newAction(functionName: string): GoogleAppsScript.Card_Service.Action {
     return CardService.newAction()
       .setFunctionName(functionName);
-  },
+  }
 };

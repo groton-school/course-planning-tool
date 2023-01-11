@@ -1,15 +1,25 @@
-/** global: App, TersePropertiesService, TerseCardService, SpreadsheetApp */
 
-const CoursePlan = {
+class CoursePlan {
+  public static readonly RANGE_HOST_ID = 'Enrollment_Host_ID';
+  public static readonly RANGE_TITLE = 'Enrollment_Title';
+  public static readonly RANGE_DEPT = 'Enrollment_Department';
+  public static readonly RANGE_YEAR = 'Enrollment_Year';
+  public static readonly RANGE_TERM = 'Enrollment_Term'
 
-  actions: {
-    mockup() {
+  public static readonly SHEET_DEPTS = 'Courses by Department';
+  public static readonly SHEET_TEMPLATE = 'Template';
+  public static readonly SHEET_MOCKUP = 'Mockup';
+
+  public static readonly GRACE = 'GRACE';
+
+  public static actions = class {
+    public static mockup(): GoogleAppsScript.Card_Service.ActionResponse {
       const spreadsheet = SpreadsheetApp.getActive();
-      spreadsheet.deleteSheet(spreadsheet.getSheetByName('Mockup'));
-      var sheet = spreadsheet.setActiveSheet(spreadsheet.getSheetByName('Template'));
+      spreadsheet.deleteSheet(spreadsheet.getSheetByName(CoursePlan.SHEET_MOCKUP));
+      var sheet = spreadsheet.setActiveSheet(spreadsheet.getSheetByName(CoursePlan.SHEET_TEMPLATE));
       sheet = spreadsheet.duplicateActiveSheet();
-      sheet.setName('Mockup');
-      const email = TersePropertiesService.getUserProperty('email');
+      sheet.setName(CoursePlan.SHEET_MOCKUP);
+      const student = new Student(JSON.parse(TersePropertiesService.getUserProperty(App.PROP_STUDENT)));
       const numYears = 5;
 
       const replaceWithValue = (a1notation, value) => {
@@ -26,33 +36,30 @@ const CoursePlan = {
         } else {
           range.setValue(range.getValue());
         }
-
       }
 
-      replaceWithValue('A3:E3', `=INDEX('Advisor List'!A:E,MATCH("${email}",'Advisor List'!B:B,0),0)`);
-      const [[hostId, , firstName, lastName, gradYear]] = sheet.getRange('A3:E3').getValues();
       sheet.getRange('A3:E3').clear();
 
-      replaceWithValue('A1', `${firstName} ${lastName} '${gradYear - 2000}`);
-      replaceWithValue('A2', `="Advisor: "&JOIN(" ",INDEX('Advisor List'!G:H,MATCH("${hostId}",'Advisor List'!A:A,0),0))`);
-      replaceWithValue('B5:G5', `=ARRAYFORMULA(SEQUENCE(1,${numYears},${gradYear - 5}, 1)&" - "&SEQUENCE(1,${numYears},${gradYear - 4},1))`);
+      replaceWithValue('A1', student.getFormattedName());
+      replaceWithValue('A2', `="Advisor: "&JOIN(" ",INDEX('${App.SHEET_ADVISORS}'!G:H,MATCH("${student.hostId}",'${App.SHEET_ADVISORS}'!A:A,0),0))`);
+      replaceWithValue('B5:G5', `=ARRAYFORMULA(SEQUENCE(1,${numYears},${student.gradYear - 5}, 1)&" - "&SEQUENCE(1,${numYears},${student.gradYear - 4},1))`);
       replaceWithValue('E5:G5', sheet.getRange('D5:F5').getValues());
       replaceWithValue('D5', sheet.getRange('D5').getValue().substr(0, 4));
 
       const topLeft = sheet.getRange('B6');
-      const validation = sheet.getParent().getSheetByName('Courses by Department');
+      const validation = sheet.getParent().getSheetByName(CoursePlan.SHEET_DEPTS);
       const numDepartments = validation.getMaxColumns();
       for (var row = 0; row < numDepartments; row++) {
         for (var column = 0; column < numYears + 1; column++) {
-          if (topLeft.offset(-2, column).getValue() == 'GRACE') {
+          if (topLeft.offset(-2, column).getValue() == CoursePlan.GRACE) {
             if (row == numDepartments - 1) {
-              replaceWithValue(topLeft.offset(row, column).getA1Notation(), `=IFNA(JOIN(CHAR(10),FILTER('Historical Enrollment'!Q:Q, 'Historical Enrollment'!B:B="${email}",'Historical Enrollment'!P:P="GRACE")),)`)
+              replaceWithValue(topLeft.offset(row, column).getA1Notation(), `=IFNA(JOIN(CHAR(10),FILTER(${CoursePlan.RANGE_TITLE}, ${CoursePlan.RANGE_HOST_ID}="${student.hostId}",${CoursePlan.RANGE_DEPT}="${CoursePlan.GRACE}")),)`)
             }
           } else {
             const year = topLeft.offset(-1, column).getValue();
             if (Number(year.substr(0, 4)) < new Date().getFullYear()) {
               const department = topLeft.offset(row, -1).getValue();
-              replaceWithValue(topLeft.offset(row, column).getA1Notation(), `=IFNA(JOIN(CHAR(10),UNIQUE(FILTER('Historical Enrollment'!Q:Q&IF('Historical Enrollment'!R:R<>""," ("&'Historical Enrollment'!R:R&")",""),'Historical Enrollment'!B:B="${email}",'Historical Enrollment'!G:G="${year}",'Historical Enrollment'!P:P="${department}"))),)`);
+              replaceWithValue(topLeft.offset(row, column).getA1Notation(), `=IFNA(JOIN(CHAR(10),UNIQUE(FILTER(${CoursePlan.RANGE_TITLE}&IF(${CoursePlan.RANGE_TERM}<>""," ("&${CoursePlan.RANGE_TERM}&")",""),${CoursePlan.RANGE_HOST_ID}="${student.hostId}",${CoursePlan.RANGE_YEAR}="${year}",${CoursePlan.RANGE_DEPT}="${department}"))),)`);
             } else {
               topLeft.offset(row, column, 1, (numYears + 1) - column).setDataValidation(SpreadsheetApp.newDataValidation()
                 .requireValueInRange(validation.getRange('A2:A').offset(0, row))
@@ -77,17 +84,11 @@ const CoursePlan = {
        *   Create advisor folders as needed and update Advisor Folder Inventory, update advisor access permissions
        */
 
-      return TerseCardService.replaceStack(App.cards.error(`Mocked up ${firstName} ${lastName}`, JSON.stringify({
-        hostId: hostId,
-        email: email,
-        firstName: firstName,
-        lastName: lastName,
-        gradYear: gradYear
-      }, null, 2)));
+      return TerseCardService.replaceStack(App.cards.error(`Mocked up ${student.getFormattedName()}`, JSON.stringify(student, null, 2)));
     }
-  },
+  }
 }
 
-function __CoursePlan_actions_mockup(...args) {
-  return CoursePlan.actions.mockup(...args);
+function __CoursePlan_actions_mockup() {
+  return CoursePlan.actions.mockup();
 }

@@ -1,30 +1,31 @@
-/** global: PropertiesService */
+type PropertyDecoder = (encoded: string) => any;
+type PropertyEncoder = (value: any) => string;
 
-const TersePropertiesService = {
-  getScriptProperty(key, decoder = null) {
+class TersePropertiesService {
+  public static getScriptProperty(key: string, decoder: PropertyDecoder = null) {
     const value = PropertiesService.getScriptProperties().getProperty(key);
     if (decoder) {
       return decoder(value);
     }
     return value;
-  },
+  }
 
-  getUserProperty(key, decoder = null) {
+  public static getUserProperty(key: string, decoder: PropertyDecoder = null) {
     const value = PropertiesService.getUserProperties().getProperty(key);
     if (decoder) {
       return decoder(value);
     }
     return value;
-  },
+  }
 
-  setUserProperty(key, value, encoder = null) {
+  public static setUserProperty(key: string, value: string, encoder: PropertyEncoder = null) {
     if (encoder) {
       value = encoder(value);
     }
     return PropertiesService.getUserProperties().setProperty(key, value);
-  },
+  }
 
-  deleteUserProperty(key) {
+  public static deleteUserProperty(key: string) {
     return PropertiesService.getUserProperties().deleteProperty(key);
   }
 }
