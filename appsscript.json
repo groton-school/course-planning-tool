@@ -1,0 +1,18 @@
+{
+  "timeZone": "America/New_York",
+  "dependencies": {
+  },
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
+  "addOns": {
+      "common": {
+          "name": "Course Planning",
+          "logoUrl": "https://drive.google.com/uc?id=1-yjGu_0kcAXjxzEZK4ryxku2B2tL--vb",
+          "homepageTrigger": {
+              "runFunction": "__App_launch"
+          }
+      },
+      "drive": {},
+      "sheets": {}
+  }
+}
