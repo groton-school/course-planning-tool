@@ -19,7 +19,7 @@ const App = {
 
   actions: {
     home() {
-      return TerseCardService.replaceStack(App.cards.studentPicker());
+      return TerseCardService.replaceStack(App.launch());
     }
   },
 
