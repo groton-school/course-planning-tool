@@ -5,10 +5,12 @@ class CoursePlan {
   public static readonly RANGE_DEPT = 'Enrollment_Department';
   public static readonly RANGE_YEAR = 'Enrollment_Year';
   public static readonly RANGE_TERM = 'Enrollment_Term'
+  public static readonly A1_NUM_OPT_PER_DEPT = 'B1';
 
   public static readonly SHEET_DEPTS = 'Courses by Department';
   public static readonly SHEET_TEMPLATE = 'Template';
   public static readonly SHEET_MOCKUP = 'Mockup';
+  public static readonly SHEET_PARAMS = 'Parameters';
 
   public static readonly GRACE = 'GRACE';
 
@@ -22,56 +24,77 @@ class CoursePlan {
       const student = new Student(JSON.parse(TersePropertiesService.getUserProperty(App.PROP_STUDENT)));
       const numYears = 5;
 
-      const replaceWithValue = (a1notation, value) => {
+      const replaceWithValue = (a1notation: string, value, replace = false) => {
         const range = sheet.getRange(a1notation);
 
         if (Array.isArray(value)) {
+          if (!Array.isArray(value[0])) {
+            value = [value];
+          }
           range.setValues(value);
         } else {
           range.offset(0, 0, 1, 1).setValue(value);
         }
-
-        if (range.getNumRows() > 1 || range.getNumColumns() > 1) {
-          range.setValues(range.getValues());
-        } else {
-          range.setValue(range.getValue());
+        if (replace) {
+          if (range.getNumRows() > 1 || range.getNumColumns() > 1) {
+            range.setValues(range.getValues());
+          } else {
+            range.setValue(range.getValue());
+          }
         }
       }
 
       sheet.getRange('A3:E3').clear();
 
-      replaceWithValue('A1', student.getFormattedName());
-      replaceWithValue('A2', `="Advisor: "&JOIN(" ",INDEX('${App.SHEET_ADVISORS}'!G:H,MATCH("${student.hostId}",'${App.SHEET_ADVISORS}'!A:A,0),0))`);
-      replaceWithValue('B5:G5', `=ARRAYFORMULA(SEQUENCE(1,${numYears},${student.gradYear - 5}, 1)&" - "&SEQUENCE(1,${numYears},${student.gradYear - 4},1))`);
-      replaceWithValue('E5:G5', sheet.getRange('D5:F5').getValues());
-      replaceWithValue('D5', sheet.getRange('D5').getValue().substr(0, 4));
+      replaceWithValue('A1:A2', [[student.getFormattedName()], [`="Advisor: "&JOIN(" ",INDEX('${App.SHEET_ADVISORS}'!G:H,MATCH("${student.hostId}",'${App.SHEET_ADVISORS}'!A:A,0),0))`]]);
+      const years: (string | number)[] = [4, 3, 2, 1, 0].map(value => `${student.gradYear - value - 1} - ${student.gradYear - value}`);
+      years.splice(2, 0, student.gradYear - 3);
+      replaceWithValue('B5:G5', years);
 
       const topLeft = sheet.getRange('B6');
       const validation = sheet.getParent().getSheetByName(CoursePlan.SHEET_DEPTS);
       const numDepartments = validation.getMaxColumns();
+      const now = new Date();
+      const schoolYear = now.getMonth() > 6 ? now.getFullYear() + 1 : now.getFullYear();
+      const values = [];
+      const validations = [];
       for (var row = 0; row < numDepartments; row++) {
+        const rowValue = [];
+        const rowValidation = [];
         for (var column = 0; column < numYears + 1; column++) {
-          if (topLeft.offset(-2, column).getValue() == CoursePlan.GRACE) {
-            if (row == numDepartments - 1) {
-              replaceWithValue(topLeft.offset(row, column).getA1Notation(), `=IFNA(JOIN(CHAR(10),FILTER(${CoursePlan.RANGE_TITLE}, ${CoursePlan.RANGE_HOST_ID}="${student.hostId}",${CoursePlan.RANGE_DEPT}="${CoursePlan.GRACE}")),)`)
+          const year = topLeft.offset(-1, column).getValue();
+          if ((year.substr ? Number(year.substr(0, 4)) : year) < schoolYear) {
+            if (topLeft.offset(-2, column).getValue() == CoursePlan.GRACE) {
+              if (row == numDepartments - 1) {
+                rowValue.push(`=IFNA(JOIN(CHAR(10),FILTER(${CoursePlan.RANGE_TITLE}, ${CoursePlan.RANGE_HOST_ID}="${student.hostId}",${CoursePlan.RANGE_DEPT}="${CoursePlan.GRACE}")),)`);
+              } else {
+                rowValue.push('');
+              }
+            } else {
+              const department = topLeft.offset(row, -1).getValue();
+              rowValue.push(`=IFNA(JOIN(CHAR(10),UNIQUE(FILTER(${CoursePlan.RANGE_TITLE}&IF(${CoursePlan.RANGE_TERM}<>""," ("&${CoursePlan.RANGE_TERM}&")",""),${CoursePlan.RANGE_HOST_ID}="${student.hostId}",${CoursePlan.RANGE_YEAR}="${year}",${CoursePlan.RANGE_DEPT}="${department}"))),)`);
             }
           } else {
-            const year = topLeft.offset(-1, column).getValue();
-            if (Number(year.substr(0, 4)) < new Date().getFullYear()) {
-              const department = topLeft.offset(row, -1).getValue();
-              replaceWithValue(topLeft.offset(row, column).getA1Notation(), `=IFNA(JOIN(CHAR(10),UNIQUE(FILTER(${CoursePlan.RANGE_TITLE}&IF(${CoursePlan.RANGE_TERM}<>""," ("&${CoursePlan.RANGE_TERM}&")",""),${CoursePlan.RANGE_HOST_ID}="${student.hostId}",${CoursePlan.RANGE_YEAR}="${year}",${CoursePlan.RANGE_DEPT}="${department}"))),)`);
-            } else {
-              topLeft.offset(row, column, 1, (numYears + 1) - column).setDataValidation(SpreadsheetApp.newDataValidation()
-                .requireValueInRange(validation.getRange('A2:A').offset(0, row))
-                .build());
-              break;
-            }
+            rowValidation.push(SpreadsheetApp.newDataValidation()
+              .requireValueInRange(validation.getRange('A2:A').offset(0, row))
+              .build());
           }
         }
+        values.push(rowValue);
+        validations.push(rowValidation);
+      }
+      topLeft.offset(0, 0, values.length, values[0].length).setValues(values);
+      if (validations[0].length) {
+        topLeft.offset(0, values[0].length, validations.length, validations[0].length).setDataValidations(validations);
+      }
+
+      const numOptions = sheet.getParent().getSheetByName(CoursePlan.SHEET_PARAMS).getRange(CoursePlan.A1_NUM_OPT_PER_DEPT).getValue();
+      for (var row = 0; row < numDepartments * numOptions; row += numOptions) {
+        sheet.insertRowsAfter(topLeft.getRow() + row, numOptions - 1);
+        topLeft.offset(row, -1, numOptions, values[0].length + 1).mergeVertically();
       }
 
       // TODO deal with GRACE course selection
-      // TODO deal with multiple planned courses from a single department
       // TODO add advisor notes (protected)
       // TODO add studies committee notes (protected)
       // TODO add college counseling notes (protected)
