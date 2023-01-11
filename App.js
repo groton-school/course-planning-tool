@@ -1,19 +1,13 @@
 /** global: SpreadsheetApp, TersePropertiesService, CoursePlan, CardService, TerseCardService */
 
 const App = {
-  sheet: null,
+  data: null,
 
   launch() {
-    const data = TersePropertiesService.getScriptProperty('DATA', SpreadsheetApp.openById);
-    if (SpreadsheetApp.getActive().getId() != data.getId()) {
+    App.data = TersePropertiesService.getScriptProperty('DATA', SpreadsheetApp.openById);
+    if (SpreadsheetApp.getActive().getId() != App.data.getId()) {
       return App.cards.error();
     }
-    App.sheet = data.getSheetByName('Mockup');
-    if (!App.sheet) {
-      App.sheet = data.insertSheet(0);
-      App.sheet.setName('Mockup');
-    }
-
     return App.cards.studentPicker();
   },
 
@@ -25,19 +19,19 @@ const App = {
 
   cards: {
     studentPicker() {
-      App.sheet.getRange('A1').setValue("=SORT(UNIQUE('Historical Enrollment'!B2:E), 4, true, 3, true)");
+      const students = App.data.getSheetByName('Advisor List');
       var dropdown = CardService.newSelectionInput()
         .setType(CardService.SelectionInputType.DROPDOWN)
         .setFieldName('email')
         .setTitle('Choose a student')
-        .setOnChangeAction(TerseCardService.newAction('__App_handlers_emailChange'));
-      for (const row of App.sheet.getRange('A:E').getValues()) {
+        .setOnChangeAction(TerseCardService.newAction('__App_handlers_emailChange'))
+        .addItem(' ', null, true);
+      for (const row of students.getRange('A2:E').getValues()) {
         if (row[0]) {
-          dropdown = dropdown.addItem(`${row[2]} ${row[3]}`, row[0], false);
+          dropdown = dropdown.addItem(`${row[2]} ${row[3]} ’${row[4] - 2000}`, row[1], false);
         }
       }
-      TersePropertiesService.setUserProperty('email', App.sheet.getRange('A1').getValue());
-      App.sheet.getRange('A1').setValue(null);
+      TersePropertiesService.deleteUserProperty('email');
 
       return CardService.newCardBuilder()
         .setHeader(TerseCardService.newCardHeader('Course Planning Mockup'))

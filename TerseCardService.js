@@ -47,10 +47,10 @@ const TerseCardService = {
     return decoratedText;
   },
 
-  newTextButton(text, functionName, stateChamge = null) {
+  newTextButton(text, functionName) {
     return CardService.newTextButton()
       .setText(text)
-      .setOnClickAction(TerseCardService.newAction(functionName, stateChamge));
+      .setOnClickAction(TerseCardService.newAction(functionName));
   },
 
   newAction(functionName, stateChange = null) {
