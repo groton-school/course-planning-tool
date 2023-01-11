@@ -17,6 +17,12 @@ const App = {
     }
   },
 
+  actions: {
+    home() {
+      return TerseCardService.replaceStack(App.cards.studentPicker());
+    }
+  },
+
   cards: {
     studentPicker() {
       const students = App.data.getSheetByName('Advisor List');
@@ -45,16 +51,21 @@ const App = {
       return CardService.newCardBuilder()
         .setHeader(TerseCardService.newCardHeader(title))
         .addSection(CardService.newCardSection()
-          .addWidget(TerseCardService.newTextParagraph(message || ' ')))
+          .addWidget(TerseCardService.newTextParagraph(message || ' '))
+          .addWidget(TerseCardService.newTextButton('OK', '__App_actions_home')))
         .build();
     }
   }
 }
 
-function __App_launch(event) {
-  return App.launch(event);
+function __App_launch(...args) {
+  return App.launch(...args);
 }
 
-function __App_handlers_emailChange(event) {
-  return App.handlers.emailChange(event);
+function __App_handlers_emailChange(...args) {
+  return App.handlers.emailChange(...args);
+}
+
+function __App_actions_home(...args) {
+  return App.actions.home(...args);
 }

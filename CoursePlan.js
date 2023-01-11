@@ -63,6 +63,7 @@ const CoursePlan = {
         }
       }
 
+      // TODO deal with GRACE course selection
       // TODO deal with multiple planned courses from a single department
       // TODO add advisor notes (protected)
       // TODO add studies committee notes (protected)
@@ -76,7 +77,13 @@ const CoursePlan = {
        *   Create advisor folders as needed and update Advisor Folder Inventory, update advisor access permissions
        */
 
-      return TerseCardService.replaceStack(App.cards.error('mockup()'));
+      return TerseCardService.replaceStack(App.cards.error(`Mocked up ${firstName} ${lastName}`, JSON.stringify({
+        hostId: hostId,
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        gradYear: gradYear
+      }, null, 2)));
     }
   },
 }
