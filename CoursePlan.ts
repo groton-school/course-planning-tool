@@ -41,7 +41,10 @@ class CoursePlan {
 
   private static createSheet() {
     const spreadsheet = SpreadsheetApp.getActive();
-    spreadsheet.deleteSheet(spreadsheet.getSheetByName(CoursePlan.SHEET_MOCKUP));
+    const mockup = spreadsheet.getSheetByName(CoursePlan.SHEET_MOCKUP);
+    if (mockup) {
+      spreadsheet.deleteSheet(mockup);
+    }
     CoursePlan.sheet = spreadsheet.setActiveSheet(spreadsheet.getSheetByName(CoursePlan.SHEET_TEMPLATE));
     CoursePlan.sheet = spreadsheet.duplicateActiveSheet();
     CoursePlan.sheet.setName(CoursePlan.SHEET_MOCKUP);
