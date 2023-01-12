@@ -2,9 +2,9 @@
 class CoursePlan {
   private static readonly RANGE_HOST_ID = 'Enrollment_Host_ID';
   private static readonly RANGE_TITLE = 'Enrollment_Title';
+  private static readonly RANGE_ORDER = 'Enrollment_Order';
   private static readonly RANGE_DEPT = 'Enrollment_Department';
   private static readonly RANGE_YEAR = 'Enrollment_Year';
-  private static readonly RANGE_TERM = 'Enrollment_Term'
 
   private static readonly A1_NAMES = 'A1:A2';
   private static readonly A1_YEARS = 'B5:G5';
@@ -51,7 +51,20 @@ class CoursePlan {
   }
 
   private static updateHeaders() {
-    CoursePlan.replaceWithValue(CoursePlan.A1_NAMES, [[CoursePlan.student.getFormattedName()], [`="Advisor: "&JOIN(" ",INDEX('${App.SHEET_ADVISORS}'!G:H,MATCH("${CoursePlan.student.hostId}",'${App.SHEET_ADVISORS}'!A:A,0),0))`]]);
+    CoursePlan.replaceWithValue(CoursePlan.A1_NAMES, [
+      [CoursePlan.student.getFormattedName()],
+      ['="Advisor: "&' + s.fcn(s.JOIN, '" "',
+        s.fcn(s.INDEX,
+          `'${App.SHEET_ADVISORS}'!G:H`,
+          s.fcn(s.MATCH,
+            `"${CoursePlan.student.hostId}"`,
+            `'${App.SHEET_ADVISORS}'!A:A`,
+            0
+          ),
+          0
+        )
+      )]
+    ]);
     const years: (string | number)[] = [4, 3, 2, 1, 0].map(value => `${CoursePlan.student.gradYear - value - 1} - ${CoursePlan.student.gradYear - value}`);
     years.splice(2, 0, CoursePlan.student.gradYear - 3);
     CoursePlan.replaceWithValue(CoursePlan.A1_YEARS, years);
@@ -79,13 +92,40 @@ class CoursePlan {
           if ((year.substr ? Number(year.substr(0, 4)) : year) < schoolYear) {
             if (topLeft.offset(-2, column).getValue() == CoursePlan.GRACE) {
               if (row == numDepartments - 1) {
-                rowValue.push(`=IFNA(JOIN(CHAR(10),FILTER(${CoursePlan.RANGE_TITLE}, ${CoursePlan.RANGE_HOST_ID}="${CoursePlan.student.hostId}",${CoursePlan.RANGE_DEPT}="${CoursePlan.GRACE}")),)`);
+                rowValue.push('=' + s.fcn(s.IFNA,
+                  s.fcn(s.JOIN,
+                    s.fcn(s.CHAR, 10),
+                    s.fcn(s.SORT,
+                      s.fcn(s.FILTER,
+                        CoursePlan.RANGE_TITLE,
+                        s.eq(CoursePlan.RANGE_HOST_ID, CoursePlan.student.hostId),
+                        s.eq(CoursePlan.RANGE_DEPT, CoursePlan.GRACE)
+                      )
+                    )
+                  ),
+                  '')
+                );
               } else {
                 rowValue.push('');
               }
             } else {
               const department = topLeft.offset(row, -1).getValue();
-              rowValue.push(`=IFNA(JOIN(CHAR(10),UNIQUE(FILTER(${CoursePlan.RANGE_TITLE}&IF(${CoursePlan.RANGE_TERM}<>""," ("&${CoursePlan.RANGE_TERM}&")",""),${CoursePlan.RANGE_HOST_ID}="${CoursePlan.student.hostId}",${CoursePlan.RANGE_YEAR}="${year}",${CoursePlan.RANGE_DEPT}="${department}"))),)`);
+              rowValue.push('=' + s.fcn(s.IFNA,
+                s.fcn(s.JOIN,
+                  s.fcn(s.CHAR, 10),
+                  s.fcn(s.INDEX,
+                    s.fcn(s.SORT,
+                      s.fcn(s.FILTER,
+                        `{${CoursePlan.RANGE_TITLE}, ${CoursePlan.RANGE_ORDER}}`,
+                        s.eq(CoursePlan.RANGE_HOST_ID, CoursePlan.student.hostId),
+                        s.eq(CoursePlan.RANGE_YEAR, year),
+                        s.eq(CoursePlan.RANGE_DEPT, department)
+                      ),
+                      2, true, 1, true), '', 1
+                  )
+                ),
+                ''
+              ));
             }
           } else {
             rowValidation.push(SpreadsheetApp.newDataValidation()
@@ -93,7 +133,7 @@ class CoursePlan {
               .build());
           }
         }
-        values.push(rowValue);
+        values.push(rowValue); // TODO replace with actual values rather than equations
         validations.push(rowValidation);
       }
       topLeft.offset(0, 0, values.length, values[0].length).setValues(values);
