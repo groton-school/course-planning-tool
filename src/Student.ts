@@ -1,4 +1,4 @@
-class Student {
+export default class Student {
     public hostId: string;
     public email: string;
     public firstName: string;

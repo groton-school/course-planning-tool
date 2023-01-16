@@ -1,4 +1,4 @@
-class SheetParameters {
+export default class SheetParameters {
     private static readonly SHEET_PARAMS = 'Parameters';
 
     private static readonly A1_NUM_OPT_PER_DEPT = 'B1';
@@ -10,7 +10,10 @@ class SheetParameters {
         }
         switch (key) {
             case SheetParameters.NUM_OPTIONS_PER_DEPT:
-                return spreadsheet.getSheetByName(SheetParameters.SHEET_PARAMS).getRange(SheetParameters.A1_NUM_OPT_PER_DEPT).getValue();
+                return spreadsheet
+                    .getSheetByName(SheetParameters.SHEET_PARAMS)
+                    .getRange(SheetParameters.A1_NUM_OPT_PER_DEPT)
+                    .getValue();
             default:
                 return null;
         }
