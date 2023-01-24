@@ -4,7 +4,7 @@ specifiers:
   '@battis/google-apps-script-helpers': github:battis/google-apps-script-helpers
   '@battis/prettier-config': github:battis/prettier-config
   '@tsconfig/recommended': ^1.0.2
-  '@types/google-apps-script': ^1.0.56
+  '@types/google-apps-script': ^1.0.57
   '@types/node': ^18.11.18
   gas-webpack-plugin: ^2.3.0
   ts-loader: ^9.4.2
@@ -13,7 +13,7 @@ specifiers:
   webpack-cli: ^5.0.1
 
 dependencies:
-  '@battis/google-apps-script-helpers': github.com/battis/google-apps-script-helpers/4fb1e9e20bc704152c965153b25a3e2f98674aba
+  '@battis/google-apps-script-helpers': github.com/battis/google-apps-script-helpers/86768311879af5db3647fba25f19cb8e0d68aa02
   '@types/google-apps-script': 1.0.57
 
 devDependencies:
@@ -255,16 +255,16 @@ packages:
     resolution: {integrity: sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==}
     dev: true
 
-  /acorn-import-assertions/1.8.0_acorn@8.8.1:
+  /acorn-import-assertions/1.8.0_acorn@8.8.2:
     resolution: {integrity: sha512-m7VZ3jwz4eK6A4Vtt8Ew1/mNbP24u0FhdyfA7fSvnJR6LMdfOYnmuIrrJAgrYfYJ10F/otaHTtrtrtmHdMNzEw==}
     peerDependencies:
       acorn: ^8
     dependencies:
-      acorn: 8.8.1
+      acorn: 8.8.2
     dev: true
 
-  /acorn/8.8.1:
-    resolution: {integrity: sha512-7zFpHzhnqYKrkYdUjF1HI1bzd0VygEGX8lFk4k5zVMqHEoES+P+7TKI+EvLO9WVMJ8eekdO0aDEK044xTXwPPA==}
+  /acorn/8.8.2:
+    resolution: {integrity: sha512-xjIYgE8HBrkpd/sJqOGNspf8uHG+NOHGOw6a/Urj8taM2EXfdNAH2oFcPeIFfsv3+kz/mJrS5VuMqbNLjCa2vw==}
     engines: {node: '>=0.4.0'}
     hasBin: true
     dev: true
@@ -315,7 +315,7 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
     dependencies:
-      caniuse-lite: 1.0.30001445
+      caniuse-lite: 1.0.30001447
       electron-to-chromium: 1.4.284
       node-releases: 2.0.8
       update-browserslist-db: 1.0.10_browserslist@4.21.4
@@ -325,8 +325,8 @@ packages:
     resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
     dev: true
 
-  /caniuse-lite/1.0.30001445:
-    resolution: {integrity: sha512-8sdQIdMztYmzfTMO6KfLny878Ln9c2M0fc7EH60IjlP4Dc4PiCy7K2Vl3ITmWgOyPgVQKa5x+UP/KqFsxj4mBg==}
+  /caniuse-lite/1.0.30001447:
+    resolution: {integrity: sha512-bdKU1BQDPeEXe9A39xJnGtY0uRq/z5osrnXUw0TcK+EYno45Y+U7QU9HhHEyzvMDffpYadFXi3idnSNkcwLkTw==}
     dev: true
 
   /chalk/4.1.2:
@@ -523,7 +523,7 @@ packages:
     resolution: {integrity: sha512-TPJ2Xfaewetvg3lVGiE9Pk62/ZNF3WIxloasOsEnJSs1A++K5hBKNBvvhpX+221XP8/NvPsz+0K2CGDEeJvebQ==}
     dependencies:
       gas-entry-generator: 2.2.0
-      minimatch: 5.1.4
+      minimatch: 5.1.6
       slash: 3.0.0
       webpack-sources: 3.2.3
     dev: true
@@ -662,8 +662,8 @@ packages:
       mime-db: 1.52.0
     dev: true
 
-  /minimatch/5.1.4:
-    resolution: {integrity: sha512-U0iNYXt9wALljzfnGkhFSy5sAC6/SCR3JrHrlsdJz4kF8MvhTRQNiC59iUi1iqsitV7abrNAJWElVL9pdnoUgw==}
+  /minimatch/5.1.6:
+    resolution: {integrity: sha512-lKwV/1brpG6mBUFHtb7NUmtABCb2WZZmm2wNiOA5hAb8VdCS4B3dtMWyvcoViccwAW/COERjXLt0zP1zXUN26g==}
     engines: {node: '>=10'}
     dependencies:
       brace-expansion: 2.0.1
@@ -743,8 +743,8 @@ packages:
     engines: {node: '>= 0.8.0'}
     dev: true
 
-  /punycode/2.2.0:
-    resolution: {integrity: sha512-LN6QV1IJ9ZhxWTNdktaPClrNfp8xdSAYS0Zk2ddX7XsXZAxckMHPCBcHRo0cTcEIgYPRiGEkmji3Idkh2yFtYw==}
+  /punycode/2.3.0:
+    resolution: {integrity: sha512-rRV+zQD8tVFys26lAGR9WUuS4iUAngJScM+ZRSKtvl5tKeZ2t5bvdNFdNHBW9FWR4guGHlgmsZ1G7BSm2wTbuA==}
     engines: {node: '>=6'}
     dev: true
 
@@ -899,7 +899,7 @@ packages:
     hasBin: true
     dependencies:
       '@jridgewell/source-map': 0.3.2
-      acorn: 8.8.1
+      acorn: 8.8.2
       commander: 2.20.3
       source-map-support: 0.5.21
     dev: true
@@ -953,7 +953,7 @@ packages:
   /uri-js/4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
     dependencies:
-      punycode: 2.2.0
+      punycode: 2.3.0
     dev: true
 
   /watchpack/2.4.0:
@@ -1025,8 +1025,8 @@ packages:
       '@webassemblyjs/ast': 1.11.1
       '@webassemblyjs/wasm-edit': 1.11.1
       '@webassemblyjs/wasm-parser': 1.11.1
-      acorn: 8.8.1
-      acorn-import-assertions: 1.8.0_acorn@8.8.1
+      acorn: 8.8.2
+      acorn-import-assertions: 1.8.0_acorn@8.8.2
       browserslist: 4.21.4
       chrome-trace-event: 1.0.3
       enhanced-resolve: 5.12.0
@@ -1072,8 +1072,8 @@ packages:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
     dev: true
 
-  github.com/battis/google-apps-script-helpers/4fb1e9e20bc704152c965153b25a3e2f98674aba:
-    resolution: {tarball: https://codeload.github.com/battis/google-apps-script-helpers/tar.gz/4fb1e9e20bc704152c965153b25a3e2f98674aba}
+  github.com/battis/google-apps-script-helpers/86768311879af5db3647fba25f19cb8e0d68aa02:
+    resolution: {tarball: https://codeload.github.com/battis/google-apps-script-helpers/tar.gz/86768311879af5db3647fba25f19cb8e0d68aa02}
     name: '@battis/google-apps-script-helpers'
     version: 1.0.0
     dependencies:

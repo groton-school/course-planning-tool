@@ -1,5 +1,6 @@
 import { Helper, Terse } from '@battis/google-apps-script-helpers';
-import App from './App';
+import { errorCard } from './Actions/App/Error';
+import { PROP_STUDENT, SHEET_ADVISORS } from './Constants';
 import SheetParameters from './SheetParameters';
 import Student from './Student';
 
@@ -7,7 +8,7 @@ const s = Helper.SpreadsheetApp;
 const fcn = Helper.SpreadsheetApp.fcn;
 const eq = Helper.SpreadsheetApp.eq;
 
-export default class CoursePlan {
+export class CoursePlan {
     private static readonly RANGE_HOST_ID = 'Enrollment_Host_ID';
     private static readonly RANGE_TITLE = 'Enrollment_Title';
     private static readonly RANGE_ORDER = 'Enrollment_Order';
@@ -70,11 +71,11 @@ export default class CoursePlan {
                     '" "',
                     fcn(
                         s.INDEX,
-                        `'${App.SHEET_ADVISORS}'!G:H`,
+                        `'${SHEET_ADVISORS}'!G:H`,
                         s.fcn(
                             s.MATCH,
                             `"${CoursePlan.student.hostId}"`,
-                            `'${App.SHEET_ADVISORS}'!A:A`,
+                            `'${SHEET_ADVISORS}'!A:A`,
                             0
                         ),
                         0
@@ -94,7 +95,7 @@ export default class CoursePlan {
     public static actions = class {
         public static mockup(): GoogleAppsScript.Card_Service.ActionResponse {
             CoursePlan.student = new Student(
-                JSON.parse(Terse.PropertiesService.getUserProperty(App.PROP_STUDENT))
+                JSON.parse(Terse.PropertiesService.getUserProperty(PROP_STUDENT))
             );
 
             CoursePlan.createSheet();
@@ -232,7 +233,7 @@ export default class CoursePlan {
              */
 
             return Terse.CardService.replaceStack(
-                App.cards.error(
+                errorCard(
                     `Mocked up ${CoursePlan.student.getFormattedName()}`,
                     JSON.stringify(CoursePlan.student, null, 2)
                 )
@@ -240,3 +241,6 @@ export default class CoursePlan {
         }
     };
 }
+
+global.action_coursePlan_mockup = CoursePlan.actions.mockup;
+export default 'action_coursePlan_mockup';

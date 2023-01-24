@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@battis/google-apps-script-helpers": "github:battis/google-apps-script-helpers",
-    "@types/google-apps-script": "^1.0.56"
+    "@types/google-apps-script": "^1.0.57"
   },
   "scripts": {
     "build": "npx webpack",
