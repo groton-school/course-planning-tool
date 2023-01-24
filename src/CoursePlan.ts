@@ -25,10 +25,12 @@ class CoursePlan {
 
     private static readonly GRACE = 'GRACE';
 
-    private static sheet: GoogleAppsScript.Spreadsheet.Sheet = null;
-
-    private static replaceWithValue(a1notation: string, value, replace = false) {
-        const range = CoursePlan.sheet.getRange(a1notation);
+    private static setValue(
+        sheet: GoogleAppsScript.Spreadsheet.Sheet,
+        a1notation: string,
+        value
+    ) {
+        const range = sheet.getRange(a1notation);
 
         if (Array.isArray(value)) {
             if (!Array.isArray(value[0])) {
@@ -38,13 +40,6 @@ class CoursePlan {
         } else {
             range.offset(0, 0, 1, 1).setValue(value);
         }
-        if (replace) {
-            if (range.getNumRows() > 1 || range.getNumColumns() > 1) {
-                range.setValues(range.getValues());
-            } else {
-                range.setValue(range.getValue());
-            }
-        }
     }
 
     private static createSheet() {
@@ -53,15 +48,16 @@ class CoursePlan {
         if (mockup) {
             spreadsheet.deleteSheet(mockup);
         }
-        CoursePlan.sheet = spreadsheet.setActiveSheet(
+        var sheet = spreadsheet.setActiveSheet(
             spreadsheet.getSheetByName(CoursePlan.SHEET_TEMPLATE)
         );
-        CoursePlan.sheet = spreadsheet.duplicateActiveSheet();
-        CoursePlan.sheet.setName(CoursePlan.SHEET_MOCKUP);
+        sheet = spreadsheet.duplicateActiveSheet();
+        sheet.setName(CoursePlan.SHEET_MOCKUP);
+        return sheet;
     }
 
-    private static updateHeaders(student: Student) {
-        CoursePlan.replaceWithValue(CoursePlan.A1_NAMES, [
+    private static updateHeaders(sheet, student: Student) {
+        CoursePlan.setValue(sheet, CoursePlan.A1_NAMES, [
             [student.getFormattedName()],
             [
                 '="Advisor: "&' +
@@ -86,21 +82,30 @@ class CoursePlan {
             (value) => `${student.gradYear - value - 1} - ${student.gradYear - value}`
         );
         years.splice(2, 0, student.gradYear - 3);
-        CoursePlan.replaceWithValue(CoursePlan.A1_YEARS, years);
+        CoursePlan.setValue(sheet, CoursePlan.A1_YEARS, years);
+    }
+
+    private static replaceWithDisplayValues(
+        sheet: GoogleAppsScript.Spreadsheet.Sheet
+    ) {
+        const range = sheet.getRange(
+            1,
+            1,
+            sheet.getMaxRows(),
+            sheet.getMaxColumns()
+        );
+        const display = range.getDisplayValues();
+        range.setValues(display);
     }
 
     public static createCoursePlan(): GoogleAppsScript.Card_Service.ActionResponse {
         const student = State.getStudent();
 
-        CoursePlan.createSheet();
-        CoursePlan.updateHeaders(student);
+        const sheet = CoursePlan.createSheet();
+        CoursePlan.updateHeaders(sheet, student);
 
-        const topLeft = CoursePlan.sheet.getRange(
-            CoursePlan.A1_ENROLLMENT_TOP_LEFT
-        );
-        const validation = CoursePlan.sheet
-            .getParent()
-            .getSheetByName(CoursePlan.SHEET_DEPTS);
+        const topLeft = sheet.getRange(CoursePlan.A1_ENROLLMENT_TOP_LEFT);
+        const validation = sheet.getParent().getSheetByName(CoursePlan.SHEET_DEPTS);
         const numDepartments = validation.getMaxColumns();
         const now = new Date();
         const schoolYear =
@@ -148,23 +153,26 @@ class CoursePlan {
                                     s.JOIN,
                                     s.fcn(s.CHAR, 10),
                                     s.fcn(
-                                        s.INDEX,
+                                        s.UNIQUE,
                                         s.fcn(
-                                            s.SORT,
+                                            s.INDEX,
                                             s.fcn(
-                                                s.FILTER,
-                                                `{${CoursePlan.RANGE_TITLE}, ${CoursePlan.RANGE_ORDER}}`,
-                                                s.eq(CoursePlan.RANGE_HOST_ID, student.hostId),
-                                                s.eq(CoursePlan.RANGE_YEAR, year),
-                                                s.eq(CoursePlan.RANGE_DEPT, department)
+                                                s.SORT,
+                                                s.fcn(
+                                                    s.FILTER,
+                                                    `{${CoursePlan.RANGE_TITLE}, ${CoursePlan.RANGE_ORDER}}`,
+                                                    s.eq(CoursePlan.RANGE_HOST_ID, student.hostId),
+                                                    s.eq(CoursePlan.RANGE_YEAR, year),
+                                                    s.eq(CoursePlan.RANGE_DEPT, department)
+                                                ),
+                                                2,
+                                                true,
+                                                1,
+                                                true
                                             ),
-                                            2,
-                                            true,
-                                            1,
-                                            true
-                                        ),
-                                        '',
-                                        1
+                                            '',
+                                            1
+                                        )
                                     )
                                 ),
                                 ''
@@ -179,7 +187,7 @@ class CoursePlan {
                     );
                 }
             }
-            values.push(rowValue); // TODO replace with actual values rather than equations
+            values.push(rowValue);
             validations.push(rowValidation);
         }
         topLeft.offset(0, 0, values.length, values[0].length).setValues(values);
@@ -189,11 +197,13 @@ class CoursePlan {
                 .setDataValidations(validations);
         }
 
+        CoursePlan.replaceWithDisplayValues(sheet);
+
         const numOptions = SheetParameters.getParam(
             SheetParameters.NUM_OPTIONS_PER_DEPT
         );
         for (var row = 0; row < numDepartments * numOptions; row += numOptions) {
-            CoursePlan.sheet.insertRowsAfter(topLeft.getRow() + row, numOptions - 1);
+            sheet.insertRowsAfter(topLeft.getRow() + row, numOptions - 1);
             topLeft
                 .offset(row, -1, numOptions, values[0].length + 1)
                 .mergeVertically();
