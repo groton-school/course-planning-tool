@@ -1,14 +1,14 @@
 import { Helper, Terse } from '@battis/google-apps-script-helpers';
 import { errorCard } from './Actions/App/Error';
-import { PROP_STUDENT, SHEET_ADVISORS } from './Constants';
+import { SHEET_ADVISORS } from './Constants';
 import SheetParameters from './SheetParameters';
+import State from './State';
 import Student from './Student';
 
 const s = Helper.SpreadsheetApp;
 const fcn = Helper.SpreadsheetApp.fcn;
-const eq = Helper.SpreadsheetApp.eq;
 
-export class CoursePlan {
+class CoursePlan {
     private static readonly RANGE_HOST_ID = 'Enrollment_Host_ID';
     private static readonly RANGE_TITLE = 'Enrollment_Title';
     private static readonly RANGE_ORDER = 'Enrollment_Order';
@@ -26,7 +26,6 @@ export class CoursePlan {
     private static readonly GRACE = 'GRACE';
 
     private static sheet: GoogleAppsScript.Spreadsheet.Sheet = null;
-    private static student: Student = null;
 
     private static replaceWithValue(a1notation: string, value, replace = false) {
         const range = CoursePlan.sheet.getRange(a1notation);
@@ -61,9 +60,9 @@ export class CoursePlan {
         CoursePlan.sheet.setName(CoursePlan.SHEET_MOCKUP);
     }
 
-    private static updateHeaders() {
+    private static updateHeaders(student: Student) {
         CoursePlan.replaceWithValue(CoursePlan.A1_NAMES, [
-            [CoursePlan.student.getFormattedName()],
+            [student.getFormattedName()],
             [
                 '="Advisor: "&' +
                 fcn(
@@ -74,7 +73,7 @@ export class CoursePlan {
                         `'${SHEET_ADVISORS}'!G:H`,
                         s.fcn(
                             s.MATCH,
-                            `"${CoursePlan.student.hostId}"`,
+                            `"${student.hostId}"`,
                             `'${SHEET_ADVISORS}'!A:A`,
                             0
                         ),
@@ -84,71 +83,38 @@ export class CoursePlan {
             ],
         ]);
         const years: (string | number)[] = [4, 3, 2, 1, 0].map(
-            (value) =>
-                `${CoursePlan.student.gradYear - value - 1} - ${CoursePlan.student.gradYear - value
-                }`
+            (value) => `${student.gradYear - value - 1} - ${student.gradYear - value}`
         );
-        years.splice(2, 0, CoursePlan.student.gradYear - 3);
+        years.splice(2, 0, student.gradYear - 3);
         CoursePlan.replaceWithValue(CoursePlan.A1_YEARS, years);
     }
 
-    public static actions = class {
-        public static mockup(): GoogleAppsScript.Card_Service.ActionResponse {
-            CoursePlan.student = new Student(
-                JSON.parse(Terse.PropertiesService.getUserProperty(PROP_STUDENT))
-            );
+    public static createCoursePlan(): GoogleAppsScript.Card_Service.ActionResponse {
+        const student = State.getStudent();
 
-            CoursePlan.createSheet();
-            CoursePlan.updateHeaders();
+        CoursePlan.createSheet();
+        CoursePlan.updateHeaders(student);
 
-            const topLeft = CoursePlan.sheet.getRange(
-                CoursePlan.A1_ENROLLMENT_TOP_LEFT
-            );
-            const validation = CoursePlan.sheet
-                .getParent()
-                .getSheetByName(CoursePlan.SHEET_DEPTS);
-            const numDepartments = validation.getMaxColumns();
-            const now = new Date();
-            const schoolYear =
-                now.getMonth() > 6 ? now.getFullYear() + 1 : now.getFullYear();
-            const values = [];
-            const validations = [];
-            for (var row = 0; row < numDepartments; row++) {
-                const rowValue = [];
-                const rowValidation = [];
-                for (var column = 0; column < 6; column++) {
-                    const year = topLeft.offset(-1, column).getValue();
-                    if ((year.substr ? Number(year.substr(0, 4)) : year) < schoolYear) {
-                        if (topLeft.offset(-2, column).getValue() == CoursePlan.GRACE) {
-                            if (row == numDepartments - 1) {
-                                rowValue.push(
-                                    '=' +
-                                    s.fcn(
-                                        s.IFNA,
-                                        s.fcn(
-                                            s.JOIN,
-                                            s.fcn(s.CHAR, 10),
-                                            s.fcn(
-                                                s.SORT,
-                                                s.fcn(
-                                                    s.FILTER,
-                                                    CoursePlan.RANGE_TITLE,
-                                                    s.eq(
-                                                        CoursePlan.RANGE_HOST_ID,
-                                                        CoursePlan.student.hostId
-                                                    ),
-                                                    s.eq(CoursePlan.RANGE_DEPT, CoursePlan.GRACE)
-                                                )
-                                            )
-                                        ),
-                                        ''
-                                    )
-                                );
-                            } else {
-                                rowValue.push('');
-                            }
-                        } else {
-                            const department = topLeft.offset(row, -1).getValue();
+        const topLeft = CoursePlan.sheet.getRange(
+            CoursePlan.A1_ENROLLMENT_TOP_LEFT
+        );
+        const validation = CoursePlan.sheet
+            .getParent()
+            .getSheetByName(CoursePlan.SHEET_DEPTS);
+        const numDepartments = validation.getMaxColumns();
+        const now = new Date();
+        const schoolYear =
+            now.getMonth() > 6 ? now.getFullYear() + 1 : now.getFullYear();
+        const values = [];
+        const validations = [];
+        for (var row = 0; row < numDepartments; row++) {
+            const rowValue = [];
+            const rowValidation = [];
+            for (var column = 0; column < 6; column++) {
+                const year = topLeft.offset(-1, column).getValue();
+                if ((year.substr ? Number(year.substr(0, 4)) : year) < schoolYear) {
+                    if (topLeft.offset(-2, column).getValue() == CoursePlan.GRACE) {
+                        if (row == numDepartments - 1) {
                             rowValue.push(
                                 '=' +
                                 s.fcn(
@@ -157,90 +123,103 @@ export class CoursePlan {
                                         s.JOIN,
                                         s.fcn(s.CHAR, 10),
                                         s.fcn(
-                                            s.INDEX,
+                                            s.SORT,
                                             s.fcn(
-                                                s.SORT,
-                                                s.fcn(
-                                                    s.FILTER,
-                                                    `{${CoursePlan.RANGE_TITLE}, ${CoursePlan.RANGE_ORDER}}`,
-                                                    s.eq(
-                                                        CoursePlan.RANGE_HOST_ID,
-                                                        CoursePlan.student.hostId
-                                                    ),
-                                                    s.eq(CoursePlan.RANGE_YEAR, year),
-                                                    s.eq(CoursePlan.RANGE_DEPT, department)
-                                                ),
-                                                2,
-                                                true,
-                                                1,
-                                                true
-                                            ),
-                                            '',
-                                            1
+                                                s.FILTER,
+                                                CoursePlan.RANGE_TITLE,
+                                                s.eq(CoursePlan.RANGE_HOST_ID, student.hostId),
+                                                s.eq(CoursePlan.RANGE_DEPT, CoursePlan.GRACE)
+                                            )
                                         )
                                     ),
                                     ''
                                 )
                             );
+                        } else {
+                            rowValue.push('');
                         }
                     } else {
-                        rowValidation.push(
-                            SpreadsheetApp.newDataValidation()
-                                .requireValueInRange(validation.getRange('A2:A').offset(0, row))
-                                .build()
+                        const department = topLeft.offset(row, -1).getValue();
+                        rowValue.push(
+                            '=' +
+                            s.fcn(
+                                s.IFNA,
+                                s.fcn(
+                                    s.JOIN,
+                                    s.fcn(s.CHAR, 10),
+                                    s.fcn(
+                                        s.INDEX,
+                                        s.fcn(
+                                            s.SORT,
+                                            s.fcn(
+                                                s.FILTER,
+                                                `{${CoursePlan.RANGE_TITLE}, ${CoursePlan.RANGE_ORDER}}`,
+                                                s.eq(CoursePlan.RANGE_HOST_ID, student.hostId),
+                                                s.eq(CoursePlan.RANGE_YEAR, year),
+                                                s.eq(CoursePlan.RANGE_DEPT, department)
+                                            ),
+                                            2,
+                                            true,
+                                            1,
+                                            true
+                                        ),
+                                        '',
+                                        1
+                                    )
+                                ),
+                                ''
+                            )
                         );
                     }
+                } else {
+                    rowValidation.push(
+                        SpreadsheetApp.newDataValidation()
+                            .requireValueInRange(validation.getRange('A2:A').offset(0, row))
+                            .build()
+                    );
                 }
-                values.push(rowValue); // TODO replace with actual values rather than equations
-                validations.push(rowValidation);
             }
-            topLeft.offset(0, 0, values.length, values[0].length).setValues(values);
-            if (validations[0].length) {
-                topLeft
-                    .offset(
-                        0,
-                        values[0].length,
-                        validations.length,
-                        validations[0].length
-                    )
-                    .setDataValidations(validations);
-            }
-
-            const numOptions = SheetParameters.getParam(
-                SheetParameters.NUM_OPTIONS_PER_DEPT
-            );
-            for (var row = 0; row < numDepartments * numOptions; row += numOptions) {
-                CoursePlan.sheet.insertRowsAfter(
-                    topLeft.getRow() + row,
-                    numOptions - 1
-                );
-                topLeft
-                    .offset(row, -1, numOptions, values[0].length + 1)
-                    .mergeVertically();
-            }
-
-            // TODO deal with GRACE course selection
-            // TODO add advisor notes (protected)
-            // TODO add studies committee notes (protected)
-            // TODO add college counseling notes (protected)
-            /*
-             * TODO create individual student spreadsheets
-             *   Create in form-level folders (updating Form Folder Inventory) and add their ID and URL as columns on the Advisor List, update student access permissions
-             */
-            /*
-             * TODO alias student spreadsheets to advisor folders
-             *   Create advisor folders as needed and update Advisor Folder Inventory, update advisor access permissions
-             */
-
-            return Terse.CardService.replaceStack(
-                errorCard(
-                    `Mocked up ${CoursePlan.student.getFormattedName()}`,
-                    JSON.stringify(CoursePlan.student, null, 2)
-                )
-            );
+            values.push(rowValue); // TODO replace with actual values rather than equations
+            validations.push(rowValidation);
         }
-    };
+        topLeft.offset(0, 0, values.length, values[0].length).setValues(values);
+        if (validations[0].length) {
+            topLeft
+                .offset(0, values[0].length, validations.length, validations[0].length)
+                .setDataValidations(validations);
+        }
+
+        const numOptions = SheetParameters.getParam(
+            SheetParameters.NUM_OPTIONS_PER_DEPT
+        );
+        for (var row = 0; row < numDepartments * numOptions; row += numOptions) {
+            CoursePlan.sheet.insertRowsAfter(topLeft.getRow() + row, numOptions - 1);
+            topLeft
+                .offset(row, -1, numOptions, values[0].length + 1)
+                .mergeVertically();
+        }
+
+        // TODO deal with GRACE course selection
+        // TODO add advisor notes (protected)
+        // TODO add studies committee notes (protected)
+        // TODO add college counseling notes (protected)
+        /*
+         * TODO create individual student spreadsheets
+         *   Create in form-level folders (updating Form Folder Inventory) and add their ID and URL as columns on the Advisor List, update student access permissions
+         */
+        /*
+         * TODO alias student spreadsheets to advisor folders
+         *   Create advisor folders as needed and update Advisor Folder Inventory, update advisor access permissions
+         */
+
+        return Terse.CardService.replaceStack(
+            errorCard(
+                `Mocked up ${student.getFormattedName()}`,
+                JSON.stringify(student, null, 2)
+            )
+        );
+    }
 }
 
-global.action_coursePlan_mockup = CoursePlan.actions.mockup;
+global.action_coursePlan_mockup = CoursePlan.createCoursePlan;
 export default 'action_coursePlan_mockup';

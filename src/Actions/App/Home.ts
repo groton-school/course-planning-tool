@@ -1,18 +1,17 @@
 import { Terse } from '@battis/google-apps-script-helpers';
-import { PROP_DATA } from '../../Constants';
 import State from '../../State';
 import { errorCard } from './Error';
-import { studentPickerCard } from './StudentPicker';
+import StudentPicker from './StudentPicker';
 
 export function homeCard() {
     const data = Terse.PropertiesService.getScriptProperty(
-        PROP_DATA,
+        'DATA',
         SpreadsheetApp.openById
     );
     if (State.getDataSheet() && State.getDataSheet().getId() != data.getId()) {
         return errorCard();
     }
-    return studentPickerCard();
+    return StudentPicker.card();
 }
 
 export function homeAction() {
