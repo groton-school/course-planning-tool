@@ -1,5 +1,5 @@
 import { Terse } from '@battis/google-apps-script-helpers';
-import State from '../../State';
+import State from '../State';
 import { errorCard } from './Error';
 import StudentPicker from './StudentPicker';
 

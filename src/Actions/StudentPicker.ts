@@ -1,12 +1,21 @@
 import { Terse } from '@battis/google-apps-script-helpers';
-import { SHEET_ADVISORS } from '../../Constants';
-import CoursePlan from '../../CoursePlan';
-import State from '../../State';
-import Student from '../../Student';
+import Constants from '../Constants';
+import { Mockup } from '../CoursePlan';
+import State from '../State';
+import Student from '../Student';
 
 export default class StudentPicker {
+    public static getAllStudents(): Student[] {
+        const students = State.getDataSheet().getSheetByName(
+            Constants.Spreadsheet.Sheet.ADVISORS
+        );
+        return students
+            .getRange('A2:E')
+            .getValues()
+            .map((row) => new Student(row));
+    }
+
     public static card(): GoogleAppsScript.Card_Service.Card {
-        const students = State.getDataSheet().getSheetByName(SHEET_ADVISORS);
         var dropdown = CardService.newSelectionInput()
             .setType(CardService.SelectionInputType.DROPDOWN)
             .setFieldName('email')
@@ -15,8 +24,7 @@ export default class StudentPicker {
                 Terse.CardService.newAction({ functionName: EmailChange })
             )
             .addItem(' ', null, true);
-        for (const row of students.getRange('A2:E').getValues()) {
-            const student = new Student(row);
+        for (const student of StudentPicker.getAllStudents()) {
             if (student.hostId) {
                 dropdown = dropdown.addItem(
                     student.getFormattedName(),
@@ -34,10 +42,17 @@ export default class StudentPicker {
                 dropdown,
                 Terse.CardService.newTextButton({
                     text: 'Mockup',
-                    functionName: CoursePlan,
+                    functionName: Mockup,
                 }),
             ],
         });
+    }
+
+    public static dialog() {
+        SpreadsheetApp.getUi().showModalDialog(
+            HtmlService.createTemplateFromFile('templates/StudentPicker').evaluate(),
+            'Student Picker'
+        );
     }
 
     public static handleEmailChange(event): void {
@@ -47,3 +62,8 @@ export default class StudentPicker {
 
 global.handler_app_studentPicker_emailChange = StudentPicker.handleEmailChange;
 const EmailChange = 'handler_app_studentPicker_emailChange';
+
+global.action_studentPicker_dialog = StudentPicker.dialog;
+export const StudentPickerDialog = 'action_studentPicker_dialog';
+
+global.helper_studentPicker_getAllStudents = StudentPicker.getAllStudents;

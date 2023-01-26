@@ -1,10 +1,10 @@
 import { Terse } from '@battis/google-apps-script-helpers';
-import { PREFIX } from './Constants';
+import Constants from './Constants';
 import Student from './Student';
 
 export default class State {
-    private static readonly DATA_SHEET = `${PREFIX}.data`;
-    private static readonly STUDENT = `${PREFIX}.student`;
+    private static readonly DATA_SHEET = `${Constants.PREFIX}.data`;
+    private static readonly STUDENT = `${Constants.PREFIX}.student`;
 
     private static dataSheet;
 

@@ -1,5 +1,5 @@
 import { Terse } from '@battis/google-apps-script-helpers';
-import State from '../../State';
+import State from '../State';
 import Home from './Home';
 
 export function errorCard(

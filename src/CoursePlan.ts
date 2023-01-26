@@ -1,6 +1,7 @@
-import { Helper, Terse } from '@battis/google-apps-script-helpers';
-import { errorCard } from './Actions/App/Error';
-import { SHEET_ADVISORS } from './Constants';
+import { Helper } from '@battis/google-apps-script-helpers';
+import { errorAction } from './Actions/Error';
+import Constants from './Constants';
+import FolderInventory from './FolderInventory';
 import SheetParameters from './SheetParameters';
 import State from './State';
 import Student from './Student';
@@ -9,21 +10,18 @@ const s = Helper.SpreadsheetApp;
 const fcn = Helper.SpreadsheetApp.fcn;
 
 class CoursePlan {
-    private static readonly RANGE_HOST_ID = 'Enrollment_Host_ID';
-    private static readonly RANGE_TITLE = 'Enrollment_Title';
-    private static readonly RANGE_ORDER = 'Enrollment_Order';
-    private static readonly RANGE_DEPT = 'Enrollment_Department';
-    private static readonly RANGE_YEAR = 'Enrollment_Year';
+    private static formFolderInventory: FolderInventory;
+    private static advisorFolderInventory: FolderInventory;
 
-    private static readonly A1_NAMES = 'A1:A2';
-    private static readonly A1_YEARS = 'B5:G5';
-    private static readonly A1_ENROLLMENT_TOP_LEFT = 'B6';
-
-    private static readonly SHEET_DEPTS = 'Courses by Department';
-    private static readonly SHEET_TEMPLATE = 'Template';
-    private static readonly SHEET_MOCKUP = 'Mockup';
-
-    private static readonly GRACE = 'GRACE';
+    private static getFormFolder(year) {
+        if (!CoursePlan.formFolderInventory) {
+            CoursePlan.formFolderInventory = new FolderInventory(
+                Constants.Spreadsheet.Sheet.FORM_FOLDER_INVENTORY,
+                (year) => `Class of ${year}`
+            );
+        }
+        return CoursePlan.formFolderInventory.getFolder(year);
+    }
 
     private static setValue(
         sheet: GoogleAppsScript.Spreadsheet.Sheet,
@@ -42,22 +40,18 @@ class CoursePlan {
         }
     }
 
-    private static createSheet() {
-        const spreadsheet = SpreadsheetApp.getActive();
-        const mockup = spreadsheet.getSheetByName(CoursePlan.SHEET_MOCKUP);
-        if (mockup) {
-            spreadsheet.deleteSheet(mockup);
-        }
+    private static createSheet(student: Student) {
+        const spreadsheet = State.getDataSheet();
         var sheet = spreadsheet.setActiveSheet(
-            spreadsheet.getSheetByName(CoursePlan.SHEET_TEMPLATE)
+            spreadsheet.getSheetByName(Constants.Spreadsheet.Sheet.TEMPLATE)
         );
         sheet = spreadsheet.duplicateActiveSheet();
-        sheet.setName(CoursePlan.SHEET_MOCKUP);
+        sheet.setName(Constants.Spreadsheet.Sheet.COURSE_PLAN);
         return sheet;
     }
 
     private static updateHeaders(sheet, student: Student) {
-        CoursePlan.setValue(sheet, CoursePlan.A1_NAMES, [
+        CoursePlan.setValue(sheet, Constants.Spreadsheet.A1Notation.NAMES, [
             [student.getFormattedName()],
             [
                 '="Advisor: "&' +
@@ -66,11 +60,11 @@ class CoursePlan {
                     '" "',
                     fcn(
                         s.INDEX,
-                        `'${SHEET_ADVISORS}'!G:H`,
+                        `'${Constants.Spreadsheet.Sheet.ADVISORS}'!G:H`,
                         s.fcn(
                             s.MATCH,
                             `"${student.hostId}"`,
-                            `'${SHEET_ADVISORS}'!A:A`,
+                            `'${Constants.Spreadsheet.Sheet.ADVISORS}'!A:A`,
                             0
                         ),
                         0
@@ -82,7 +76,7 @@ class CoursePlan {
             (value) => `${student.gradYear - value - 1} - ${student.gradYear - value}`
         );
         years.splice(2, 0, student.gradYear - 3);
-        CoursePlan.setValue(sheet, CoursePlan.A1_YEARS, years);
+        CoursePlan.setValue(sheet, Constants.Spreadsheet.A1Notation.YEARS, years);
     }
 
     private static replaceWithDisplayValues(
@@ -98,14 +92,97 @@ class CoursePlan {
         range.setValues(display);
     }
 
-    public static createCoursePlan(): GoogleAppsScript.Card_Service.ActionResponse {
-        const student = State.getStudent();
+    private static createSpreadsheet(
+        student: Student,
+        sheet: GoogleAppsScript.Spreadsheet.Sheet
+    ) {
+        const spreadsheet = SpreadsheetApp.create(
+            `Course Plan for ${student.getFormattedName()}`
+        );
+        sheet.copyTo(spreadsheet).setName(Constants.Spreadsheet.Sheet.COURSE_PLAN);
+        sheet.getParent().deleteSheet(sheet);
+        spreadsheet.getSheets().forEach((sheet) => {
+            if (sheet.getName() != Constants.Spreadsheet.Sheet.COURSE_PLAN) {
+                spreadsheet.deleteSheet(sheet);
+            }
+        });
+        DriveApp.getFileById(spreadsheet.getId()).moveTo(
+            CoursePlan.getFormFolder(student.gradYear)
+        );
+        return spreadsheet;
+    }
 
-        const sheet = CoursePlan.createSheet();
+    private static getGraceEnrollments(student: Student) {
+        return (
+            '=' +
+            s.fcn(
+                s.IFNA,
+                s.fcn(
+                    s.JOIN,
+                    s.fcn(s.CHAR, 10),
+                    s.fcn(
+                        s.SORT,
+                        s.fcn(
+                            s.FILTER,
+                            Constants.Spreadsheet.Range.TITLE,
+                            s.eq(Constants.Spreadsheet.Range.HOST_ID, student.hostId),
+                            s.eq(Constants.Spreadsheet.Range.DEPT, Constants.GRACE)
+                        )
+                    )
+                ),
+                ''
+            )
+        );
+    }
+
+    private static getDepartmentalEnrollments(
+        student: Student,
+        year: string,
+        department: string
+    ) {
+        '=' +
+            s.fcn(
+                s.IFNA,
+                s.fcn(
+                    s.JOIN,
+                    s.fcn(s.CHAR, 10),
+                    s.fcn(
+                        s.UNIQUE,
+                        s.fcn(
+                            s.INDEX,
+                            s.fcn(
+                                s.SORT,
+                                s.fcn(
+                                    s.FILTER,
+                                    `{${Constants.Spreadsheet.Range.TITLE}, ${Constants.Spreadsheet.Range.ORDER}}`,
+                                    s.eq(Constants.Spreadsheet.Range.HOST_ID, student.hostId),
+                                    s.eq(Constants.Spreadsheet.Range.YEAR, year),
+                                    s.eq(Constants.Spreadsheet.Range.DEPT, department)
+                                ),
+                                2,
+                                true,
+                                1,
+                                true
+                            ),
+                            '',
+                            1
+                        )
+                    )
+                ),
+                ''
+            );
+    }
+
+    public static createCoursePlan(student: Student) {
+        const sheet = CoursePlan.createSheet(student);
         CoursePlan.updateHeaders(sheet, student);
 
-        const topLeft = sheet.getRange(CoursePlan.A1_ENROLLMENT_TOP_LEFT);
-        const validation = sheet.getParent().getSheetByName(CoursePlan.SHEET_DEPTS);
+        const topLeft = sheet.getRange(
+            Constants.Spreadsheet.A1Notation.ENROLLMENT_TOP_LEFT
+        );
+        const validation = sheet
+            .getParent()
+            .getSheetByName(Constants.Spreadsheet.Sheet.DEPTS);
         const numDepartments = validation.getMaxColumns();
         const now = new Date();
         const schoolYear =
@@ -118,65 +195,16 @@ class CoursePlan {
             for (var column = 0; column < 6; column++) {
                 const year = topLeft.offset(-1, column).getValue();
                 if ((year.substr ? Number(year.substr(0, 4)) : year) < schoolYear) {
-                    if (topLeft.offset(-2, column).getValue() == CoursePlan.GRACE) {
+                    if (topLeft.offset(-2, column).getValue() == Constants.GRACE) {
                         if (row == numDepartments - 1) {
-                            rowValue.push(
-                                '=' +
-                                s.fcn(
-                                    s.IFNA,
-                                    s.fcn(
-                                        s.JOIN,
-                                        s.fcn(s.CHAR, 10),
-                                        s.fcn(
-                                            s.SORT,
-                                            s.fcn(
-                                                s.FILTER,
-                                                CoursePlan.RANGE_TITLE,
-                                                s.eq(CoursePlan.RANGE_HOST_ID, student.hostId),
-                                                s.eq(CoursePlan.RANGE_DEPT, CoursePlan.GRACE)
-                                            )
-                                        )
-                                    ),
-                                    ''
-                                )
-                            );
+                            rowValue.push(CoursePlan.getGraceEnrollments(student));
                         } else {
                             rowValue.push('');
                         }
                     } else {
                         const department = topLeft.offset(row, -1).getValue();
                         rowValue.push(
-                            '=' +
-                            s.fcn(
-                                s.IFNA,
-                                s.fcn(
-                                    s.JOIN,
-                                    s.fcn(s.CHAR, 10),
-                                    s.fcn(
-                                        s.UNIQUE,
-                                        s.fcn(
-                                            s.INDEX,
-                                            s.fcn(
-                                                s.SORT,
-                                                s.fcn(
-                                                    s.FILTER,
-                                                    `{${CoursePlan.RANGE_TITLE}, ${CoursePlan.RANGE_ORDER}}`,
-                                                    s.eq(CoursePlan.RANGE_HOST_ID, student.hostId),
-                                                    s.eq(CoursePlan.RANGE_YEAR, year),
-                                                    s.eq(CoursePlan.RANGE_DEPT, department)
-                                                ),
-                                                2,
-                                                true,
-                                                1,
-                                                true
-                                            ),
-                                            '',
-                                            1
-                                        )
-                                    )
-                                ),
-                                ''
-                            )
+                            CoursePlan.getDepartmentalEnrollments(student, year, department)
                         );
                     }
                 } else {
@@ -214,22 +242,28 @@ class CoursePlan {
         // TODO add studies committee notes (protected)
         // TODO add college counseling notes (protected)
         /*
-         * TODO create individual student spreadsheets
-         *   Create in form-level folders (updating Form Folder Inventory) and add their ID and URL as columns on the Advisor List, update student access permissions
-         */
-        /*
          * TODO alias student spreadsheets to advisor folders
          *   Create advisor folders as needed and update Advisor Folder Inventory, update advisor access permissions
          */
 
-        return Terse.CardService.replaceStack(
-            errorCard(
-                `Mocked up ${student.getFormattedName()}`,
-                JSON.stringify(student, null, 2)
-            )
+        return CoursePlan.createSpreadsheet(student, sheet);
+    }
+
+    public static createCoursePlanMockup(student?) {
+        student && State.setStudent(student);
+        student = State.getStudent();
+        CoursePlan.createCoursePlan(student);
+        return errorAction(
+            `${student.getFormattedName()}`,
+            `A course plan for ${student.getFormattedName()} has been created in the "Mockup" sheet.`
         );
     }
+
+    public static createAll() { }
 }
 
-global.action_coursePlan_mockup = CoursePlan.createCoursePlan;
-export default 'action_coursePlan_mockup';
+global.action_coursePlan_mockup = CoursePlan.createCoursePlanMockup;
+export const Mockup = 'action_coursePlan_mockup';
+
+global.action_coursePlan_createAll = CoursePlan.createAll;
+export const CreateAll = 'action_coursePlan_createAll';

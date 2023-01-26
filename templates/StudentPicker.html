@@ -1,0 +1,45 @@
+<!DOCTYPE html lang="en">
+<html>
+  <head>
+    <title>Student Picker</title>
+    <link
+      rel="stylesheet"
+      href="https://ssl.gstatic.com/docs/script/css/add-ons1.css"
+    />
+  </head>
+  <body>
+    <p>Please select a student for whom to mock up a course plan.</p>
+    <form id="student-picker">
+      <div>
+        <select id="student" name="student">
+          <?
+           const students = helper_studentPicker_getAllStudents();
+           for (const student of students) { ?>
+          <option value="<?= JSON.stringify(student) ?>">
+            <?= student.getFormattedName() ?>
+          </option>
+          <? } ?>
+        </select>
+        <button class="create" type="submit">Mockup</button>
+      </div>
+    </form>
+    <script>
+      function handleSubmit(e) {
+        if (e.preventDefault) {
+          e.preventDefault();
+        }
+        const student = document.getElementById('student');
+        google.script.run.action_coursePlan_mockup(student.value);
+        google.script.host.close();
+        return false;
+      }
+
+      const form = document.getElementById('student-picker');
+      if (form.attachEvent) {
+        form.attachEvent('submit', handleSubmit);
+      } else {
+        form.addEventListener('submit', handleSubmit);
+      }
+    </script>
+  </body>
+</html>
