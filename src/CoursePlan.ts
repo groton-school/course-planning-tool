@@ -23,6 +23,33 @@ class CoursePlan {
         return CoursePlan.formFolderInventory.getFolder(year);
     }
 
+    private static getAdvisorFolder(hostId) {
+        if (!CoursePlan.advisorFolderInventory) {
+            CoursePlan.advisorFolderInventory = new FolderInventory(
+                Constants.Spreadsheet.Sheet.ADVISOR_FOLDER_INVENTORY,
+                (email) => {
+                    const [[firstName, lastName]] = State.getDataSheet()
+                        .getSheetByName(Constants.Spreadsheet.Sheet.ADVISORS)
+                        .createTextFinder(email)
+                        .matchEntireCell(true)
+                        .findNext()
+                        .offset(0, 1, 1, 2)
+                        .getDisplayValues();
+                    return `${lastName}, ${firstName} - Advisee Course Plans`;
+                }
+            );
+        }
+        return CoursePlan.advisorFolderInventory.getFolder(
+            CoursePlan.advisorFolderInventory
+                .getSheet()
+                .createTextFinder(hostId)
+                .matchEntireCell(true)
+                .findNext()
+                .offset(0, 4, 1, 1)
+                .getDisplayValue()
+        );
+    }
+
     private static setValue(
         sheet: GoogleAppsScript.Spreadsheet.Sheet,
         a1notation: string,
@@ -106,13 +133,17 @@ class CoursePlan {
                 spreadsheet.deleteSheet(sheet);
             }
         });
-        DriveApp.getFileById(spreadsheet.getId()).moveTo(
-            CoursePlan.getFormFolder(student.gradYear)
-        );
+        // TODO make sure course list validation transfers to new spreadsheet
+        // TODO add access privileges
+
+        // FIXME file is getting neither moved nor shortcutted
+        const file = DriveApp.getFileById(spreadsheet.getId());
+        file.moveTo(CoursePlan.getFormFolder(student.gradYear));
+        CoursePlan.getAdvisorFolder(student).createShortcut(file.getId());
         return spreadsheet;
     }
 
-    private static getGraceEnrollments(student: Student) {
+    private static getGraceEnrollments(student: Student): string {
         return (
             '=' +
             s.fcn(
@@ -139,8 +170,9 @@ class CoursePlan {
         student: Student,
         year: string,
         department: string
-    ) {
-        '=' +
+    ): string {
+        return (
+            '=' +
             s.fcn(
                 s.IFNA,
                 s.fcn(
@@ -170,7 +202,8 @@ class CoursePlan {
                     )
                 ),
                 ''
-            );
+            )
+        );
     }
 
     public static createCoursePlan(student: Student) {
@@ -241,10 +274,6 @@ class CoursePlan {
         // TODO add advisor notes (protected)
         // TODO add studies committee notes (protected)
         // TODO add college counseling notes (protected)
-        /*
-         * TODO alias student spreadsheets to advisor folders
-         *   Create advisor folders as needed and update Advisor Folder Inventory, update advisor access permissions
-         */
 
         return CoursePlan.createSpreadsheet(student, sheet);
     }

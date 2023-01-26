@@ -31,6 +31,8 @@ export default class Constants {
             public static readonly COURSE_PLAN = 'Course Plan';
             public static readonly PARAMETERS = 'Parameters';
             public static readonly FORM_FOLDER_INVENTORY = 'Form Folder Inventory';
+            public static readonly ADVISOR_FOLDER_INVENTORY =
+                'Advisor Folder Inventory';
         };
     };
 }

@@ -18,21 +18,30 @@ export default class FolderInventory {
     }
 
     getFolder(key): GoogleAppsScript.Drive.Folder {
-        var folder = this.inventorySheet
-            .getSheetValues(
-                2,
-                1,
-                this.inventorySheet.getMaxRows() - 1,
-                this.inventorySheet.getMaxColumns()
-            )
-            .reduce((folder: GoogleAppsScript.Drive.Folder, row) => {
-                if (row[Col.Key] == key) {
-                    return DriveApp.getFolderById(row[Col.FolderID]);
-                }
-            }, null);
+        const debug = { key };
+        var folder = DriveApp.getFolderById(
+            this.inventorySheet
+                .createTextFinder(key)
+                .matchEntireCell(true)
+                .findNext()
+                .offset(0, 1, 1, 1)
+                .getDisplayValue()
+        );
+        debug['initialFolder'] = folder && {
+            id: folder.getId(),
+            name: folder.getName(),
+        };
         if (!folder) {
-            return this.createFolder(key);
+            folder = this.createFolder(key);
+            debug['createFolder'] = folder && {
+                id: folder.getId(),
+                name: folder.getName(),
+            };
         }
+        SpreadsheetApp.getUi().showModalDialog(
+            HtmlService.createHtmlOutput(`<pre>${JSON.stringify(debug)}</pre>`),
+            'Debugging'
+        );
         return folder;
     }
 
@@ -49,5 +58,9 @@ export default class FolderInventory {
         row[Col.FolderURL] = folder.getUrl();
         this.inventorySheet.appendRow(row);
         return folder;
+    }
+
+    public getSheet() {
+        return this.inventorySheet;
     }
 }
