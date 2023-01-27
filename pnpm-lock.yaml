@@ -13,7 +13,7 @@ specifiers:
   webpack-cli: ^5.0.1
 
 dependencies:
-  '@battis/google-apps-script-helpers': github.com/battis/google-apps-script-helpers/86768311879af5db3647fba25f19cb8e0d68aa02
+  '@battis/google-apps-script-helpers': github.com/battis/google-apps-script-helpers/35712bc4edaf064ac2f56ab44f432dfdae61027c
   '@types/google-apps-script': 1.0.57
 
 devDependencies:
@@ -315,7 +315,7 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
     dependencies:
-      caniuse-lite: 1.0.30001447
+      caniuse-lite: 1.0.30001448
       electron-to-chromium: 1.4.284
       node-releases: 2.0.8
       update-browserslist-db: 1.0.10_browserslist@4.21.4
@@ -325,8 +325,8 @@ packages:
     resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
     dev: true
 
-  /caniuse-lite/1.0.30001447:
-    resolution: {integrity: sha512-bdKU1BQDPeEXe9A39xJnGtY0uRq/z5osrnXUw0TcK+EYno45Y+U7QU9HhHEyzvMDffpYadFXi3idnSNkcwLkTw==}
+  /caniuse-lite/1.0.30001448:
+    resolution: {integrity: sha512-tq2YI+MJnooG96XpbTRYkBxLxklZPOdLmNIOdIhvf7SNJan6u5vCKum8iT7ZfCt70m1GPkuC7P3TtX6UuhupuA==}
     dev: true
 
   /chalk/4.1.2:
@@ -1072,8 +1072,8 @@ packages:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
     dev: true
 
-  github.com/battis/google-apps-script-helpers/86768311879af5db3647fba25f19cb8e0d68aa02:
-    resolution: {tarball: https://codeload.github.com/battis/google-apps-script-helpers/tar.gz/86768311879af5db3647fba25f19cb8e0d68aa02}
+  github.com/battis/google-apps-script-helpers/35712bc4edaf064ac2f56ab44f432dfdae61027c:
+    resolution: {tarball: https://codeload.github.com/battis/google-apps-script-helpers/tar.gz/35712bc4edaf064ac2f56ab44f432dfdae61027c}
     name: '@battis/google-apps-script-helpers'
     version: 1.0.0
     dependencies:

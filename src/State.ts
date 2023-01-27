@@ -3,58 +3,55 @@ import Constants from './Constants';
 import Student from './Student';
 
 export default class State {
-    private static readonly DATA_SHEET = `${Constants.PREFIX}.data`;
-    private static readonly STUDENT = `${Constants.PREFIX}.student`;
+    private static readonly PROP_STUDENT = `${Constants.PREFIX}.PROP_STUDENT
+`;
 
-    private static dataSheet;
+    private static dataSheet?: GoogleAppsScript.Spreadsheet.Spreadsheet;
+    private static template?: GoogleAppsScript.Spreadsheet.Spreadsheet;
 
     public static getDataSheet() {
         if (!this.dataSheet) {
-            const id = Terse.PropertiesService.getUserProperty(State.DATA_SHEET);
-            if (id) {
-                this.dataSheet = SpreadsheetApp.openById(id);
-            }
-            if (!this.dataSheet) {
-                this.setDataSheet(SpreadsheetApp.getActive());
-            }
+            const id = Terse.PropertiesService.getScriptProperty(
+                Constants.ScriptProperties.DATA
+            );
+            State.dataSheet = id && SpreadsheetApp.openById(id);
         }
-        return this.dataSheet;
+        return State.dataSheet;
     }
 
-    public static setDataSheet(
-        spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet
-    ) {
-        this.dataSheet = spreadsheet;
-        if (this.dataSheet) {
-            Terse.PropertiesService.setUserProperty(
-                this.DATA_SHEET,
-                this.dataSheet.getId()
+    public static getTemplate() {
+        if (!this.template) {
+            const id = Terse.PropertiesService.getScriptProperty(
+                Constants.ScriptProperties.TEMPLATE
             );
-        } else {
-            Terse.PropertiesService.deleteUserProperty(State.DATA_SHEET);
+            State.template = id && SpreadsheetApp.openById(id);
         }
+        return State.template;
     }
 
     public static getStudent() {
         return new Student(
-            JSON.parse(Terse.PropertiesService.getUserProperty(State.STUDENT))
+            JSON.parse(Terse.PropertiesService.getUserProperty(State.PROP_STUDENT))
         );
     }
 
     public static setStudent(student: Student | string) {
         Terse.PropertiesService.setUserProperty(
-            this.STUDENT,
+            State.PROP_STUDENT,
             student instanceof Student ? JSON.stringify(student) : student
         );
     }
 
     public static resetStudent() {
-        Terse.PropertiesService.deleteUserProperty(State.STUDENT);
+        Terse.PropertiesService.deleteUserProperty(State.PROP_STUDENT);
     }
 
     public static toJSON() {
         return JSON.stringify(
-            { student: State.getStudent(), dataSheet: State.getDataSheet().getId() },
+            {
+                student: State.getStudent(),
+                dataSheet: State.getDataSheet().getId(),
+            },
             null,
             2
         );

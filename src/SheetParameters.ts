@@ -1,21 +1,36 @@
 import Constants from './Constants';
+import State from './State';
 
+// TODO there is surely a less cumbersome way to do this
 export default class SheetParameters {
-    private static readonly A1_NUM_OPT_PER_DEPT = 'B1';
-    public static readonly NUM_OPTIONS_PER_DEPT = Symbol('opt-per-dept');
+    private static params?: GoogleAppsScript.Spreadsheet.Sheet;
 
-    public static getParam(key: Symbol, spreadsheet = null) {
-        if (!spreadsheet) {
-            spreadsheet = SpreadsheetApp.getActive();
+    public static getParam(a1Notation) {
+        if (!SheetParameters.params) {
+            SheetParameters.params = State.getDataSheet().getSheetByName(
+                Constants.Spreadsheet.Sheet.PARAMETERS
+            );
         }
-        switch (key) {
-            case SheetParameters.NUM_OPTIONS_PER_DEPT:
-                return spreadsheet
-                    .getSheetByName(Constants.Spreadsheet.Sheet.PARAMETERS)
-                    .getRange(SheetParameters.A1_NUM_OPT_PER_DEPT)
-                    .getValue();
-            default:
-                return null;
-        }
+        return SheetParameters.params.getRange(a1Notation).getValue();
     }
+
+    public static getNumOptionsPerDepartment = SheetParameters.getParam.bind(
+        null,
+        Constants.Spreadsheet.A1Notation.NUM_OPTIONS_PER_DEPT
+    );
+
+    public static getFormFolderNameFormat = SheetParameters.getParam.bind(
+        null,
+        Constants.Spreadsheet.A1Notation.FORM_FOLDER_NAME_FORMAT
+    );
+
+    public static getAdvisorFolderNameFormat = SheetParameters.getParam.bind(
+        null,
+        Constants.Spreadsheet.A1Notation.ADVISOR_FOLDER_NAME_FORMAT
+    );
+
+    public static getCoursePlanNameFormat = SheetParameters.getParam.bind(
+        null,
+        Constants.Spreadsheet.A1Notation.COURSE_PLAN_NAME_FORMAT
+    );
 }

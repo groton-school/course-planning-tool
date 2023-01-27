@@ -18,7 +18,6 @@ export default class FolderInventory {
     }
 
     getFolder(key): GoogleAppsScript.Drive.Folder {
-        const debug = { key };
         var folder = DriveApp.getFolderById(
             this.inventorySheet
                 .createTextFinder(key)
@@ -27,21 +26,9 @@ export default class FolderInventory {
                 .offset(0, 1, 1, 1)
                 .getDisplayValue()
         );
-        debug['initialFolder'] = folder && {
-            id: folder.getId(),
-            name: folder.getName(),
-        };
         if (!folder) {
             folder = this.createFolder(key);
-            debug['createFolder'] = folder && {
-                id: folder.getId(),
-                name: folder.getName(),
-            };
         }
-        SpreadsheetApp.getUi().showModalDialog(
-            HtmlService.createHtmlOutput(`<pre>${JSON.stringify(debug)}</pre>`),
-            'Debugging'
-        );
         return folder;
     }
 
