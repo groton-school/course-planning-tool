@@ -1,0 +1,34 @@
+<!DOCTYPE html lang="en">
+<html>
+  <head>
+    <title>Mockup</title>
+    <link
+      rel="stylesheet"
+      href="https://ssl.gstatic.com/docs/script/css/add-ons1.css"
+    />
+    <? const result = helper_coursePlan_getMockupResult() ?>
+  </head>
+  <body>
+    <p>
+      Mockup course plan created for
+      <?= result.student ?>.
+    </p>
+    <ul>
+      <li>
+        <a href="<?= result.plan.url ?>" target="_blank"
+          ><?= result.plan.name ?></a
+        >
+      </li>
+      <li>
+        <a href="<?= result.advisorFolder.url ?>" target="_blank"
+          ><?= result.advisorFolder.name ?></a
+        >
+      </li>
+      <li>
+        <a href="<?= result.formFolder.url ?>" target="_blank"
+          ><?= result.formFolder.name ?></a
+        >
+      </li>
+    </ul>
+  </body>
+</html>

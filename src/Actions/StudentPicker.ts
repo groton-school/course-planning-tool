@@ -39,7 +39,9 @@ export default class StudentPicker {
 
     public static dialog() {
         SpreadsheetApp.getUi().showModalDialog(
-            HtmlService.createTemplateFromFile('templates/StudentPicker').evaluate(),
+            HtmlService.createTemplateFromFile('templates/StudentPicker')
+                .evaluate()
+                .setHeight(100),
             'Student Picker'
         );
     }

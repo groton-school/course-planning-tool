@@ -7,8 +7,11 @@ import State from './State';
 import Student from './Student';
 
 export default class CoursePlan {
+    private static readonly MOCKUP_RESULT = `${Constants.PREFIX}.CoursePlan.Mockup`;
+
     private static formFolderInventory?: Inventory;
     private static advisorFolderInventory?: Inventory;
+    private static coursePlanInventory?: Inventory;
 
     private student: Student;
     private advisor: Advisor;
@@ -28,46 +31,52 @@ export default class CoursePlan {
         this.prepareCommentBlanks();
     }
 
+    public static for(student: Student) {
+        if (!CoursePlan.coursePlanInventory) {
+            CoursePlan.coursePlanInventory = new Inventory(
+                Constants.Spreadsheet.Sheet.COURSE_PLAN_INVENTORY
+            );
+        }
+        return CoursePlan.coursePlanInventory.getCoursePlan(student);
+    }
+
     public static createMockup(student?: Student | string) {
         student && State.setStudent(student);
         student = State.getStudent();
-        const plan = new CoursePlan(student);
+        const plan = CoursePlan.for(student);
+        const advisorFolder = CoursePlan.getAdvisorFolderFor(student);
+        const formFolder = CoursePlan.getFormFolderFor(student);
+        CacheService.getUserCache().put(
+            CoursePlan.MOCKUP_RESULT,
+            JSON.stringify({
+                student: student.getFormattedName(),
+                plan: {
+                    name: plan.getName(),
+                    url: plan.getUrl(),
+                },
+                formFolder: {
+                    name: formFolder.getName(),
+                    url: formFolder.getUrl(),
+                },
+                advisorFolder: {
+                    name: advisorFolder.getName(),
+                    url: advisorFolder.getUrl(),
+                },
+            }),
+            15
+        );
         SpreadsheetApp.getUi().showModalDialog(
-            HtmlService.createHtmlOutput(`
-            <html>
-                <head>
-                    <title>Mockup</title>
-                    <link
-                      rel="stylesheet"
-                      href="https://ssl.gstatic.com/docs/script/css/add-ons1.css"
-                    />
-                </head>
-                <body>
-                    <p>Mockup course plan created for ${plan
-                    .getStudent()
-                    .getFormattedName()}.</p>
-                    <ul>
-                        <li><a href="${plan
-                    .getFile()
-                    .getUrl()}" target="_blank">${plan
-                        .getFile()
-                        .getName()}</a></li>
-                        <li><a href="${plan
-                    .getAdvisorFolder()
-                    .getUrl()}" target="_blank">${plan
-                        .getAdvisorFolder()
-                        .getName()}</a></li>
-                        <li><a href="${plan
-                    .getFormFolder()
-                    .getUrl()}" target="_blank">${plan
-                        .getFormFolder()
-                        .getName()}</a></li>
-                    </ul>
-                </body>
-            </html>
-        `),
+            HtmlService.createTemplateFromFile('templates/Mockup')
+                .evaluate()
+                .setHeight(150),
             'Mockup'
         );
+    }
+
+    public static getMockupResult() {
+        const result = CacheService.getUserCache().get(CoursePlan.MOCKUP_RESULT);
+        CacheService.getUserCache().remove(CoursePlan.MOCKUP_RESULT);
+        return result;
     }
 
     private getStudent() {
@@ -214,40 +223,60 @@ export default class CoursePlan {
         this.insertAndMergeOptionsRows(values[0].length);
     }
 
-    private applyFormat(format, data) {
+    private static applyFormat(format, data) {
         return Object.keys(data).reduce(
             (format, key) => format.replaceAll(`{{${key}}}`, data[key]),
             format
         );
     }
 
-    private getFormFolder() {
-        const self = this;
+    private static getFormFolderInventory() {
         if (!CoursePlan.formFolderInventory) {
             CoursePlan.formFolderInventory = new Inventory(
                 Constants.Spreadsheet.Sheet.FORM_FOLDER_INVENTORY,
                 (gradYear) =>
-                    self.applyFormat(SheetParameters.getFormFolderNameFormat(), {
+                    CoursePlan.applyFormat(SheetParameters.getFormFolderNameFormat(), {
                         gradYear,
                     })
             );
         }
-        return CoursePlan.formFolderInventory.getFolder(this.getStudent().gradYear);
+        return CoursePlan.formFolderInventory;
     }
 
-    private getAdvisorFolder() {
+    private getFormFolder() {
+        return CoursePlan.getFormFolderInventory().getFolder(
+            this.getStudent().gradYear
+        );
+    }
+
+    public static getFormFolderFor(student: Student) {
+        return CoursePlan.getFormFolderInventory().getFolder(student.gradYear);
+    }
+
+    private static getAdvisorFolderInventory() {
         if (!CoursePlan.advisorFolderInventory) {
-            const self = this;
             CoursePlan.advisorFolderInventory = new Inventory(
                 Constants.Spreadsheet.Sheet.ADVISOR_FOLDER_INVENTORY,
                 (email) =>
-                    self.applyFormat(
+                    CoursePlan.applyFormat(
                         SheetParameters.getAdvisorFolderNameFormat(),
                         Advisor.getByEmail(email.toString())
                     )
             );
         }
-        return CoursePlan.advisorFolderInventory.getFolder(this.getAdvisor().email);
+        return CoursePlan.advisorFolderInventory;
+    }
+
+    private getAdvisorFolder() {
+        return CoursePlan.getAdvisorFolderInventory().getFolder(
+            this.getAdvisor().email
+        );
+    }
+
+    public static getAdvisorFolderFor(student: Student) {
+        return CoursePlan.getAdvisorFolderInventory().getFolder(
+            student.getAdvisor().email
+        );
     }
 
     private setValue(a1notation: string, value) {
@@ -267,7 +296,7 @@ export default class CoursePlan {
         const template = State.getTemplate();
         this.setSpreadsheet(
             template.copy(
-                this.applyFormat(
+                CoursePlan.applyFormat(
                     SheetParameters.getCoursePlanNameFormat(),
                     this.getStudent()
                 )
@@ -320,10 +349,13 @@ export default class CoursePlan {
     }
 
     private setPermissions() {
-        // TODO add access privileges
         // TODO do we want to protect the course planning grid at all?
         this.getFile().moveTo(this.getFormFolder());
         this.getAdvisorFolder().createShortcut(this.getFile().getId());
+        this.getSpreadsheet().addEditors([
+            this.getStudent().email,
+            this.getAdvisor().email,
+        ]);
     }
 
     private getGRACEEnrollmentsFunction(): string {
@@ -450,3 +482,5 @@ export default class CoursePlan {
 
 global.action_coursePlan_mockup = CoursePlan.createMockup;
 export const Mockup = 'action_coursePlan_mockup';
+
+global.helper_coursePlan_getMockupResult = CoursePlan.getMockupResult;

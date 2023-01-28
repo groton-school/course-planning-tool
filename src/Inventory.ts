@@ -70,6 +70,7 @@ export default class Inventory {
         const folder = this.getRootFolder().createFolder(folderName);
         const row = [key, folder.getId(), folder.getUrl()];
         this.inventorySheet.appendRow(row);
+        // TODO add advisor as viewer to newly created advisory folder
         return folder;
     }
 
