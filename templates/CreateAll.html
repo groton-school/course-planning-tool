@@ -18,18 +18,17 @@
     <script>
       // https://stackoverflow.com/a/72292354
 
-      const student = document.getElementById('student');
-      const progress = document.getElementById('progress');
-
       function updateProgress(data) {
-        console.log(data);
-        progress.innerHtml = `${data.progress}/${data.total}`;
-        progress.max = data.total;
-        progress.value = data.progress;
+        const student = document.getElementById('student');
+        const progress = document.getElementById('progress');
+        progress.innerHtml = `${data.value}/${data.max}`;
+        progress.max = data.max;
+        progress.value = data.value;
         student.innerHtml = data.current;
-
-        if (data.progress != data.total) {
+        if (data.value != data.max) {
           getUpdatedProgress();
+        } else {
+          google.script.host.close();
         }
       }
 

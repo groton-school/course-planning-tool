@@ -12,7 +12,7 @@ export default class Constants {
         public static readonly TEMPLATE = 'TEMPLATE';
     };
 
-    public static readonly FolderInventory = class {
+    public static readonly Inventory = class {
         public static readonly ROOT = 'ROOT';
     };
 

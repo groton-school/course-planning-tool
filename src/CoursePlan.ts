@@ -89,7 +89,7 @@ export default class CoursePlan {
         this.advisor = advisor;
     }
 
-    private getSpreadsheet() {
+    public getSpreadsheet() {
         return this.spreadsheet;
     }
 
@@ -243,7 +243,7 @@ export default class CoursePlan {
                 (email) =>
                     self.applyFormat(
                         SheetParameters.getAdvisorFolderNameFormat(),
-                        Advisor.getByEmail(email)
+                        Advisor.getByEmail(email.toString())
                     )
             );
         }

@@ -3,7 +3,10 @@ import CoursePlan from './CoursePlan';
 import State from './State';
 import Student from './Student';
 
-type Formatter = (key: string) => string;
+type Key = number | string;
+type Formatter = (key: Key) => string;
+type Getter<T> = (id: string) => T;
+type Creator<T> = (key: Key) => T;
 
 export default class Inventory {
     private inventorySheet: GoogleAppsScript.Spreadsheet.Sheet;
@@ -15,6 +18,7 @@ export default class Inventory {
     }
 
     private getData() {
+        // TODO reasonably, caching this should improve performance, no?
         return this.inventorySheet
             .getRange(
                 1,
@@ -25,8 +29,8 @@ export default class Inventory {
             .getValues();
     }
 
-    private getItem(getter: Function, creator: Function, key) {
-        const id = this.getData().reduce((id: string, [k, i, u]) => {
+    private getItem<T>(getter: Getter<T>, creator: Creator<T>, key: Key) {
+        const id = this.getData().reduce((id: string, [k, i]) => {
             if (k == key) {
                 return i;
             }
@@ -38,37 +42,45 @@ export default class Inventory {
         return getter(id);
     }
 
-    public getFolder = this.getItem.bind(
-        this,
-        DriveApp.getFolderById,
-        this.createFolder
-    );
+    public getFolder(key: Key) {
+        const self = this;
+        return this.getItem(
+            DriveApp.getFolderById,
+            this.createFolder.bind(self),
+            key
+        );
+    }
 
     public getCoursePlan(student: Student) {
+        const self = this;
         return this.getItem(
             SpreadsheetApp.openById,
-            this.createCoursePlan.bind(this, student),
+            this.createCoursePlan.bind(self, student),
             student.hostId
         );
     }
 
     public getRootFolder() {
-        return this.getFolder(Constants.FolderInventory.ROOT);
+        return this.getFolder(Constants.Inventory.ROOT);
     }
 
-    private createFolder(key): GoogleAppsScript.Drive.Folder {
-        const folderName = (this.formatter && this.formatter(key)) || key;
+    private createFolder(key: Key): GoogleAppsScript.Drive.Folder {
+        const folderName =
+            (this.formatter && this.formatter(key)) || key.toString();
         const folder = this.getRootFolder().createFolder(folderName);
         const row = [key, folder.getId(), folder.getUrl()];
         this.inventorySheet.appendRow(row);
         return folder;
     }
 
-    private createCoursePlan(student: Student, key): CoursePlan {
+    private createCoursePlan(
+        student: Student,
+        key: Key
+    ): GoogleAppsScript.Spreadsheet.Spreadsheet {
         const plan = new CoursePlan(student);
         const row = [key, plan.getFile().getId(), plan.getFile().getUrl()];
         this.inventorySheet.appendRow(row);
-        return plan;
+        return plan.getSpreadsheet();
     }
 
     public getSheet() {
