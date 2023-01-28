@@ -34,7 +34,7 @@ export default class Student {
             .getSheetByName(Constants.Spreadsheet.Sheet.ADVISORS)
             .getRange(Constants.Spreadsheet.A1Notation.STUDENT_DATA)
             .getValues()
-            .slice(0, 4) // FIXME remove when testing complete
+            .slice(0, 10) // FIXME remove when testing complete
             .map((row) => new Student(row))
             .filter((student) => student.gradYear != thisYear); // filter out seniors
     }

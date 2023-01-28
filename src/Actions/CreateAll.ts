@@ -1,5 +1,5 @@
 import Constants from '../Constants';
-import CoursePlan from '../CoursePlan';
+import Inventory from '../Inventory';
 import Student from '../Student';
 
 class CreateAll {
@@ -7,7 +7,17 @@ class CreateAll {
     private static readonly CURRENT = `${Constants.PREFIX}.CreateAll.Current`;
     private static readonly PROGRESS = `${Constants.PREFIX}.CreateAll.Progress`;
 
+    private static coursePlanInventory?: Inventory;
     private static cache;
+
+    private static getCoursePlan(student: Student) {
+        if (!this.coursePlanInventory) {
+            this.coursePlanInventory = new Inventory(
+                Constants.Spreadsheet.Sheet.COURSE_PLAN_INVENTORY
+            );
+        }
+        return this.coursePlanInventory.getCoursePlan(student);
+    }
 
     public static dialog() {
         const students = Student.getAll();
@@ -24,7 +34,7 @@ class CreateAll {
                 10
             );
             CreateAll.cache.put(CreateAll.PROGRESS, JSON.stringify(i), 10);
-            new CoursePlan(students[i]);
+            CreateAll.getCoursePlan(students[i]);
         }
     }
 

@@ -1,14 +1,14 @@
 import s from '@battis/google-apps-script-helpers/src/Helper/SpreadsheetApp';
 import Advisor from './Advisor';
 import Constants from './Constants';
-import FolderInventory from './FolderInventory';
+import Inventory from './Inventory';
 import SheetParameters from './SheetParameters';
 import State from './State';
 import Student from './Student';
 
 export default class CoursePlan {
-    private static formFolderInventory: FolderInventory;
-    private static advisorFolderInventory: FolderInventory;
+    private static formFolderInventory?: Inventory;
+    private static advisorFolderInventory?: Inventory;
 
     private student: Student;
     private advisor: Advisor;
@@ -224,7 +224,7 @@ export default class CoursePlan {
     private getFormFolder() {
         const self = this;
         if (!CoursePlan.formFolderInventory) {
-            CoursePlan.formFolderInventory = new FolderInventory(
+            CoursePlan.formFolderInventory = new Inventory(
                 Constants.Spreadsheet.Sheet.FORM_FOLDER_INVENTORY,
                 (gradYear) =>
                     self.applyFormat(SheetParameters.getFormFolderNameFormat(), {
@@ -238,7 +238,7 @@ export default class CoursePlan {
     private getAdvisorFolder() {
         if (!CoursePlan.advisorFolderInventory) {
             const self = this;
-            CoursePlan.advisorFolderInventory = new FolderInventory(
+            CoursePlan.advisorFolderInventory = new Inventory(
                 Constants.Spreadsheet.Sheet.ADVISOR_FOLDER_INVENTORY,
                 (email) =>
                     self.applyFormat(
@@ -264,7 +264,6 @@ export default class CoursePlan {
     }
 
     private createFromTemplate() {
-        // TODO log link to plan in data sheet
         const template = State.getTemplate();
         this.setSpreadsheet(
             template.copy(

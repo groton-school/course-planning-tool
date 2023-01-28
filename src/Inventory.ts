@@ -1,9 +1,11 @@
 import Constants from './Constants';
+import CoursePlan from './CoursePlan';
 import State from './State';
+import Student from './Student';
 
-type Formatter = (string) => string;
+type Formatter = (key: string) => string;
 
-export default class FolderInventory {
+export default class Inventory {
     private inventorySheet: GoogleAppsScript.Spreadsheet.Sheet;
     private formatter?: Formatter;
 
@@ -23,7 +25,7 @@ export default class FolderInventory {
             .getValues();
     }
 
-    public getFolder(key): GoogleAppsScript.Drive.Folder {
+    private getItem(getter: Function, creator: Function, key) {
         const id = this.getData().reduce((id: string, [k, i, u]) => {
             if (k == key) {
                 return i;
@@ -31,9 +33,23 @@ export default class FolderInventory {
             return id;
         }, null);
         if (!id) {
-            return this.createFolder(key);
+            return creator(key);
         }
-        return DriveApp.getFolderById(id);
+        return getter(id);
+    }
+
+    public getFolder = this.getItem.bind(
+        this,
+        DriveApp.getFolderById,
+        this.createFolder
+    );
+
+    public getCoursePlan(student: Student) {
+        return this.getItem(
+            SpreadsheetApp.openById,
+            this.createCoursePlan.bind(this, student),
+            student.hostId
+        );
     }
 
     public getRootFolder() {
@@ -46,6 +62,13 @@ export default class FolderInventory {
         const row = [key, folder.getId(), folder.getUrl()];
         this.inventorySheet.appendRow(row);
         return folder;
+    }
+
+    private createCoursePlan(student: Student, key): CoursePlan {
+        const plan = new CoursePlan(student);
+        const row = [key, plan.getFile().getId(), plan.getFile().getUrl()];
+        this.inventorySheet.appendRow(row);
+        return plan;
     }
 
     public getSheet() {
