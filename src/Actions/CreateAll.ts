@@ -30,7 +30,9 @@ class CreateAll {
         const students = Student.getAll();
         const progress: Progress = { max: students.length };
         SpreadsheetApp.getUi().showModalDialog(
-            HtmlService.createTemplateFromFile('templates/CreateAll').evaluate(),
+            HtmlService.createTemplateFromFile('templates/CreateAll')
+                .evaluate()
+                .setHeight(70),
             'Create All'
         );
         for (
@@ -44,14 +46,17 @@ class CreateAll {
             });
             CreateAll.getCoursePlan(students[progress.value]);
         }
+        CreateAll.putProgress({
+            ...progress,
+            value: progress.max,
+        });
     }
 
     private static putProgress(progress: Progress) {
-        CreateAll.getCache().put(CreateAll.PROGRESS, JSON.stringify(progress), 10);
+        CreateAll.getCache().put(CreateAll.PROGRESS, JSON.stringify(progress), 60);
     }
 
     public static getProgress() {
-        // FIXME progress bar is not updating
         return JSON.parse(CreateAll.getCache().get(CreateAll.PROGRESS));
     }
 }

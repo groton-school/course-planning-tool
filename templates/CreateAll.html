@@ -13,19 +13,22 @@
     </style>
   </head>
   <body>
-    <p id="student"></p>
-    <div><progress id="progress" value="0" max="100"></progress></div>
+    <progress id="progress" value="0" max="100"></progress>
+    <p id="student">&nbsp;</p>
     <script>
       // https://stackoverflow.com/a/72292354
 
       function updateProgress(data) {
-        const student = document.getElementById('student');
         const progress = document.getElementById('progress');
-        progress.innerHtml = `${data.value}/${data.max}`;
-        progress.max = data.max;
-        progress.value = data.value;
-        student.innerHtml = data.current;
-        if (data.value != data.max) {
+        const student = document.getElementById('student');
+        try {
+          Object.assign(progress, data);
+          progress.innerHTML = `${data.value} / ${data.max}`;
+          student.innerHTML = data.current;
+        } catch (e) {
+          console.error(e.message);
+        }
+        if (!data || data.value != data.max) {
           getUpdatedProgress();
         } else {
           google.script.host.close();
