@@ -24,7 +24,6 @@ export default class FolderInventory {
     }
 
     public getFolder(key): GoogleAppsScript.Drive.Folder {
-        // FIXME advisor folders keep being re-created
         const id = this.getData().reduce((id: string, [k, i, u]) => {
             if (k == key) {
                 return i;
