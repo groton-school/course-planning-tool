@@ -1,20 +1,9 @@
 import { Terse } from '@battis/google-apps-script-helpers';
-import Constants from '../Constants';
 import { Mockup } from '../CoursePlan';
 import State from '../State';
 import Student from '../Student';
 
 export default class StudentPicker {
-    public static getAllStudents(): Student[] {
-        const students = State.getDataSheet().getSheetByName(
-            Constants.Spreadsheet.Sheet.ADVISORS
-        );
-        return students
-            .getRange('A2:E')
-            .getValues()
-            .map((row) => new Student(row));
-    }
-
     public static card(): GoogleAppsScript.Card_Service.Card {
         var dropdown = CardService.newSelectionInput()
             .setType(CardService.SelectionInputType.DROPDOWN)
@@ -24,7 +13,7 @@ export default class StudentPicker {
                 Terse.CardService.newAction({ functionName: EmailChange })
             )
             .addItem(' ', null, true);
-        for (const student of StudentPicker.getAllStudents()) {
+        for (const student of Student.getAll()) {
             if (student.hostId) {
                 dropdown = dropdown.addItem(
                     student.getFormattedName(),
@@ -66,4 +55,4 @@ const EmailChange = 'handler_app_studentPicker_emailChange';
 global.action_studentPicker_dialog = StudentPicker.dialog;
 export const StudentPickerDialog = 'action_studentPicker_dialog';
 
-global.helper_studentPicker_getAllStudents = StudentPicker.getAllStudents;
+global.helper_studentPicker_getAllStudents = Student.getAll;

@@ -20,6 +20,7 @@ export default class Constants {
         public static readonly NAME = 'Course Planning';
         public static readonly Item = class {
             public static readonly MOCKUP = 'Mockup';
+            public static readonly CREATE_ALL = 'Create all course plans';
         };
     };
 
@@ -44,6 +45,7 @@ export default class Constants {
             public static readonly COURSE_PLAN_NAME_FORMAT = 'B5';
             public static readonly STUDIES_COMMITTEE = 'C2:C';
             public static readonly COLLEGE_COUNSELING = 'D2:D';
+            public static readonly STUDENT_DATA = 'A2:E';
         };
 
         public static readonly Sheet = class {

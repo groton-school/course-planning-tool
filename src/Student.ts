@@ -1,4 +1,6 @@
 import Advisor from './Advisor';
+import Constants from './Constants';
+import State from './State';
 
 export default class Student {
     public hostId: string;
@@ -23,5 +25,15 @@ export default class Student {
 
     public getAdvisor() {
         return Advisor.getByAdvisee(this.hostId);
+    }
+
+    public static getAll(): Student[] {
+        // TODO filter out seniors
+        return State.getDataSheet()
+            .getSheetByName(Constants.Spreadsheet.Sheet.ADVISORS)
+            .getRange(Constants.Spreadsheet.A1Notation.STUDENT_DATA)
+            .getValues()
+            .slice(0, 4) // FIXME remove when testing complete
+            .map((row) => new Student(row));
     }
 }

@@ -6,7 +6,7 @@ import SheetParameters from './SheetParameters';
 import State from './State';
 import Student from './Student';
 
-class CoursePlan {
+export default class CoursePlan {
     private static formFolderInventory: FolderInventory;
     private static advisorFolderInventory: FolderInventory;
 

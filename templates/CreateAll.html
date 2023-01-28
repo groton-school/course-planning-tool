@@ -1,0 +1,46 @@
+<!DOCTYPE html lang="en">
+<html>
+  <head>
+    <title>Create All</title>
+    <link
+      rel="stylesheet"
+      href="https://ssl.gstatic.com/docs/script/css/add-ons1.css"
+    />
+    <style>
+      progress {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <p id="student"></p>
+    <div><progress id="progress" value="0" max="100"></progress></div>
+    <script>
+      // FIXME progress bar is not updating
+      // https://stackoverflow.com/a/72292354
+
+      const student = document.getElementById('student');
+      const progress = document.getElementById('progress');
+
+      function updateProgress(data) {
+        console.log(data);
+        progress.innerHtml = `${data.progress}/${data.total}`;
+        progress.max = data.total;
+        progress.value = data.progress;
+        student.innerHtml = data.current;
+
+        if (data.progress != data.total) {
+          getUpdatedProgress();
+        }
+      }
+
+      function getUpdatedProgress() {
+        google.script.run
+          .withSuccessHandler(updateProgress)
+          .helper_createAll_getProgress();
+      }
+
+      getUpdatedProgress();
+    </script>
+  </body>
+</html>
