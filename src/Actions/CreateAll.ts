@@ -29,6 +29,7 @@ class CreateAll {
     }
 
     public static getProgress() {
+        // FIXME progress bar is not updating
         return {
             total: CreateAll.cache.get(CreateAll.TOTAL),
             current: CreateAll.cache.get(CreateAll.CURRENT),
