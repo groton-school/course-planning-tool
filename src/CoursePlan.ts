@@ -162,7 +162,7 @@ export default class CoursePlan {
                 const year = this.getEnrollmentOffset(-1, column).getValue();
                 if (
                     (year.substr ? Number(year.substr(0, 4)) : year) <
-                    this.getSchoolYear()
+                    CoursePlan.getCurrentSchoolYear()
                 ) {
                     if (
                         this.getEnrollmentOffset(-2, column).getValue() == Constants.GRACE
@@ -382,7 +382,7 @@ export default class CoursePlan {
         );
     }
 
-    private getSchoolYear() {
+    public static getCurrentSchoolYear() {
         const now = new Date();
         return now.getMonth() > 6 ? now.getFullYear() + 1 : now.getFullYear();
     }

@@ -1,5 +1,6 @@
 import Advisor from './Advisor';
 import Constants from './Constants';
+import CoursePlan from './CoursePlan';
 import State from './State';
 
 export default class Student {
@@ -28,12 +29,13 @@ export default class Student {
     }
 
     public static getAll(): Student[] {
-        // TODO filter out seniors
+        const thisYear = CoursePlan.getCurrentSchoolYear();
         return State.getDataSheet()
             .getSheetByName(Constants.Spreadsheet.Sheet.ADVISORS)
             .getRange(Constants.Spreadsheet.A1Notation.STUDENT_DATA)
             .getValues()
             .slice(0, 4) // FIXME remove when testing complete
-            .map((row) => new Student(row));
+            .map((row) => new Student(row))
+            .filter((student) => student.gradYear != thisYear); // filter out seniors
     }
 }
