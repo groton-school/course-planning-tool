@@ -1,6 +1,11 @@
 export default class Constants {
     public static readonly PREFIX = 'org.groton.CoursePlanning';
     public static readonly GRACE = 'GRACE';
+    public static readonly COMMENTORS = [
+        'Comments from Faculty Advisor',
+        'Comments from Studies Committee',
+        'Comments from College Counseling Office',
+    ];
 
     public static readonly ScriptProperties = class {
         public static readonly DATA = 'DATA';
@@ -33,9 +38,12 @@ export default class Constants {
             public static readonly ENROLLMENT_TOP_LEFT = 'B6';
             public static readonly DEPT_COURSE_LIST = 'A2:A';
             public static readonly NUM_OPTIONS_PER_DEPT = 'B1';
+            public static readonly NUM_COMMENTS = 'B2';
             public static readonly FORM_FOLDER_NAME_FORMAT = 'B3';
             public static readonly ADVISOR_FOLDER_NAME_FORMAT = 'B4';
             public static readonly COURSE_PLAN_NAME_FORMAT = 'B5';
+            public static readonly STUDIES_COMMITTEE = 'C2:C';
+            public static readonly COLLEGE_COUNSELING = 'D2:D';
         };
 
         public static readonly Sheet = class {

@@ -6,7 +6,6 @@ type Formatter = (string) => string;
 export default class FolderInventory {
     private inventorySheet: GoogleAppsScript.Spreadsheet.Sheet;
     private formatter?: Formatter;
-    private data?;
 
     constructor(sheetName: string, formatter?: Formatter) {
         this.inventorySheet = State.getDataSheet().getSheetByName(sheetName);
@@ -14,20 +13,18 @@ export default class FolderInventory {
     }
 
     private getData() {
-        if (!this.data) {
-            this.data = this.inventorySheet
-                .getRange(
-                    1,
-                    1,
-                    this.inventorySheet.getMaxRows(),
-                    this.inventorySheet.getMaxColumns()
-                )
-                .getValues();
-        }
-        return this.data;
+        return this.inventorySheet
+            .getRange(
+                1,
+                1,
+                this.inventorySheet.getMaxRows(),
+                this.inventorySheet.getMaxColumns()
+            )
+            .getValues();
     }
 
     public getFolder(key): GoogleAppsScript.Drive.Folder {
+        // FIXME advisor folders keep being re-created
         const id = this.getData().reduce((id: string, [k, i, u]) => {
             if (k == key) {
                 return i;
@@ -47,7 +44,8 @@ export default class FolderInventory {
     private createFolder(key): GoogleAppsScript.Drive.Folder {
         const folderName = (this.formatter && this.formatter(key)) || key;
         const folder = this.getRootFolder().createFolder(folderName);
-        this.inventorySheet.appendRow([key, folder.getId(), folder.getUrl()]);
+        const row = [key, folder.getId(), folder.getUrl()];
+        this.inventorySheet.appendRow(row);
         return folder;
     }
 

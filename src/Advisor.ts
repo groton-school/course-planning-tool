@@ -35,8 +35,8 @@ export default class Advisor {
     public static getByEmail(email: string) {
         return new Advisor(
             Advisor.getData().reduce(
-                (data, [hid, sem, sfn, sln, gy, em, firstName, lastName]) => {
-                    if (em == email) {
+                (data, [h, se, sfn, sln, gy, e, firstName, lastName]) => {
+                    if (e == email) {
                         return { email, firstName, lastName };
                     }
                     return data;
@@ -49,8 +49,8 @@ export default class Advisor {
     public static getByAdvisee(hostId: string) {
         return new Advisor(
             Advisor.getData().reduce(
-                (data, [hid, sem, sfn, sln, gy, email, firstName, lastName]) => {
-                    if (hid == hostId) {
+                (data, [h, se, sfn, sln, gy, email, firstName, lastName]) => {
+                    if (h == hostId) {
                         return { email, firstName, lastName };
                     }
                     return data;

@@ -19,24 +19,55 @@ class CoursePlan {
     private validationSheet?: GoogleAppsScript.Spreadsheet.Sheet;
 
     public constructor(student: Student) {
+        // TODO deal with GRACE course selection
         this.setStudent(student);
         this.createFromTemplate();
         this.populateHeaders();
         this.populateEnrollmentHistory();
-
-        // TODO deal with GRACE course selection
-        // TODO add advisor notes (protected)
-        // TODO add studies committee notes (protected)
-        // TODO add college counseling notes (protected)
-        // TODO honor number of comment blanks param
-
         this.setPermissions();
+        this.prepareCommentBlanks();
     }
 
     public static createMockup(student?: Student | string) {
         student && State.setStudent(student);
         student = State.getStudent();
         const plan = new CoursePlan(student);
+        SpreadsheetApp.getUi().showModalDialog(
+            HtmlService.createHtmlOutput(`
+            <html>
+                <head>
+                    <title>Mockup</title>
+                    <link
+                      rel="stylesheet"
+                      href="https://ssl.gstatic.com/docs/script/css/add-ons1.css"
+                    />
+                </head>
+                <body>
+                    <p>Mockup course plan created for ${plan
+                    .getStudent()
+                    .getFormattedName()}.</p>
+                    <ul>
+                        <li><a href="${plan
+                    .getFile()
+                    .getUrl()}" target="_blank">${plan
+                        .getFile()
+                        .getName()}</a></li>
+                        <li><a href="${plan
+                    .getAdvisorFolder()
+                    .getUrl()}" target="_blank">${plan
+                        .getAdvisorFolder()
+                        .getName()}</a></li>
+                        <li><a href="${plan
+                    .getFormFolder()
+                    .getUrl()}" target="_blank">${plan
+                        .getFormFolder()
+                        .getName()}</a></li>
+                    </ul>
+                </body>
+            </html>
+        `),
+            'Mockup'
+        );
     }
 
     private getStudent() {
@@ -291,6 +322,7 @@ class CoursePlan {
 
     private setPermissions() {
         // TODO add access privileges
+        // TODO do we want to protect the course planning grid at all?
         this.getFile().moveTo(this.getFormFolder());
         this.getAdvisorFolder().createShortcut(this.getFile().getId());
     }
@@ -372,6 +404,47 @@ class CoursePlan {
                 numOptions,
                 valueWidth + 1
             ).mergeVertically();
+        }
+    }
+
+    private additionalComments(row: number, targetNumComments: number) {
+        this.getWorkingCopy().insertRowsAfter(row, targetNumComments - 2);
+        for (var i = 0; i < targetNumComments - 2; i++) {
+            this.getWorkingCopy()
+                .getRange(row + i + 1, 3, 1, 3)
+                .mergeAcross();
+        }
+    }
+
+    private prepareCommentBlanks() {
+        const numComments = SheetParameters.getNumComments();
+        for (const commentor of Constants.COMMENTORS) {
+            const row = this.getWorkingCopy()
+                .getRange(1, 2, this.getWorkingCopy().getMaxRows(), 1)
+                .getValues()
+                .findIndex(([cell]) => cell == commentor);
+            const protection = this.getWorkingCopy()
+                .getRange(row + 3, 2, 2, commentor == Constants.COMMENTORS[0] ? 4 : 5)
+                .protect()
+                .setDescription(commentor);
+            const me = Session.getEffectiveUser();
+            protection.addEditor(me);
+            protection.removeEditors(protection.getEditors());
+            if (protection.canDomainEdit()) {
+                protection.setDomainEdit(false);
+            }
+            switch (commentor) {
+                case Constants.COMMENTORS[0]:
+                    protection.addEditor(this.getAdvisor().email);
+                    break;
+                case Constants.COMMENTORS[1]:
+                    protection.addEditors(SheetParameters.getStudiesCommittee());
+                    break;
+                case Constants.COMMENTORS[2]:
+                    protection.addEditors(SheetParameters.getCollegeCounseling());
+                    break;
+            }
+            this.additionalComments(row + 3, numComments);
         }
     }
 }
