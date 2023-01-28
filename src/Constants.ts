@@ -1,10 +1,14 @@
 export default class Constants {
-    public static readonly PREFIX = 'org.groton.CoursePlanningTool';
+    public static readonly PREFIX = 'org.groton.CoursePlanning';
     public static readonly GRACE = 'GRACE';
 
     public static readonly ScriptProperties = class {
         public static readonly DATA = 'DATA';
         public static readonly TEMPLATE = 'TEMPLATE';
+    };
+
+    public static readonly FolderInventory = class {
+        public static readonly ROOT = 'ROOT';
     };
 
     public static readonly Menu = class {

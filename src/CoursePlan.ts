@@ -18,6 +18,27 @@ class CoursePlan {
     private enrollmentTopLeft?: GoogleAppsScript.Spreadsheet.Range;
     private validationSheet?: GoogleAppsScript.Spreadsheet.Sheet;
 
+    public constructor(student: Student) {
+        this.setStudent(student);
+        this.createFromTemplate();
+        this.populateHeaders();
+        this.populateEnrollmentHistory();
+
+        // TODO deal with GRACE course selection
+        // TODO add advisor notes (protected)
+        // TODO add studies committee notes (protected)
+        // TODO add college counseling notes (protected)
+        // TODO honor number of comment blanks param
+
+        this.setPermissions();
+    }
+
+    public static createMockup(student?: Student | string) {
+        student && State.setStudent(student);
+        student = State.getStudent();
+        const plan = new CoursePlan(student);
+    }
+
     private getStudent() {
         return this.student;
     }
@@ -27,16 +48,8 @@ class CoursePlan {
     }
 
     private getAdvisor() {
-        if (!this.advisor) {
-            this.advisor = new Advisor(
-                State.getDataSheet()
-                    .getSheetByName(Constants.Spreadsheet.Sheet.ADVISORS)
-                    .createTextFinder(this.getStudent().hostId)
-                    .matchEntireCell(true)
-                    .findNext()
-                    .offset(0, 5, 1, 3)
-                    .getValues()[0]
-            );
+        if (!this.advisor && this.student) {
+            this.advisor = this.getStudent().getAdvisor();
         }
         return this.advisor;
     }
@@ -56,6 +69,9 @@ class CoursePlan {
     }
 
     public getFile() {
+        if (!this.file && this.spreadsheet) {
+            this.file = DriveApp.getFileById(this.getSpreadsheet().getId());
+        }
         return this.file;
     }
 
@@ -69,7 +85,7 @@ class CoursePlan {
     }
 
     private getEnrollmentOffset(...offset: number[]) {
-        if (!this.enrollmentTopLeft && this.getWorkingCopy()) {
+        if (!this.enrollmentTopLeft && this.workingCopy) {
             this.enrollmentTopLeft = this.getWorkingCopy().getRange(
                 Constants.Spreadsheet.A1Notation.ENROLLMENT_TOP_LEFT
             );
@@ -102,6 +118,69 @@ class CoursePlan {
 
     private getNumDepartments() {
         return this.getValidationSheet().getMaxColumns();
+    }
+
+    private populateEnrollmentHistory() {
+        const values = [];
+        const validations = [];
+
+        for (var row = 0; row < this.getNumDepartments(); row++) {
+            const rowValue = [];
+            const rowValidation = [];
+            for (var column = 0; column < 6; column++) {
+                const year = this.getEnrollmentOffset(-1, column).getValue();
+                if (
+                    (year.substr ? Number(year.substr(0, 4)) : year) <
+                    this.getSchoolYear()
+                ) {
+                    if (
+                        this.getEnrollmentOffset(-2, column).getValue() == Constants.GRACE
+                    ) {
+                        if (row == this.getNumDepartments() - 1) {
+                            rowValue.push(this.getGRACEEnrollmentsFunction());
+                        } else {
+                            rowValue.push('');
+                        }
+                    } else {
+                        const department = this.getEnrollmentOffset()
+                            .offset(row, -1)
+                            .getValue();
+                        rowValue.push(this.getEnrollmentsFunctionBy(year, department));
+                    }
+                } else {
+                    rowValidation.push(
+                        SpreadsheetApp.newDataValidation()
+                            .requireValueInRange(
+                                this.getValidationSheet()
+                                    .getRange(Constants.Spreadsheet.A1Notation.DEPT_COURSE_LIST)
+                                    .offset(0, row)
+                            )
+                            .build()
+                    );
+                }
+            }
+            values.push(rowValue);
+            validations.push(rowValidation);
+        }
+
+        this.getEnrollmentOffset(0, 0, values.length, values[0].length).setValues(
+            values
+        );
+
+        this.replaceFunctionsWithDisplayValues();
+
+        this.moveToStudentCoursePlanSpreadsheet();
+
+        if (validations[0].length) {
+            this.getEnrollmentOffset(
+                0,
+                values[0].length,
+                validations.length,
+                validations[0].length
+            ).setDataValidations(validations);
+        }
+
+        this.insertAndMergeOptionsRows(values[0].length);
     }
 
     private applyFormat(format, data) {
@@ -172,7 +251,7 @@ class CoursePlan {
         );
     }
 
-    private updateHeaders() {
+    private populateHeaders() {
         this.setValue(Constants.Spreadsheet.A1Notation.NAMES, [
             [this.getStudent().getFormattedName()],
             [`Advisor: ${this.getAdvisor().getFormattedName()}`],
@@ -212,12 +291,8 @@ class CoursePlan {
 
     private setPermissions() {
         // TODO add access privileges
-
-        // FIXME file is getting neither moved nor shortcutted
-        const file = DriveApp.getFileById(this.getSpreadsheet().getId());
-        file.moveTo(this.getFormFolder());
-        this.getAdvisorFolder().createShortcut(file.getId());
-        return file;
+        this.getFile().moveTo(this.getFormFolder());
+        this.getAdvisorFolder().createShortcut(this.getFile().getId());
     }
 
     private getGRACEEnrollmentsFunction(): string {
@@ -298,95 +373,6 @@ class CoursePlan {
                 valueWidth + 1
             ).mergeVertically();
         }
-    }
-
-    public constructor(student: Student) {
-        this.setStudent(student);
-        this.createFromTemplate();
-        this.updateHeaders();
-
-        const values = [];
-        const validations = [];
-
-        for (var row = 0; row < this.getNumDepartments(); row++) {
-            const rowValue = [];
-            const rowValidation = [];
-            for (var column = 0; column < 6; column++) {
-                const year = this.getEnrollmentOffset(-1, column).getValue();
-                if (
-                    (year.substr ? Number(year.substr(0, 4)) : year) <
-                    this.getSchoolYear()
-                ) {
-                    if (
-                        this.getEnrollmentOffset(-2, column).getValue() == Constants.GRACE
-                    ) {
-                        if (row == this.getNumDepartments() - 1) {
-                            rowValue.push(this.getGRACEEnrollmentsFunction());
-                        } else {
-                            rowValue.push('');
-                        }
-                    } else {
-                        const department = this.getEnrollmentOffset()
-                            .offset(row, -1)
-                            .getValue();
-                        rowValue.push(this.getEnrollmentsFunctionBy(year, department));
-                    }
-                } else {
-                    rowValidation.push(
-                        SpreadsheetApp.newDataValidation()
-                            .requireValueInRange(
-                                this.getValidationSheet()
-                                    .getRange(Constants.Spreadsheet.A1Notation.DEPT_COURSE_LIST)
-                                    .offset(0, row)
-                            )
-                            .build()
-                    );
-                }
-            }
-            values.push(rowValue);
-            validations.push(rowValidation);
-        }
-
-        this.getEnrollmentOffset(0, 0, values.length, values[0].length).setValues(
-            values
-        );
-
-        this.replaceFunctionsWithDisplayValues();
-
-        this.moveToStudentCoursePlanSpreadsheet();
-
-        if (validations[0].length) {
-            this.getEnrollmentOffset(
-                0,
-                values[0].length,
-                validations.length,
-                validations[0].length
-            ).setDataValidations(validations);
-        }
-
-        this.insertAndMergeOptionsRows(values[0].length);
-
-        // TODO deal with GRACE course selection
-        // TODO add advisor notes (protected)
-        // TODO add studies committee notes (protected)
-        // TODO add college counseling notes (protected)
-        // TODO honor number of comment blanks param
-
-        this.setPermissions();
-    }
-
-    public static createMockup(student?: Student | string) {
-        student && State.setStudent(student);
-        student = State.getStudent();
-        const plan = new CoursePlan(student);
-        SpreadsheetApp.getUi().showModalDialog(
-            HtmlService.createHtmlOutput(
-                `<a href="${plan.getFile().getUrl()}" target="_blank">${plan
-                    .getFile()
-                    .getName()}</a>`
-            ),
-            'Created'
-        );
     }
 }
 

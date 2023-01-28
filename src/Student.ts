@@ -1,3 +1,5 @@
+import Advisor from './Advisor';
+
 export default class Student {
     public hostId: string;
     public email: string;
@@ -17,5 +19,9 @@ export default class Student {
 
     public getFormattedName(): string {
         return `${this.firstName} ${this.lastName} ‘${this.gradYear - 2000}`;
+    }
+
+    public getAdvisor() {
+        return Advisor.getByAdvisee(this.hostId);
     }
 }

@@ -1,7 +1,6 @@
 import Constants from './Constants';
 import State from './State';
 
-// TODO there is surely a less cumbersome way to do this
 export default class SheetParameters {
     private static params?: GoogleAppsScript.Spreadsheet.Sheet;
 
