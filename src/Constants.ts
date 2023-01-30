@@ -43,8 +43,8 @@ export default class Constants {
             public static readonly FORM_FOLDER_NAME_FORMAT = 'B3';
             public static readonly ADVISOR_FOLDER_NAME_FORMAT = 'B4';
             public static readonly COURSE_PLAN_NAME_FORMAT = 'B5';
-            public static readonly STUDIES_COMMITTEE = 'C2:C';
-            public static readonly COLLEGE_COUNSELING = 'D2:D';
+            public static readonly STUDIES_COMMITTEE = 'B6';
+            public static readonly COLLEGE_COUNSELING = 'B7';
             public static readonly STUDENT_DATA = 'A2:E';
         };
 
