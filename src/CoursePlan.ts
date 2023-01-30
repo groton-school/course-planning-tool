@@ -469,10 +469,10 @@ export default class CoursePlan {
                     protection.addEditor(this.getAdvisor().email);
                     break;
                 case Constants.COMMENTORS[1]:
-                    protection.addEditors(SheetParameters.getStudiesCommittee());
+                    protection.addEditor(SheetParameters.getStudiesCommittee());
                     break;
                 case Constants.COMMENTORS[2]:
-                    protection.addEditors(SheetParameters.getCollegeCounseling());
+                    protection.addEditor(SheetParameters.getCollegeCounseling());
                     break;
             }
             this.additionalComments(row + 3, numComments);
