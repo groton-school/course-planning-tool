@@ -1,9 +1,9 @@
 import { Terse } from '@battis/google-apps-script-helpers';
 import Constants from './Constants';
-import Student from './Student';
 
 export default class State {
-  private static readonly PROP_STUDENT = `${Constants.PREFIX}.State.student`;
+  private static PROGRESS = `${Constants.PREFIX}.State.progress`;
+  private static COMPLETE = `${Constants.PREFIX}.State.complete`;
 
   private static dataSheet?: GoogleAppsScript.Spreadsheet.Spreadsheet;
   private static template?: GoogleAppsScript.Spreadsheet.Spreadsheet;
@@ -24,31 +24,27 @@ export default class State {
     return State.template;
   }
 
-  public static getStudent() {
-    return new Student(
-      JSON.parse(Terse.PropertiesService.getUserProperty(State.PROP_STUDENT))
-    );
+  public static setProgress(message) {
+    if (typeof message != 'string') {
+      message = JSON.stringify(message);
+    }
+    CacheService.getUserCache().put(State.PROGRESS, message, 10);
   }
 
-  public static setStudent(student: Student | string) {
-    Terse.PropertiesService.setUserProperty(
-      State.PROP_STUDENT,
-      student instanceof Student ? JSON.stringify(student) : student
-    );
+  public static getProgress() {
+    return CacheService.getUserCache().get(State.PROGRESS);
   }
 
-  public static resetStudent() {
-    Terse.PropertiesService.deleteUserProperty(State.PROP_STUDENT);
+  public static resetComplete() {
+    CacheService.getUserCache().remove(State.PROGRESS);
+    CacheService.getUserCache().remove(State.COMPLETE);
   }
 
-  public static toJSON() {
-    return JSON.stringify(
-      {
-        student: State.getStudent(),
-        dataSheet: State.getDataSheet().getId(),
-      },
-      null,
-      2
-    );
+  public static setComplete(message: string) {
+    CacheService.getUserCache().put(State.COMPLETE, message);
+  }
+
+  public static getComplete() {
+    return CacheService.getUserCache().get(State.COMPLETE);
   }
 }

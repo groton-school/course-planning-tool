@@ -6,8 +6,9 @@
 # and our transpiled code
 !build/*.js
 # and our templates
+!css/*.html
+!js/*.html
 !templates/*.html
-
 # ignore even valid files if in…
 .git/**
 node_modules/**

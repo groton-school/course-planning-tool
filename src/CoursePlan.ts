@@ -24,6 +24,7 @@ export default class CoursePlan {
   private anchor?: GoogleAppsScript.Spreadsheet.Range;
   private validationSheet?: GoogleAppsScript.Spreadsheet.Sheet;
 
+  // FIXME CoursePlan constructor should be private to enforce inventory updates
   public constructor(student: Student) {
     // TODO deal with GRACE course selection
     this.setStudent(student);
@@ -39,48 +40,8 @@ export default class CoursePlan {
     if (!CoursePlan.coursePlanInventory) {
       CoursePlan.coursePlanInventory = new Inventory('Course Plan Inventory');
     }
+    State.setProgress('Updating inventory');
     return CoursePlan.coursePlanInventory.getCoursePlan(student);
-  }
-
-  // TODO extract Mockup as separate action
-  public static createMockup(student?: Student | string) {
-    student && State.setStudent(student);
-    student = State.getStudent();
-    const plan = CoursePlan.for(student);
-    const advisorFolder = CoursePlan.getAdvisorFolderFor(student);
-    const formFolder = CoursePlan.getFormFolderFor(student);
-    CacheService.getUserCache().put(
-      CoursePlan.MOCKUP_RESULT,
-      JSON.stringify({
-        student: student.getFormattedName(),
-        plan: {
-          name: plan.getName(),
-          url: plan.getUrl(),
-        },
-        formFolder: {
-          name: formFolder.getName(),
-          url: formFolder.getUrl(),
-        },
-        advisorFolder: {
-          name: advisorFolder.getName(),
-          url: advisorFolder.getUrl(),
-        },
-      }),
-      15
-    );
-    SpreadsheetApp.getUi().showModalDialog(
-      HtmlService.createTemplateFromFile('templates/Mockup')
-        .evaluate()
-        .setHeight(150),
-      'Mockup'
-    );
-    // TODO finish mockup by opening course plan
-  }
-
-  public static getMockupResult() {
-    const result = CacheService.getUserCache().get(CoursePlan.MOCKUP_RESULT);
-    CacheService.getUserCache().remove(CoursePlan.MOCKUP_RESULT);
-    return result;
   }
 
   private getStudent() {
@@ -88,6 +49,7 @@ export default class CoursePlan {
   }
 
   private setStudent(student: Student) {
+    State.setProgress('Identifying student');
     this.student = student;
   }
 
@@ -158,6 +120,7 @@ export default class CoursePlan {
   }
 
   private populateEnrollmentHistory() {
+    State.setProgress('Writing course enrollment history');
     const values = [];
     const validations = [];
 
@@ -203,6 +166,7 @@ export default class CoursePlan {
 
     this.replaceFunctionsWithDisplayValues();
 
+    State.setProgress('Moving course plan into place');
     this.moveToStudentCoursePlanSpreadsheet();
 
     if (validations[0].length) {
@@ -214,6 +178,7 @@ export default class CoursePlan {
       ).setDataValidations(validations);
     }
 
+    State.setProgress('Protecting data');
     this.protectNonCommentRanges(historyWidth, historyHeight);
 
     this.insertAndMergeOptionsRows(values[0].length);
@@ -290,6 +255,7 @@ export default class CoursePlan {
   }
 
   private createFromTemplate() {
+    State.setProgress('Creating course plan from template');
     const template = State.getTemplate();
     this.setSpreadsheet(
       template.copy(
@@ -308,6 +274,7 @@ export default class CoursePlan {
   }
 
   private populateHeaders() {
+    State.setProgress('Filling in the labels');
     this.setValue('Template_Names', [
       [this.getStudent().getFormattedName()],
       [`Advisor: ${this.getAdvisor().getFormattedName()}`],
@@ -344,7 +311,7 @@ export default class CoursePlan {
   }
 
   private setPermissions() {
-    // TODO do we want to protect the course planning grid at all?
+    State.setProgress('Setting permissions');
     this.getFile().moveTo(this.getFormFolder());
     this.getAdvisorFolder().createShortcut(this.getFile().getId());
     Helper.DriveApp.addPermission(
@@ -476,6 +443,7 @@ export default class CoursePlan {
   }
 
   private prepareCommentBlanks() {
+    State.setProgress('Making room for comments');
     const numComments = SheetParameters.getNumComments();
     const commentors = {
       'Comments from Faculty Advisor': this.getAdvisor().email,
@@ -504,8 +472,3 @@ export default class CoursePlan {
     }
   }
 }
-
-global.action_coursePlan_mockup = CoursePlan.createMockup;
-export const Mockup = 'action_coursePlan_mockup';
-
-global.helper_coursePlan_getMockupResult = CoursePlan.getMockupResult;

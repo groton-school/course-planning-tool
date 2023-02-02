@@ -23,6 +23,28 @@ export default class Student {
     return `${this.firstName} ${this.lastName} ‘${this.gradYear - 2000}`;
   }
 
+  public static getByHostId(id: string) {
+    return State.getDataSheet()
+      .getSheetByName('Advisor List')
+      .getRange('AdvisorList_StudentData')
+      .getValues()
+      .reduce(
+        (student: Student, [hostId, email, firstName, lastName, gradYear]) => {
+          if (hostId == id) {
+            return new Student({
+              hostId,
+              firstName,
+              lastName,
+              email,
+              gradYear,
+            });
+          }
+          return student;
+        },
+        null
+      );
+  }
+
   public getAdvisor() {
     return Advisor.getByAdvisee(this.hostId);
   }
