@@ -355,17 +355,17 @@ export default class CoursePlan {
     this.getFile().moveTo(this.getFormFolder());
     this.getAdvisorFolder().createShortcut(this.getFile().getId());
     Helper.DriveApp.addPermission(
-      this.getAdvisorFolder().getId(),
-      this.getAdvisor().email,
-      Helper.DriveApp.Permission.Role.Reader
-    );
-    Helper.DriveApp.addPermission(
       this.getFile().getId(),
       this.getStudent().email
     );
     Helper.DriveApp.addPermission(
       this.getFile().getId(),
       this.getAdvisor().email
+    );
+    Helper.DriveApp.addPermission(
+      this.getAdvisorFolder().getId(),
+      this.getAdvisor().email,
+      Helper.DriveApp.Permission.Role.Reader
     );
   }
 
