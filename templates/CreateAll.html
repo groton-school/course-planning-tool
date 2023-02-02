@@ -23,8 +23,7 @@
         const student = document.getElementById('student');
         try {
           Object.assign(progress, data);
-          progress.innerHTML = `${data.value} / ${data.max}`;
-          student.innerHTML = data.current;
+          student.innerHTML = `${data.current} (${data.value} / ${data.max})`;
         } catch (e) {
           console.error(e.message);
         }
