@@ -23,6 +23,8 @@ function deleteAll() {
     plans.deleteRows(3, plans.getMaxRows() - 2);
     plans.getRange('A2:C2').setValues([['', '', '']]);
   }
+
+  // TODO finish deleteAll by making course plan inventory active sheet
 }
 
 global.action_coursePlan_deleteAll = deleteAll;

@@ -1,13 +1,12 @@
 import Constants from '../Constants';
-import Inventory from '../Inventory';
 import Student from '../Student';
+import CoursePlan from '../CoursePlan';
 
 type Progress = { max: number; value?: number; current?: string };
 
 class CreateAll {
   private static readonly PROGRESS = `${Constants.PREFIX}.CreateAll.Progress`;
 
-  private static coursePlanInventory?: Inventory;
   private static cache?: GoogleAppsScript.Cache.Cache;
 
   private static getCache() {
@@ -15,15 +14,6 @@ class CreateAll {
       CreateAll.cache = CacheService.getUserCache();
     }
     return CreateAll.cache;
-  }
-
-  private static getCoursePlan(student: Student) {
-    if (!this.coursePlanInventory) {
-      this.coursePlanInventory = new Inventory(
-        Constants.Spreadsheet.Sheet.COURSE_PLAN_INVENTORY
-      );
-    }
-    return this.coursePlanInventory.getCoursePlan(student);
   }
 
   public static dialog() {
@@ -41,8 +31,10 @@ class CreateAll {
         value: i + 1,
         current: student.getFormattedName(),
       });
-      CreateAll.getCoursePlan(student);
+      CoursePlan.for(student);
     });
+
+    // TODO make course plan inventory active sheet
   }
 
   private static putProgress(progress: Progress) {

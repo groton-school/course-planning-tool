@@ -14,13 +14,14 @@ export default class CoursePlan {
   private static formFolderInventory?: Inventory;
   private static advisorFolderInventory?: Inventory;
   private static coursePlanInventory?: Inventory;
+  private static me?: GoogleAppsScript.Base.User;
 
   private student: Student;
   private advisor: Advisor;
   private spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet;
   private file: GoogleAppsScript.Drive.File;
   private workingCopy?: GoogleAppsScript.Spreadsheet.Sheet;
-  private enrollmentTopLeft?: GoogleAppsScript.Spreadsheet.Range;
+  private anchor?: GoogleAppsScript.Spreadsheet.Range;
   private validationSheet?: GoogleAppsScript.Spreadsheet.Sheet;
 
   public constructor(student: Student) {
@@ -34,14 +35,14 @@ export default class CoursePlan {
   }
 
   public static for(student: Student) {
+    // TODO update inventory page way sooner
     if (!CoursePlan.coursePlanInventory) {
-      CoursePlan.coursePlanInventory = new Inventory(
-        Constants.Spreadsheet.Sheet.COURSE_PLAN_INVENTORY
-      );
+      CoursePlan.coursePlanInventory = new Inventory('Course Plan Inventory');
     }
     return CoursePlan.coursePlanInventory.getCoursePlan(student);
   }
 
+  // TODO extract Mockup as separate action
   public static createMockup(student?: Student | string) {
     student && State.setStudent(student);
     student = State.getStudent();
@@ -73,6 +74,7 @@ export default class CoursePlan {
         .setHeight(150),
       'Mockup'
     );
+    // TODO finish mockup by opening course plan
   }
 
   public static getMockupResult() {
@@ -123,36 +125,29 @@ export default class CoursePlan {
 
   private setWorkingCopy(sheet: GoogleAppsScript.Spreadsheet.Sheet) {
     this.workingCopy = sheet;
-    this.enrollmentTopLeft = null;
+    this.anchor = null;
   }
 
-  private getEnrollmentOffset(...offset: number[]) {
-    if (!this.enrollmentTopLeft && this.workingCopy) {
-      this.enrollmentTopLeft = this.getWorkingCopy().getRange(
-        Constants.Spreadsheet.A1Notation.ENROLLMENT_TOP_LEFT
-      );
+  private getAnchorOffset(...offset: number[]) {
+    if (!this.anchor && this.workingCopy) {
+      this.anchor = this.getWorkingCopy().getRange('Template_Anchor');
     }
     const [rowOffset, columnOffset, numRows, numColumns] = offset;
     switch (offset.length) {
       case 2:
-        return this.enrollmentTopLeft.offset(rowOffset, columnOffset);
+        return this.anchor.offset(rowOffset, columnOffset);
       case 4:
-        return this.enrollmentTopLeft.offset(
-          rowOffset,
-          columnOffset,
-          numRows,
-          numColumns
-        );
+        return this.anchor.offset(rowOffset, columnOffset, numRows, numColumns);
       case 0:
       default:
-        return this.enrollmentTopLeft;
+        return this.anchor;
     }
   }
 
   private getValidationSheet() {
     if (!this.validationSheet) {
       this.validationSheet = this.getSpreadsheet().getSheetByName(
-        Constants.Spreadsheet.Sheet.COURSES
+        'Courses by Department'
       );
     }
     return this.validationSheet;
@@ -170,21 +165,19 @@ export default class CoursePlan {
       const rowValue = [];
       const rowValidation = [];
       for (var column = 0; column < 6; column++) {
-        const year = this.getEnrollmentOffset(-1, column).getValue();
+        const year = this.getAnchorOffset(-1, column).getValue();
         if (
           (year.substr ? Number(year.substr(0, 4)) : year) <
           CoursePlan.getCurrentSchoolYear()
         ) {
-          if (
-            this.getEnrollmentOffset(-2, column).getValue() == Constants.GRACE
-          ) {
+          if (this.getAnchorOffset(-2, column).getValue() == 'GRACE') {
             if (row == this.getNumDepartments() - 1) {
               rowValue.push(this.getGRACEEnrollmentsFunction());
             } else {
               rowValue.push('');
             }
           } else {
-            const department = this.getEnrollmentOffset()
+            const department = this.getAnchorOffset()
               .offset(row, -1)
               .getValue();
             rowValue.push(this.getEnrollmentsFunctionBy(year, department));
@@ -193,9 +186,7 @@ export default class CoursePlan {
           rowValidation.push(
             SpreadsheetApp.newDataValidation()
               .requireValueInRange(
-                this.getValidationSheet()
-                  .getRange(Constants.Spreadsheet.A1Notation.DEPT_COURSE_LIST)
-                  .offset(0, row)
+                this.getValidationSheet().getRange('A2:A').offset(0, row)
               )
               .build()
           );
@@ -205,22 +196,25 @@ export default class CoursePlan {
       validations.push(rowValidation);
     }
 
-    this.getEnrollmentOffset(0, 0, values.length, values[0].length).setValues(
-      values
-    );
+    const historyHeight = values.length;
+    const historyWidth = values[0].length;
+
+    this.getAnchorOffset(0, 0, historyHeight, historyWidth).setValues(values);
 
     this.replaceFunctionsWithDisplayValues();
 
     this.moveToStudentCoursePlanSpreadsheet();
 
     if (validations[0].length) {
-      this.getEnrollmentOffset(
+      this.getAnchorOffset(
         0,
-        values[0].length,
+        historyWidth,
         validations.length,
         validations[0].length
       ).setDataValidations(validations);
     }
+
+    this.protectNonCommentRanges(historyWidth, historyHeight);
 
     this.insertAndMergeOptionsRows(values[0].length);
   }
@@ -235,7 +229,7 @@ export default class CoursePlan {
   private static getFormFolderInventory() {
     if (!CoursePlan.formFolderInventory) {
       CoursePlan.formFolderInventory = new Inventory(
-        Constants.Spreadsheet.Sheet.FORM_FOLDER_INVENTORY,
+        'Form Folder Inventory',
         (gradYear) =>
           CoursePlan.applyFormat(SheetParameters.getFormFolderNameFormat(), {
             gradYear,
@@ -258,7 +252,7 @@ export default class CoursePlan {
   private static getAdvisorFolderInventory() {
     if (!CoursePlan.advisorFolderInventory) {
       CoursePlan.advisorFolderInventory = new Inventory(
-        Constants.Spreadsheet.Sheet.ADVISOR_FOLDER_INVENTORY,
+        'Advisor Folder Inventory',
         (email) =>
           CoursePlan.applyFormat(
             SheetParameters.getAdvisorFolderNameFormat(),
@@ -281,6 +275,7 @@ export default class CoursePlan {
     );
   }
 
+  // TODO setValue() should really be dumped into @battis/google-apps-script-helpers
   private setValue(a1notation: string, value) {
     const range = this.getWorkingCopy().getRange(a1notation);
 
@@ -307,13 +302,13 @@ export default class CoursePlan {
     s.addImportrangePermission(this.getSpreadsheet(), State.getDataSheet());
     this.setWorkingCopy(
       this.getSpreadsheet()
-        .getSheetByName(Constants.Spreadsheet.Sheet.COURSE_PLAN)
+        .getSheetByName(Constants.COURSE_PLAN)
         .copyTo(State.getDataSheet())
     );
   }
 
   private populateHeaders() {
-    this.setValue(Constants.Spreadsheet.A1Notation.NAMES, [
+    this.setValue('Template_Names', [
       [this.getStudent().getFormattedName()],
       [`Advisor: ${this.getAdvisor().getFormattedName()}`],
     ]);
@@ -322,7 +317,7 @@ export default class CoursePlan {
       (value) => `${gradYear - value - 1} - ${gradYear - value}`
     );
     years.splice(2, 0, gradYear - 3);
-    this.setValue(Constants.Spreadsheet.A1Notation.YEARS, years);
+    this.setValue('Template_Years', years);
   }
 
   private replaceFunctionsWithDisplayValues() {
@@ -338,14 +333,12 @@ export default class CoursePlan {
 
   private moveToStudentCoursePlanSpreadsheet() {
     this.getSpreadsheet().deleteSheet(
-      this.getSpreadsheet().getSheetByName(
-        Constants.Spreadsheet.Sheet.COURSE_PLAN
-      )
+      this.getSpreadsheet().getSheetByName(Constants.COURSE_PLAN)
     );
     const plan = this.getWorkingCopy().copyTo(this.getSpreadsheet());
     State.getDataSheet().deleteSheet(this.getWorkingCopy());
     this.setWorkingCopy(plan);
-    this.getWorkingCopy().setName(Constants.Spreadsheet.Sheet.COURSE_PLAN);
+    this.getWorkingCopy().setName(Constants.COURSE_PLAN);
     this.spreadsheet.setActiveSheet(this.getWorkingCopy());
     this.spreadsheet.moveActiveSheet(1);
   }
@@ -377,12 +370,9 @@ export default class CoursePlan {
           s.char(10),
           s.sort(
             s.filter(
-              Constants.Spreadsheet.Range.TITLE,
-              s.eq(
-                Constants.Spreadsheet.Range.HOST_ID,
-                this.getStudent().hostId
-              ),
-              s.eq(Constants.Spreadsheet.Range.DEPT, Constants.GRACE)
+              'Enrollment_Title',
+              s.eq('Enrollment_Host_ID', this.getStudent().hostId),
+              s.eq('Enrollment_Department', 'GRACE')
             )
           )
         ),
@@ -401,13 +391,10 @@ export default class CoursePlan {
             s.index(
               s.sort(
                 s.filter(
-                  `{${Constants.Spreadsheet.Range.TITLE}, ${Constants.Spreadsheet.Range.ORDER}}`,
-                  s.eq(
-                    Constants.Spreadsheet.Range.HOST_ID,
-                    this.getStudent().hostId
-                  ),
-                  s.eq(Constants.Spreadsheet.Range.YEAR, year),
-                  s.eq(Constants.Spreadsheet.Range.DEPT, department)
+                  '{Enrollment_Title, Enrollment_Order}',
+                  s.eq('Enrollment_Host_ID', this.getStudent().hostId),
+                  s.eq('Enrollment_Year', year),
+                  s.eq('Enrollment_Department', department)
                 ),
                 2,
                 true,
@@ -437,10 +424,10 @@ export default class CoursePlan {
       row += numOptions
     ) {
       this.getWorkingCopy().insertRowsAfter(
-        this.getEnrollmentOffset().getRow() + row,
+        this.getAnchorOffset().getRow() + row,
         numOptions - 1
       );
-      this.getEnrollmentOffset(
+      this.getAnchorOffset(
         row,
         -1,
         numOptions,
@@ -458,34 +445,61 @@ export default class CoursePlan {
     }
   }
 
+  private protectNonCommentRanges(historyWidth: number, historyHeight: number) {
+    const history = this.getAnchorOffset(0, 0, historyHeight, historyWidth);
+    for (const range of [
+      history.getA1Notation(),
+      'Protect_LeftMargin',
+      'Protect_RightMargin',
+      'Protect_TopMargin',
+      'Protect_AdvisorInitials',
+      'Protect_AfterAdvisor',
+      'Protect_AfterStudiesCommittee',
+    ]) {
+      const protection = this.getWorkingCopy()
+        .getRange(range)
+        .protect()
+        .setDescription('No Edits');
+      this.clearEditors(protection);
+    }
+  }
+
+  private clearEditors(protection: GoogleAppsScript.Spreadsheet.Protection) {
+    if (!CoursePlan.me) {
+      CoursePlan.me = Session.getEffectiveUser();
+    }
+    protection.addEditor(CoursePlan.me);
+    protection.removeEditors(protection.getEditors());
+    if (protection.canDomainEdit()) {
+      protection.setDomainEdit(false);
+    }
+  }
+
   private prepareCommentBlanks() {
     const numComments = SheetParameters.getNumComments();
-    for (const commentor of Constants.COMMENTORS) {
+    const commentors = {
+      'Comments from Faculty Advisor': this.getAdvisor().email,
+      'Comments from Studies Committee': SheetParameters.getStudiesCommittee(),
+      'Comments from College Counseling Office':
+        SheetParameters.getCollegeCounseling(),
+    };
+    for (const commentor in commentors) {
+      // TODO extract finding a cell by content to @battis/google-apps-script-helpers
       const row = this.getWorkingCopy()
         .getRange(1, 2, this.getWorkingCopy().getMaxRows(), 1)
         .getValues()
         .findIndex(([cell]) => cell == commentor);
       const protection = this.getWorkingCopy()
-        .getRange(row + 3, 2, 2, commentor == Constants.COMMENTORS[0] ? 4 : 5)
+        .getRange(
+          row + 3,
+          2,
+          2,
+          commentor == 'Comments from Faculty Advisor' ? 4 : 5
+        )
         .protect()
         .setDescription(commentor);
-      const me = Session.getEffectiveUser();
-      protection.addEditor(me);
-      protection.removeEditors(protection.getEditors());
-      if (protection.canDomainEdit()) {
-        protection.setDomainEdit(false);
-      }
-      switch (commentor) {
-        case Constants.COMMENTORS[0]:
-          protection.addEditor(this.getAdvisor().email);
-          break;
-        case Constants.COMMENTORS[1]:
-          protection.addEditor(SheetParameters.getStudiesCommittee());
-          break;
-        case Constants.COMMENTORS[2]:
-          protection.addEditor(SheetParameters.getCollegeCounseling());
-          break;
-      }
+      this.clearEditors(protection);
+      protection.addEditor(commentors[commentor]);
       this.additionalComments(row + 3, numComments);
     }
   }

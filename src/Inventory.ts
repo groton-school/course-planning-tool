@@ -1,4 +1,3 @@
-import Constants from './Constants';
 import CoursePlan from './CoursePlan';
 import State from './State';
 import Student from './Student';
@@ -61,7 +60,7 @@ export default class Inventory {
   }
 
   public getRootFolder() {
-    return this.getFolder(Constants.Inventory.ROOT);
+    return this.getFolder('ROOT');
   }
 
   private createFolder(key: Key): GoogleAppsScript.Drive.Folder {
