@@ -8,6 +8,7 @@ export default class State {
   private static dataSheet?: GoogleAppsScript.Spreadsheet.Spreadsheet;
   private static template?: GoogleAppsScript.Spreadsheet.Spreadsheet;
 
+  // TODO don't really need getDataSheet now that this is attached to the sheet
   public static getDataSheet() {
     if (!this.dataSheet) {
       const id = Terse.PropertiesService.getScriptProperty('DATA');
