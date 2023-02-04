@@ -5,7 +5,7 @@
         if (progress.complete) {
           google.script.host.close();
         } else {
-          replaceContent(progress.html);
+          document.getElementById('content').innerHTML = progress.html;
           updateProgress();
         }
       })
