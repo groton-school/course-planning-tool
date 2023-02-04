@@ -1,10 +1,6 @@
 import { Terse } from '@battis/gas-lighter';
-import Constants from './Constants';
 
 export default class State {
-  private static PROGRESS = `${Constants.PREFIX}.State.progress`;
-  private static COMPLETE = `${Constants.PREFIX}.State.complete`;
-
   private static dataSheet?: GoogleAppsScript.Spreadsheet.Spreadsheet;
   private static template?: GoogleAppsScript.Spreadsheet.Spreadsheet;
 
@@ -23,29 +19,5 @@ export default class State {
       State.template = id && SpreadsheetApp.openById(id);
     }
     return State.template;
-  }
-
-  public static setProgress(message) {
-    if (typeof message != 'string') {
-      message = JSON.stringify(message);
-    }
-    CacheService.getUserCache().put(State.PROGRESS, message, 10);
-  }
-
-  public static getProgress() {
-    return CacheService.getUserCache().get(State.PROGRESS);
-  }
-
-  public static resetComplete() {
-    CacheService.getUserCache().remove(State.PROGRESS);
-    CacheService.getUserCache().remove(State.COMPLETE);
-  }
-
-  public static setComplete(message: string) {
-    CacheService.getUserCache().put(State.COMPLETE, message);
-  }
-
-  public static getComplete() {
-    return CacheService.getUserCache().get(State.COMPLETE);
   }
 }

@@ -1,9 +1,13 @@
 import CoursePlan from '../CoursePlan';
 import Student from '../Student';
-import State from '../State';
+import { Terse } from '@battis/gas-lighter';
+
+const P = Terse.HtmlService.Element.Progress.getInstance(
+  CoursePlan.PROGRESS_KEY
+);
 
 global.action_create = () => {
-  State.resetComplete();
+  P.reset();
   SpreadsheetApp.getUi().showModalDialog(
     HtmlService.createTemplateFromFile('templates/create')
       .evaluate()
@@ -15,11 +19,10 @@ global.action_create = () => {
 global.helper_create_getAllStudents = Student.getAll;
 
 global.helper_create_create = (hostId: string) => {
-  State.setComplete(CoursePlan.for(Student.getByHostId(hostId)).getUrl());
+  const plan = CoursePlan.for(Student.getByHostId(hostId));
+  P.setComplete(plan.getUrl());
 };
 
-global.helper_create_progress = () => {
-  return { progress: State.getProgress(), complete: State.getComplete() };
-};
+global.helper_create_getProgress = P.getProgress;
 
 export default 'action_create';

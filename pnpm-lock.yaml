@@ -13,7 +13,7 @@ specifiers:
   webpack-cli: ^5.0.1
 
 dependencies:
-  '@battis/gas-lighter': github.com/battis/gas-lighter/8b9203adce30b13e46f54b8d558b086be39991c4
+  '@battis/gas-lighter': github.com/battis/gas-lighter/d8da27a11896c079ab1401d6222400dbeb58ba97
 
 devDependencies:
   '@battis/prettier-config': github.com/battis/prettier-config/900b9359d263370b14e206fe46db3ec4bc41f4ad
@@ -1072,8 +1072,8 @@ packages:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
     dev: true
 
-  github.com/battis/gas-lighter/8b9203adce30b13e46f54b8d558b086be39991c4:
-    resolution: {tarball: https://codeload.github.com/battis/gas-lighter/tar.gz/8b9203adce30b13e46f54b8d558b086be39991c4}
+  github.com/battis/gas-lighter/d8da27a11896c079ab1401d6222400dbeb58ba97:
+    resolution: {tarball: https://codeload.github.com/battis/gas-lighter/tar.gz/d8da27a11896c079ab1401d6222400dbeb58ba97}
     name: '@battis/gas-lighter'
     version: 0.1.0
     dev: false

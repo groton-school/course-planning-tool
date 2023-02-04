@@ -4,11 +4,17 @@ import Inventory from './Inventory';
 import SheetParameters from './SheetParameters';
 import State from './State';
 import Student from './Student';
-import { Helper } from '@battis/gas-lighter';
+import { Helper, Terse } from '@battis/gas-lighter';
 
 const s = Helper.SpreadsheetApp;
+const progress = Terse.HtmlService.Element.Progress.setStatus.bind(
+  null,
+  'course-plan'
+);
 
 export default class CoursePlan {
+  public static readonly PROGRESS_KEY = 'course-plan';
+
   private static formFolderInventory?: Inventory;
   private static advisorFolderInventory?: Inventory;
   private static coursePlanInventory?: Inventory;
@@ -34,11 +40,10 @@ export default class CoursePlan {
   }
 
   public static for(student: Student) {
-    // TODO update inventory page way sooner
     if (!CoursePlan.coursePlanInventory) {
       CoursePlan.coursePlanInventory = new Inventory('Course Plan Inventory');
     }
-    State.setProgress('Updating inventory');
+    progress(`${student.getFormattedName()} (updating inventory)`);
     return CoursePlan.coursePlanInventory.getCoursePlan(student);
   }
 
@@ -47,7 +52,7 @@ export default class CoursePlan {
   }
 
   private setStudent(student: Student) {
-    State.setProgress('Identifying student');
+    progress(`${student.getFormattedName()} (identifying student)`);
     this.student = student;
   }
 
@@ -118,7 +123,9 @@ export default class CoursePlan {
   }
 
   private populateEnrollmentHistory() {
-    State.setProgress('Writing course enrollment history');
+    progress(
+      `${this.getStudent().getFormattedName()} (writing course enrollment history)`
+    );
     const values = [];
     const validations = [];
 
@@ -164,7 +171,9 @@ export default class CoursePlan {
 
     this.replaceFunctionsWithDisplayValues();
 
-    State.setProgress('Moving course plan into place');
+    progress(
+      `${this.getStudent().getFormattedName()} (moving course plan into place)`
+    );
     this.moveToStudentCoursePlanSpreadsheet();
 
     if (validations[0].length) {
@@ -176,7 +185,7 @@ export default class CoursePlan {
       ).setDataValidations(validations);
     }
 
-    State.setProgress('Protecting data');
+    progress(`${this.getStudent().getFormattedName()} (protecting data)`);
     this.protectNonCommentRanges(historyWidth, historyHeight);
 
     this.insertAndMergeOptionsRows(values[0].length);
@@ -253,7 +262,9 @@ export default class CoursePlan {
   }
 
   private createFromTemplate() {
-    State.setProgress('Creating course plan from template');
+    progress(
+      `${this.getStudent().getFormattedName()} (creating course plan from template)`
+    );
     const template = State.getTemplate();
     this.setSpreadsheet(
       template.copy(
@@ -272,7 +283,7 @@ export default class CoursePlan {
   }
 
   private populateHeaders() {
-    State.setProgress('Filling in the labels');
+    progress(`${this.getStudent().getFormattedName()} (filling in the labels)`);
     this.setValue('Template_Names', [
       [this.getStudent().getFormattedName()],
       [`Advisor: ${this.getAdvisor().getFormattedName()}`],
@@ -309,7 +320,7 @@ export default class CoursePlan {
   }
 
   private setPermissions() {
-    State.setProgress('Setting permissions');
+    progress(`${this.getStudent().getFormattedName()} (setting permissions)`);
     this.getFile().moveTo(this.getFormFolder());
     this.getAdvisorFolder().createShortcut(this.getFile().getId());
     Helper.DriveApp.addPermission(
@@ -441,7 +452,9 @@ export default class CoursePlan {
   }
 
   private prepareCommentBlanks() {
-    State.setProgress('Making room for comments');
+    progress(
+      `${this.getStudent().getFormattedName()} (making room for comments)`
+    );
     const numComments = SheetParameters.getNumComments();
     const commentors = {
       'Comments from Faculty Advisor': this.getAdvisor().email,

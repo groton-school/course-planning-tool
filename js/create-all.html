@@ -1,23 +1,16 @@
 <script>
-  function updateProgress(html) {
-    const content = document.getElementById('content');
-    content.innerHTML = html;
-    const progress = content.querySelector('.progress');
-    if (
-      progress &&
-      progress.value &&
-      progress.max &&
-      progress.value == progress.max
-    ) {
-      google.script.host.close();
-    } else {
-      google.script.run
-        .withSuccessHandler(updateProgress)
-        .helper_createAll_progressBar();
-    }
+  function updateProgress() {
+    google.script.run
+      .withSuccessHandler((progress) => {
+        if (progress.complete) {
+          google.script.host.close();
+        } else {
+          replaceContent(progress.html);
+          updateProgress();
+        }
+      })
+      .helper_createAll_getProgress();
   }
 
-  google.script.run
-    .withSuccessHandler(updateProgress)
-    .helper_createAll_progressBar();
+  updateProgress();
 </script>

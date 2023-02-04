@@ -34,27 +34,27 @@
   }
 
   function showProgress() {
-    replaceContent(`<div>Loading…</div>`);
-    pollProgress();
+    replaceContent(`Loading…`);
+    updateProgress();
   }
 
-  function pollProgress() {
+  function updateProgress() {
     google.script.run
       .withSuccessHandler((progress) => {
         if (progress.complete) {
           showResult(progress.complete);
         } else {
-          replaceContent(progress.progress || 'Working…');
-          pollProgress();
+          replaceContent(progress.html);
+          updateProgress();
         }
       })
-      .helper_create_progress();
+      .helper_create_getProgress();
   }
 
   function showResult(url) {
     replaceContent(
       `<div>Created course plan for ${student}.</div>
-      <div><a id="button" class="button action" href="${url}" target="_blank">Open Spreadsheet</a></div>`
+      <div><a id="button" class="button action" href="${url}" target="_blank">Open Plan</a></div>`
     );
     attachEvent(document.getElementById('button'), 'click', () =>
       google.script.host.close()
