@@ -4,13 +4,11 @@ import Inventory from './Inventory';
 import SheetParameters from './SheetParameters';
 import State from './State';
 import Student from './Student';
-import { Helper } from '@battis/google-apps-script-helpers';
+import { Helper } from '@battis/gas-lighter';
 
 const s = Helper.SpreadsheetApp;
 
 export default class CoursePlan {
-  private static readonly MOCKUP_RESULT = `${Constants.PREFIX}.CoursePlan.Mockup`;
-
   private static formFolderInventory?: Inventory;
   private static advisorFolderInventory?: Inventory;
   private static coursePlanInventory?: Inventory;

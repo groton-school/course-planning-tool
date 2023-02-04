@@ -1,28 +1,23 @@
 <script>
-  // https://stackoverflow.com/a/72292354
-
-  function updateProgress({ progress, complete }) {
-    const student = document.getElementById('student');
-    try {
-      Object.assign(document.getElementById('progress'), progress);
-      student.innerHTML = `${progress.current} (${progress.value} / ${
-        progress.max
-      })<br/>${progress.progress || 'Working…'}`;
-    } catch (e) {
-      console.error(e.message);
-    }
-    if (!complete) {
-      getUpdatedProgress();
-    } else {
+  function updateProgress(html) {
+    const content = document.getElementById('content');
+    content.innerHTML = html;
+    const progress = content.querySelector('.progress');
+    if (
+      progress &&
+      progress.value &&
+      progress.max &&
+      progress.value == progress.max
+    ) {
       google.script.host.close();
+    } else {
+      google.script.run
+        .withSuccessHandler(updateProgress)
+        .helper_createAll_progressBar();
     }
   }
 
-  function getUpdatedProgress() {
-    google.script.run
-      .withSuccessHandler(updateProgress)
-      .helper_createAll_getProgress();
-  }
-
-  getUpdatedProgress();
+  google.script.run
+    .withSuccessHandler(updateProgress)
+    .helper_createAll_progressBar();
 </script>

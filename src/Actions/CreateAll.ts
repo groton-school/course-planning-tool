@@ -1,38 +1,30 @@
 import Student from '../Student';
 import CoursePlan from '../CoursePlan';
-import State from '../State';
+import { Terse } from '@battis/gas-lighter';
 
-type Progress = {
-  max: number;
-  value?: number;
-  current?: string;
-  progress?: string;
-};
+const me = 'create-all';
 
 global.action_createAll = () => {
-  State.resetComplete();
+  Terse.HtmlService.Element.Progress.reset(me);
   const students = Student.getAll();
-  const progress: Progress = { max: students.length };
+  Terse.HtmlService.Element.Progress.setMax(me, students.length);
   SpreadsheetApp.getUi().showModalDialog(
-    HtmlService.createTemplateFromFile('templates/create-all')
-      .evaluate()
-      .setHeight(100),
+    HtmlService.createTemplateFromFile('templates/create-all').evaluate(),
+    //.setHeight(100),
     'Create Course Plans'
   );
   students.forEach((student: Student, i) => {
-    State.setProgress({
-      ...progress,
-      value: i + 1,
-      current: student.getFormattedName(),
-      progress: State.getProgress(),
-    });
+    Terse.HtmlService.Element.Progress.setValue(me, i + 1);
+    Terse.HtmlService.Element.Progress.setStatus(
+      me,
+      `${student.getFormattedName()} (${i + 1} / ${students.length})`
+    );
     CoursePlan.for(student);
   });
-  State.setComplete('All course plans created');
+  Terse.HtmlService.Element.Progress.setComplete(me, true);
 };
 
-global.helper_createAll_getProgress = () => {
-  return { progress: State.getProgress(), complete: State.getComplete() };
-};
+global.helper_createAll_progressBar =
+  Terse.HtmlService.Element.Progress.getHtml.bind(null, me);
 
 export default 'action_createAll';

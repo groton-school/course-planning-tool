@@ -1,7 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@battis/google-apps-script-helpers': github:battis/google-apps-script-helpers
+  '@battis/gas-lighter': github:battis/gas-lighter
   '@battis/prettier-config': github:battis/prettier-config
   '@tsconfig/recommended': ^1.0.2
   '@types/google-apps-script': ^1.0.57
@@ -13,12 +13,12 @@ specifiers:
   webpack-cli: ^5.0.1
 
 dependencies:
-  '@battis/google-apps-script-helpers': github.com/battis/google-apps-script-helpers/89b63b3674d5ebd60ec6ca910c7ef283ce63aab0
-  '@types/google-apps-script': 1.0.57
+  '@battis/gas-lighter': github.com/battis/gas-lighter/8b9203adce30b13e46f54b8d558b086be39991c4
 
 devDependencies:
   '@battis/prettier-config': github.com/battis/prettier-config/900b9359d263370b14e206fe46db3ec4bc41f4ad
   '@tsconfig/recommended': 1.0.2
+  '@types/google-apps-script': 1.0.57
   '@types/node': 18.11.18
   gas-webpack-plugin: 2.3.0
   ts-loader: 9.4.2_hhrrucqyg4eysmfpujvov2ym5u
@@ -94,7 +94,7 @@ packages:
 
   /@types/google-apps-script/1.0.57:
     resolution: {integrity: sha512-w06Yoh+SamGpS2kGVlGy/5JkmFkLrW6u3tbglyHEu9uC9lrzqr6FyLcgVsL95Tmq9L0q//D8seqd4GZGRPPKUw==}
-    dev: false
+    dev: true
 
   /@types/json-schema/7.0.11:
     resolution: {integrity: sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==}
@@ -1072,12 +1072,10 @@ packages:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
     dev: true
 
-  github.com/battis/google-apps-script-helpers/89b63b3674d5ebd60ec6ca910c7ef283ce63aab0:
-    resolution: {tarball: https://codeload.github.com/battis/google-apps-script-helpers/tar.gz/89b63b3674d5ebd60ec6ca910c7ef283ce63aab0}
-    name: '@battis/google-apps-script-helpers'
-    version: 1.0.0
-    dependencies:
-      '@types/google-apps-script': 1.0.57
+  github.com/battis/gas-lighter/8b9203adce30b13e46f54b8d558b086be39991c4:
+    resolution: {tarball: https://codeload.github.com/battis/gas-lighter/tar.gz/8b9203adce30b13e46f54b8d558b086be39991c4}
+    name: '@battis/gas-lighter'
+    version: 0.1.0
     dev: false
 
   github.com/battis/prettier-config/900b9359d263370b14e206fe46db3ec4bc41f4ad:

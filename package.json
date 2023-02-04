@@ -1,16 +1,16 @@
 {
-  "dependencies": {
-    "@battis/google-apps-script-helpers": "github:battis/google-apps-script-helpers",
-    "@types/google-apps-script": "^1.0.57"
-  },
   "scripts": {
     "build": "webpack",
     "clean": "rm -rf ./build/*",
     "deploy": "pnpm run build; clasp push"
   },
+  "dependencies": {
+    "@battis/gas-lighter": "github:battis/gas-lighter"
+  },
   "devDependencies": {
     "@battis/prettier-config": "github:battis/prettier-config",
     "@tsconfig/recommended": "^1.0.2",
+    "@types/google-apps-script": "^1.0.57",
     "@types/node": "^18.11.18",
     "gas-webpack-plugin": "^2.3.0",
     "ts-loader": "^9.4.2",

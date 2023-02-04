@@ -1,4 +1,4 @@
-import { Terse } from '@battis/google-apps-script-helpers';
+import { Terse } from '@battis/gas-lighter';
 import Constants from './Constants';
 
 export default class State {
