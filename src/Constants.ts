@@ -1,4 +1,2 @@
-export default class Constants {
-  public static readonly PREFIX = 'org.groton.CoursePlanning';
-  public static readonly COURSE_PLAN = 'Course Plan';
-}
+export const PREFIX = 'org.groton.CoursePlanning';
+export const COURSE_PLAN = 'Course Plan';

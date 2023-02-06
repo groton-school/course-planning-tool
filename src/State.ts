@@ -1,23 +1,21 @@
 import { Terse } from '@battis/gas-lighter';
 
-export default class State {
-  private static dataSheet?: GoogleAppsScript.Spreadsheet.Spreadsheet;
-  private static template?: GoogleAppsScript.Spreadsheet.Spreadsheet;
+let dataSheet: GoogleAppsScript.Spreadsheet.Spreadsheet = null;
+let template: GoogleAppsScript.Spreadsheet.Spreadsheet = null;
 
-  // TODO don't really need getDataSheet now that this is attached to the sheet
-  public static getDataSheet() {
-    if (!this.dataSheet) {
-      const id = Terse.PropertiesService.getScriptProperty('DATA');
-      State.dataSheet = id && SpreadsheetApp.openById(id);
+// TODO don't really need getDataSheet now that this is attached to the sheet
+export function getDataSheet() {
+    if (!dataSheet) {
+        const id = Terse.PropertiesService.getScriptProperty('DATA');
+        dataSheet = id && SpreadsheetApp.openById(id);
     }
-    return State.dataSheet;
-  }
+    return dataSheet;
+}
 
-  public static getTemplate() {
-    if (!this.template) {
-      const id = Terse.PropertiesService.getScriptProperty('TEMPLATE');
-      State.template = id && SpreadsheetApp.openById(id);
+export function getTemplate() {
+    if (!template) {
+        const id = Terse.PropertiesService.getScriptProperty('TEMPLATE');
+        template = id && SpreadsheetApp.openById(id);
     }
-    return State.template;
-  }
+    return template;
 }

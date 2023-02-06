@@ -1,5 +1,5 @@
-import Editor from './Editor';
 import { Terse } from '@battis/gas-lighter';
+import * as Editor from './Editor';
 
 global.onOpen = Editor.onOpen;
 global.onInstall = Editor.onInstall;
