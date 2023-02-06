@@ -31,23 +31,20 @@ export default class Advisor {
 
   public static getByEmail(email: string) {
     return new Advisor(
-      Advisor.getData().reduce(
-        (data, [h, se, sfn, sln, gy, e, firstName, lastName]) => {
-          if (e == email) {
-            return { email, firstName, lastName };
-          }
-          return data;
-        },
-        null
-      )
+      Advisor.getData().reduce((data, [, , , , , e, firstName, lastName]) => {
+        if (e == email) {
+          return { email, firstName, lastName };
+        }
+        return data;
+      }, null)
     );
   }
 
   public static getByAdvisee(hostId: string) {
     return new Advisor(
       Advisor.getData().reduce(
-        (data, [h, se, sfn, sln, gy, email, firstName, lastName]) => {
-          if (h == hostId) {
+        (data, [id, , , , , email, firstName, lastName]) => {
+          if (id == hostId) {
             return { email, firstName, lastName };
           }
           return data;

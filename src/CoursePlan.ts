@@ -5,8 +5,8 @@ import SheetParameters from './SheetParameters';
 import State from './State';
 import Student from './Student';
 import { Helper, Terse } from '@battis/gas-lighter';
+import * as s from '@battis/gas-lighter/src/Helper/SpreadsheetApp/Function';
 
-const s = Helper.SpreadsheetApp;
 const progress = Terse.HtmlService.Element.Progress.setStatus.bind(
   null,
   'course-plan'
@@ -274,7 +274,10 @@ export default class CoursePlan {
         )
       )
     );
-    s.addImportrangePermission(this.getSpreadsheet(), State.getDataSheet());
+    Helper.SpreadsheetApp.addImportrangePermission(
+      this.getSpreadsheet(),
+      State.getDataSheet()
+    );
     this.setWorkingCopy(
       this.getSpreadsheet()
         .getSheetByName(Constants.COURSE_PLAN)
@@ -334,18 +337,18 @@ export default class CoursePlan {
     Helper.DriveApp.addPermission(
       this.getAdvisorFolder().getId(),
       this.getAdvisor().email,
-      Helper.DriveApp.Permission.Role.Reader
+      Helper.DriveApp.Role.Reader
     );
   }
 
   private getGRACEEnrollmentsFunction(): string {
     return (
       '=' +
-      s.ifna(
-        s.join(
-          s.char(10),
-          s.sort(
-            s.filter(
+      s.IFNA(
+        s.JOIN(
+          s.CHAR(10),
+          s.SORT(
+            s.FILTER(
               'Enrollment_Title',
               s.eq('Enrollment_Host_ID', this.getStudent().hostId),
               s.eq('Enrollment_Department', 'GRACE')
@@ -360,13 +363,13 @@ export default class CoursePlan {
   private getEnrollmentsFunctionBy(year: string, department: string): string {
     return (
       '=' +
-      s.ifna(
-        s.join(
-          s.char(10),
-          s.unique(
-            s.index(
-              s.sort(
-                s.filter(
+      s.IFNA(
+        s.JOIN(
+          s.CHAR(10),
+          s.UNIQUE(
+            s.INDEX(
+              s.SORT(
+                s.FILTER(
                   '{Enrollment_Title, Enrollment_Order}',
                   s.eq('Enrollment_Host_ID', this.getStudent().hostId),
                   s.eq('Enrollment_Year', year),
