@@ -12,6 +12,7 @@ export function getDataSheet() {
     return dataSheet;
 }
 
+// TODO template should be a sheet parameter for visibility
 export function getTemplate() {
     if (!template) {
         const id = Terse.PropertiesService.getScriptProperty('TEMPLATE');
