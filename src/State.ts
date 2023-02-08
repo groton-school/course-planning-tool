@@ -1,4 +1,5 @@
 import { Terse } from '@battis/gas-lighter';
+import * as SheetParameters from './SheetParameters';
 
 let dataSheet: GoogleAppsScript.Spreadsheet.Spreadsheet = null;
 let template: GoogleAppsScript.Spreadsheet.Spreadsheet = null;
@@ -15,8 +16,8 @@ export function getDataSheet() {
 // TODO template should be a sheet parameter for visibility
 export function getTemplate() {
     if (!template) {
-        const id = Terse.PropertiesService.getScriptProperty('TEMPLATE');
-        template = id && SpreadsheetApp.openById(id);
+        const url = SheetParameters.getCoursePlanTemplate();
+        template = url && SpreadsheetApp.openByUrl(url);
     }
     return template;
 }

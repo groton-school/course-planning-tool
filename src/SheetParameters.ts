@@ -49,3 +49,8 @@ export const getCollegeCounseling = getParam.bind(
     null,
     'Param_CollegeCounselingOffice'
 );
+
+export const getCoursePlanTemplate = getParam.bind(
+    null,
+    'Param_CoursePlanTemplate'
+);
