@@ -13,6 +13,8 @@ const progress =
         null
     );
 
+// TODO modify workflow to allow for updating enrollment history on existing course plans
+// TODO document process for change of advisor
 export default class CoursePlan {
     public static readonly PROGRESS_KEY = 'course-plan';
 
