@@ -57,6 +57,6 @@ export default class Student {
             .getValues()
             .slice(0, 10) // FIXME remove when testing complete
             .map((row) => new Student(row))
-            .filter((student) => student.gradYear != thisYear); // TODO confirm filtering out seniors
+            .filter((student) => student.gradYear != thisYear);
     }
 }
