@@ -1,6 +1,7 @@
 import { Helper, Terse } from '@battis/gas-lighter';
 import Advisor from './Advisor';
 import * as Constants from './Constants';
+import { PREFIX } from './Constants';
 import Inventory, { Key as InventoryKey } from './Inventory';
 import * as SheetParameters from './SheetParameters';
 import * as State from './State';
@@ -16,6 +17,9 @@ const progress =
 // TODO modify workflow to allow for updating enrollment history on existing course plans
 export default class CoursePlan {
     public static readonly PROGRESS_KEY = 'course-plan';
+    private static readonly META_NUM_COMMENTS = `${PREFIX}.CoursePlan.numComments`;
+    private static readonly META_NUM_OPTIONS_PER_DEPT = `${PREFIX}.CoursePlan.numOptionsPerDept`;
+    private static readonly META_HISTORY_WIDTH = `${PREFIX}.CoursePlan.historyWidth`;
 
     private static formFolderInventory?: Inventory;
     private static advisorFolderInventory?: Inventory;
@@ -190,6 +194,12 @@ export default class CoursePlan {
         const historyWidth = values[0].length;
 
         this.getAnchorOffset(0, 0, historyHeight, historyWidth).setValues(values);
+
+        Terse.SpreadsheetApp.DeveloperMetadata.set(
+            this.getWorkingCopy(),
+            CoursePlan.META_HISTORY_WIDTH,
+            historyWidth
+        );
 
         this.replaceFunctionsWithDisplayValues();
 
@@ -435,6 +445,11 @@ export default class CoursePlan {
                 valueWidth + 1
             ).mergeVertically();
         }
+        Terse.SpreadsheetApp.DeveloperMetadata.set(
+            this.getWorkingCopy(),
+            CoursePlan.META_NUM_OPTIONS_PER_DEPT,
+            numOptions
+        );
     }
 
     private additionalComments(row: number, targetNumComments: number) {
@@ -506,5 +521,10 @@ export default class CoursePlan {
             protection.addEditor(commentors[commentor]);
             this.additionalComments(row + 3, numComments);
         }
+        Terse.SpreadsheetApp.DeveloperMetadata.set(
+            this.getWorkingCopy(),
+            CoursePlan.META_NUM_COMMENTS,
+            numComments
+        );
     }
 }

@@ -39,7 +39,11 @@ export default class Inventory {
         if (!id) {
             return creator(key);
         }
-        return getter(id, key);
+        try {
+            return getter(id, key);
+        } catch (e) {
+            return getter(id); // not everyone _wants_ the key!
+        }
     }
 
     public getFolder(key: Key) {
