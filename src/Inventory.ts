@@ -2,9 +2,9 @@ import CoursePlan from './CoursePlan';
 import * as State from './State';
 import Student from './Student';
 
-type Key = number | string;
+export type Key = number | string;
 type Formatter = (key: Key) => string;
-type Getter<T> = (id: string) => T;
+type Getter<T> = (id: string, key?: Key) => T;
 type Creator<T> = (key: Key) => T;
 
 export default class Inventory {
@@ -33,12 +33,13 @@ export default class Inventory {
             if (k == key) {
                 return i;
             }
+
             return id;
         }, null);
         if (!id) {
             return creator(key);
         }
-        return getter(id);
+        return getter(id, key);
     }
 
     public getFolder(key: Key) {
@@ -53,7 +54,7 @@ export default class Inventory {
     public getCoursePlan(student: Student) {
         const self = this;
         return this.getItem(
-            SpreadsheetApp.openById,
+            CoursePlan.bindTo,
             this.createCoursePlan.bind(self, student),
             student.hostId
         );
@@ -72,14 +73,11 @@ export default class Inventory {
         return folder;
     }
 
-    private createCoursePlan(
-        student: Student,
-        key: Key
-    ): GoogleAppsScript.Spreadsheet.Spreadsheet {
+    private createCoursePlan(student: Student, key: Key): CoursePlan {
         const plan = new CoursePlan(student);
         const row = [key, plan.getFile().getId(), plan.getFile().getUrl()];
         this.inventorySheet.appendRow(row);
-        return plan.getSpreadsheet();
+        return plan;
     }
 
     public getSheet() {

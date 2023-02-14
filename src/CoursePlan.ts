@@ -1,7 +1,7 @@
 import { Helper, Terse } from '@battis/gas-lighter';
 import Advisor from './Advisor';
 import * as Constants from './Constants';
-import Inventory from './Inventory';
+import Inventory, { Key as InventoryKey } from './Inventory';
 import * as SheetParameters from './SheetParameters';
 import * as State from './State';
 import Student from './Student';
@@ -14,7 +14,6 @@ const progress =
     );
 
 // TODO modify workflow to allow for updating enrollment history on existing course plans
-// TODO document process for change of advisor
 export default class CoursePlan {
     public static readonly PROGRESS_KEY = 'course-plan';
 
@@ -32,14 +31,34 @@ export default class CoursePlan {
     private validationSheet?: GoogleAppsScript.Spreadsheet.Sheet;
 
     // FIXME CoursePlan constructor should be private to enforce inventory updates
-    public constructor(student: Student) {
+    public constructor(arg: Student | { hostId; spreadsheetId }) {
         // TODO deal with GRACE course selection
+        if (arg instanceof Student) {
+            this.createFromStudent(arg);
+        } else {
+            this.bindToExistingSpreadsheet(arg);
+        }
+    }
+
+    private createFromStudent(student: Student) {
         this.setStudent(student);
         this.createFromTemplate();
         this.populateHeaders();
         this.populateEnrollmentHistory();
         this.setPermissions();
         this.prepareCommentBlanks();
+    }
+
+    private bindToExistingSpreadsheet({ hostId, spreadsheetId }) {
+        this.setStudent(Student.getByHostId(hostId));
+        this.setSpreadsheet(SpreadsheetApp.openById(spreadsheetId));
+    }
+
+    public static bindTo(
+        spreadsheetId: string,
+        hostId: InventoryKey
+    ): CoursePlan {
+        return new CoursePlan({ hostId, spreadsheetId });
     }
 
     public static for(student: Student) {
