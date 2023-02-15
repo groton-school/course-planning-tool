@@ -1,4 +1,5 @@
 <script>
+  const thread = '<?= data.thread ?>';
   var student;
 
   function replaceContent(html) {
@@ -48,7 +49,7 @@
           updateProgress();
         }
       })
-      .helper_create_getProgress();
+      .helper_create_getProgress(thread);
   }
 
   function showResult(url) {
@@ -70,7 +71,7 @@
       `#student option[value="${s.value}"]`
     ).innerHTML;
     showProgress();
-    google.script.run.helper_create_create(s.value);
+    google.script.run.helper_create_create(s.value, thread);
     return false;
   }
 

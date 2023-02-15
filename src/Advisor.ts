@@ -1,4 +1,3 @@
-import * as State from './State';
 
 export default class Advisor {
     private static data?;
@@ -19,7 +18,8 @@ export default class Advisor {
 
     private static getData() {
         if (!Advisor.data) {
-            const advisors = State.getDataSheet().getSheetByName('Advisor List');
+            const advisors =
+                SpreadsheetApp.getActive().getSheetByName('Advisor List');
             Advisor.data = advisors
                 .getRange(1, 1, advisors.getMaxRows(), advisors.getMaxColumns())
                 .getValues();

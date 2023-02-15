@@ -1,29 +1,46 @@
 import { Helper, Terse } from '@battis/gas-lighter';
-import Advisor from './Advisor';
-import * as Constants from './Constants';
-import { PREFIX } from './Constants';
+import Advisor from '../Advisor';
+import * as Constants from '../Constants';
+import * as SheetParameters from '../SheetParameters';
+import Student from '../Student';
+import FolderInventory from './FolderInventory';
 import Inventory, { Key as InventoryKey } from './Inventory';
-import * as SheetParameters from './SheetParameters';
-import * as State from './State';
-import Student from './Student';
 
 const s = Helper.SpreadsheetApp;
 
-const progress =
-    Terse.HtmlService.Element.Progress.getInstance('course-plan').setStatus.bind(
-        null
-    );
+class CoursePlanInventory extends Inventory<CoursePlan> {
+    protected getter = (id: string, key?: InventoryKey): CoursePlan =>
+        CoursePlan.bindTo(id, key);
+
+    // added to Inventory by CoursePlan constructor directly
+    protected creator = (key: InventoryKey): CoursePlan =>
+        new CoursePlan(Student.getByHostId(key.toString()));
+}
 
 // TODO modify workflow to allow for updating enrollment history on existing course plans
 export default class CoursePlan {
-    public static readonly PROGRESS_KEY = 'course-plan';
-    private static readonly META_NUM_COMMENTS = `${PREFIX}.CoursePlan.numComments`;
-    private static readonly META_NUM_OPTIONS_PER_DEPT = `${PREFIX}.CoursePlan.numOptionsPerDept`;
-    private static readonly META_HISTORY_WIDTH = `${PREFIX}.CoursePlan.historyWidth`;
+    private static readonly META_NUM_COMMENTS = `${Constants.PREFIX}.CoursePlan.numComments`;
+    private static readonly META_NUM_OPTIONS_PER_DEPT = `${Constants.PREFIX}.CoursePlan.numOptionsPerDept`;
+    private static readonly META_HISTORY_WIDTH = `${Constants.PREFIX}.CoursePlan.historyWidth`;
 
-    private static formFolderInventory?: Inventory;
-    private static advisorFolderInventory?: Inventory;
-    private static coursePlanInventory?: Inventory;
+    private static formFolderInventory = new FolderInventory(
+        'Form Folder Inventory',
+        (gradYear) =>
+            CoursePlan.applyFormat(SheetParameters.getFormFolderNameFormat(), {
+                gradYear,
+            })
+    );
+    private static advisorFolderInventory = new FolderInventory(
+        'Advisor Folder Inventory',
+        (email) =>
+            CoursePlan.applyFormat(
+                SheetParameters.getAdvisorFolderNameFormat(),
+                Advisor.getByEmail(email.toString())
+            )
+    );
+    private static coursePlanInventory = new CoursePlanInventory(
+        'Course Plan Inventory'
+    );
     private static me?: GoogleAppsScript.Base.User;
 
     private student: Student;
@@ -40,14 +57,23 @@ export default class CoursePlan {
     ): CoursePlan => new CoursePlan({ hostId, spreadsheetId });
 
     public static for(student: Student) {
-        if (!CoursePlan.coursePlanInventory) {
-            CoursePlan.coursePlanInventory = new Inventory('Course Plan Inventory');
-        }
-        progress(`${student.getFormattedName()} (updating inventory)`);
-        return CoursePlan.coursePlanInventory.getCoursePlan(student);
+        Terse.HtmlService.Element.Progress.setStatus(
+            CoursePlan.thread,
+            `${student.getFormattedName()} (updating inventory)`
+        );
+        return CoursePlan.coursePlanInventory.get(student.hostId);
     }
 
-    // FIXME CoursePlan constructor should be private to enforce inventory updates
+    private static thread = 'course-plan';
+
+    public static setThread(thread: string) {
+        CoursePlan.thread = thread;
+    }
+
+    private setStatus(message: string) {
+        Terse.HtmlService.Element.Progress.setStatus(CoursePlan.thread, message);
+    }
+
     public constructor(arg: Student | { hostId; spreadsheetId }) {
         // TODO deal with GRACE course selection
         if (arg instanceof Student) {
@@ -64,9 +90,15 @@ export default class CoursePlan {
         this.populateEnrollmentHistory();
         this.setPermissions();
         this.prepareCommentBlanks();
+        CoursePlan.coursePlanInventory.add([
+            student.hostId,
+            this.getSpreadsheet().getId(),
+            this.getSpreadsheet().getUrl(),
+        ]);
     }
 
     private bindToExistingSpreadsheet({ hostId, spreadsheetId }) {
+        // TODO double check that this exists in inventory
         this.setStudent(Student.getByHostId(hostId));
         this.setSpreadsheet(SpreadsheetApp.openById(spreadsheetId));
     }
@@ -74,7 +106,7 @@ export default class CoursePlan {
     private getStudent = () => this.student;
 
     private setStudent(student: Student) {
-        progress(`${student.getFormattedName()} (identifying student)`);
+        this.setStatus(`${student.getFormattedName()} (identifying student)`);
         this.student = student;
     }
 
@@ -135,7 +167,7 @@ export default class CoursePlan {
     private getNumDepartments = () => this.getValidationSheet().getMaxColumns();
 
     private populateEnrollmentHistory() {
-        progress(
+        this.setStatus(
             `${this.getStudent().getFormattedName()} (writing course enrollment history)`
         );
         const values = [];
@@ -189,7 +221,7 @@ export default class CoursePlan {
 
         this.replaceFunctionsWithDisplayValues();
 
-        progress(
+        this.setStatus(
             `${this.getStudent().getFormattedName()} (moving course plan into place)`
         );
         this.moveToStudentCoursePlanSpreadsheet();
@@ -203,7 +235,7 @@ export default class CoursePlan {
             ).setDataValidations(validations);
         }
 
-        progress(`${this.getStudent().getFormattedName()} (protecting data)`);
+        this.setStatus(`${this.getStudent().getFormattedName()} (protecting data)`);
         this.protectNonCommentRanges(historyWidth, historyHeight);
 
         this.insertAndMergeOptionsRows(values[0].length);
@@ -215,46 +247,17 @@ export default class CoursePlan {
             format
         );
 
-    private static getFormFolderInventory() {
-        if (!CoursePlan.formFolderInventory) {
-            CoursePlan.formFolderInventory = new Inventory(
-                'Form Folder Inventory',
-                (gradYear) =>
-                    CoursePlan.applyFormat(SheetParameters.getFormFolderNameFormat(), {
-                        gradYear,
-                    })
-            );
-        }
-        return CoursePlan.formFolderInventory;
-    }
-
     private getFormFolder = () =>
-        CoursePlan.getFormFolderInventory().getFolder(this.getStudent().gradYear);
+        CoursePlan.formFolderInventory.get(this.getStudent().gradYear);
 
     public static getFormFolderFor = (student: Student) =>
-        CoursePlan.getFormFolderInventory().getFolder(student.gradYear);
-
-    private static getAdvisorFolderInventory() {
-        if (!CoursePlan.advisorFolderInventory) {
-            CoursePlan.advisorFolderInventory = new Inventory(
-                'Advisor Folder Inventory',
-                (email) =>
-                    CoursePlan.applyFormat(
-                        SheetParameters.getAdvisorFolderNameFormat(),
-                        Advisor.getByEmail(email.toString())
-                    )
-            );
-        }
-        return CoursePlan.advisorFolderInventory;
-    }
+        CoursePlan.formFolderInventory.get(student.gradYear);
 
     private getAdvisorFolder = () =>
-        CoursePlan.getAdvisorFolderInventory().getFolder(this.getAdvisor().email);
+        CoursePlan.advisorFolderInventory.get(this.getAdvisor().email);
 
     public static getAdvisorFolderFor = (student: Student) =>
-        CoursePlan.getAdvisorFolderInventory().getFolder(
-            student.getAdvisor().email
-        );
+        CoursePlan.advisorFolderInventory.get(student.getAdvisor().email);
 
     // TODO setValue() should really be dumped into @battis/google-apps-script-helpers
     private setValue(a1notation: string, value) {
@@ -271,10 +274,12 @@ export default class CoursePlan {
     }
 
     private createFromTemplate() {
-        progress(
+        this.setStatus(
             `${this.getStudent().getFormattedName()} (creating course plan from template)`
         );
-        const template = State.getTemplate();
+        const template = SpreadsheetApp.openByUrl(
+            SheetParameters.getCoursePlanTemplate()
+        );
         this.setSpreadsheet(
             template.copy(
                 CoursePlan.applyFormat(
@@ -285,17 +290,19 @@ export default class CoursePlan {
         );
         Helper.SpreadsheetApp.addImportrangePermission(
             this.getSpreadsheet(),
-            State.getDataSheet()
+            SpreadsheetApp.getActive() // assumes Active() is the data sheet
         );
         this.setWorkingCopy(
             this.getSpreadsheet()
                 .getSheetByName(Constants.COURSE_PLAN)
-                .copyTo(State.getDataSheet())
+                .copyTo(SpreadsheetApp.getActive()) // assumes Active() is the data sheet
         );
     }
 
     private populateHeaders() {
-        progress(`${this.getStudent().getFormattedName()} (filling in the labels)`);
+        this.setStatus(
+            `${this.getStudent().getFormattedName()} (filling in the labels)`
+        );
         this.setValue('Template_Names', [
             [this.getStudent().getFormattedName()],
             [`Advisor: ${this.getAdvisor().getFormattedName()}`],
@@ -325,7 +332,7 @@ export default class CoursePlan {
             this.getSpreadsheet().getSheetByName(Constants.COURSE_PLAN)
         );
         const plan = this.getWorkingCopy().copyTo(this.getSpreadsheet());
-        State.getDataSheet().deleteSheet(this.getWorkingCopy());
+        SpreadsheetApp.getActive().deleteSheet(this.getWorkingCopy()); // assumes Active() is the data sheet
         this.setWorkingCopy(plan);
         this.getWorkingCopy().setName(Constants.COURSE_PLAN);
         this.spreadsheet.setActiveSheet(this.getWorkingCopy());
@@ -333,7 +340,9 @@ export default class CoursePlan {
     }
 
     private setPermissions() {
-        progress(`${this.getStudent().getFormattedName()} (setting permissions)`);
+        this.setStatus(
+            `${this.getStudent().getFormattedName()} (setting permissions)`
+        );
         this.getFile().moveTo(this.getFormFolder());
         this.getAdvisorFolder().createShortcut(this.getFile().getId());
         Helper.DriveApp.addPermission(
@@ -399,7 +408,7 @@ export default class CoursePlan {
         return now.getMonth() > 6 ? now.getFullYear() + 1 : now.getFullYear();
     }
 
-    private insertAndMergeOptionsRows(valueWidth) {
+    private insertAndMergeOptionsRows(valueWidth: number) {
         const numOptions = SheetParameters.getNumOptionsPerDepartment();
         for (
             var row = 0;
@@ -465,7 +474,7 @@ export default class CoursePlan {
     }
 
     private prepareCommentBlanks() {
-        progress(
+        this.setStatus(
             `${this.getStudent().getFormattedName()} (making room for comments)`
         );
         const numComments = SheetParameters.getNumComments();

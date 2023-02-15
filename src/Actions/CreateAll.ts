@@ -2,28 +2,30 @@ import { Terse } from '@battis/gas-lighter';
 import CoursePlan from '../CoursePlan';
 import Student from '../Student';
 
-const P = Terse.HtmlService.Element.Progress.getInstance(
-    CoursePlan.PROGRESS_KEY
-);
-
 // TODO add confirmation dialog
 global.action_createAll = () => {
-    P.reset();
+    const thread = Utilities.getUuid();
+    Terse.HtmlService.Element.Progress.reset(thread);
+    CoursePlan.setThread(thread);
     const students = Student.getAll();
-    P.setMax(students.length);
+    Terse.HtmlService.Element.Progress.setMax(thread, students.length);
     SpreadsheetApp.getUi().showModalDialog(
-        HtmlService.createTemplateFromFile('templates/create-all')
-            .evaluate()
-            .setHeight(100),
+        Terse.HtmlService.createTemplateFromFile('templates/create-all', {
+            thread,
+        }).setHeight(100),
         'Create Course Plans'
     );
     students.forEach((student: Student, i) => {
-        P.setValue(i + 1);
+        Terse.HtmlService.Element.Progress.setValue(thread, i + 1);
         CoursePlan.for(student);
     });
-    P.setComplete('All course plans created');
+    Terse.HtmlService.Element.Progress.setComplete(
+        thread,
+        'All course plans created'
+    );
 };
 
-global.helper_createAll_getProgress = P.getProgress;
+global.helper_createAll_getProgress = (thread) =>
+    Terse.HtmlService.Element.Progress.getProgress(thread);
 
 export default 'action_createAll';

@@ -1,4 +1,6 @@
 <script>
+  const thread = '<?= data.thread ?>';
+
   function updateProgress() {
     google.script.run
       .withSuccessHandler((progress) => {
@@ -9,7 +11,7 @@
           updateProgress();
         }
       })
-      .helper_createAll_getProgress();
+      .helper_createAll_getProgress(thread);
   }
 
   updateProgress();

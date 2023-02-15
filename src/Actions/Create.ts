@@ -2,27 +2,28 @@ import { Terse } from '@battis/gas-lighter';
 import CoursePlan from '../CoursePlan';
 import Student from '../Student';
 
-const P = Terse.HtmlService.Element.Progress.getInstance(
-    CoursePlan.PROGRESS_KEY
-);
-
 global.action_create = () => {
-    P.reset();
     SpreadsheetApp.getUi().showModalDialog(
-        HtmlService.createTemplateFromFile('templates/create')
-            .evaluate()
-            .setHeight(100),
+        Terse.HtmlService.createTemplateFromFile('templates/create', {
+            thread: Utilities.getUuid(),
+        }).setHeight(100),
         'Create Course Plan'
     );
 };
 
 global.helper_create_getAllStudents = Student.getAll;
 
-global.helper_create_create = (hostId: string) => {
+global.helper_create_create = (hostId: string, thread: string) => {
+    Terse.HtmlService.Element.Progress.reset(thread);
+    CoursePlan.setThread(thread);
     const plan = CoursePlan.for(Student.getByHostId(hostId));
-    P.setComplete(plan.getSpreadsheet().getUrl());
+    Terse.HtmlService.Element.Progress.setComplete(
+        thread,
+        plan.getSpreadsheet().getUrl()
+    );
 };
 
-global.helper_create_getProgress = P.getProgress;
+global.helper_create_getProgress = (thread) =>
+    Terse.HtmlService.Element.Progress.getProgress(thread);
 
 export default 'action_create';

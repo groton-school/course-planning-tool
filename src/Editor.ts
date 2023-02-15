@@ -2,7 +2,7 @@ import Create from './Actions/Create';
 import CreateAll from './Actions/CreateAll';
 import DeleteAll from './Actions/DeleteAll';
 
-export function onOpen(event: GoogleAppsScript.Events.AppsScriptEvent) {
+export function onOpen() {
     SpreadsheetApp.getUi()
         .createMenu('Course Planning')
         .addItem('Create all course plans', CreateAll)
@@ -12,6 +12,6 @@ export function onOpen(event: GoogleAppsScript.Events.AppsScriptEvent) {
         .addToUi();
 }
 
-export function onInstall(event: GoogleAppsScript.Events.AppsScriptEvent) {
-    onOpen(event);
+export function onInstall() {
+    onOpen();
 }

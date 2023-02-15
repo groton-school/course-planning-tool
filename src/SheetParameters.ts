@@ -1,10 +1,9 @@
-import * as State from './State';
 
 let params: GoogleAppsScript.Spreadsheet.Sheet = null;
 
 export function getParam(namedRange: string) {
     if (!params) {
-        params = State.getDataSheet().getSheetByName('Parameters');
+        params = SpreadsheetApp.getActive().getSheetByName('Parameters');
     }
     const range = params.getRange(namedRange);
     if (range.getNumRows() > 1) {

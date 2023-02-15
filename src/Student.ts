@@ -1,6 +1,5 @@
 import Advisor from './Advisor';
 import CoursePlan from './CoursePlan';
-import * as State from './State';
 
 export default class Student {
     public hostId: string;
@@ -23,7 +22,7 @@ export default class Student {
         `${this.firstName} ${this.lastName} ‘${this.gradYear - 2000}`;
 
     public static getByHostId = (id: string) =>
-        State.getDataSheet()
+        SpreadsheetApp.getActive()
             .getSheetByName('Advisor List')
             .getRange('AdvisorList_StudentData')
             .getValues()
@@ -47,7 +46,7 @@ export default class Student {
 
     public static getAll(): Student[] {
         const thisYear = CoursePlan.getCurrentSchoolYear();
-        return State.getDataSheet()
+        return SpreadsheetApp.getActive()
             .getSheetByName('Advisor List')
             .getRange('AdvisorList_StudentData')
             .getValues()
