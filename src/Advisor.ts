@@ -15,9 +15,7 @@ export default class Advisor {
         Object.assign(this, data);
     }
 
-    public getFormattedName() {
-        return `${this.firstName} ${this.lastName}`;
-    }
+    public getFormattedName = () => `${this.firstName} ${this.lastName}`;
 
     private static getData() {
         if (!Advisor.data) {
@@ -29,8 +27,8 @@ export default class Advisor {
         return Advisor.data;
     }
 
-    public static getByEmail(email: string) {
-        return new Advisor(
+    public static getByEmail = (email: string) =>
+        new Advisor(
             Advisor.getData().reduce((data, [, , , , , e, firstName, lastName]) => {
                 if (e == email) {
                     return { email, firstName, lastName };
@@ -38,10 +36,9 @@ export default class Advisor {
                 return data;
             }, null)
         );
-    }
 
-    public static getByAdvisee(hostId: string) {
-        return new Advisor(
+    public static getByAdvisee = (hostId: string) =>
+        new Advisor(
             Advisor.getData().reduce(
                 (data, [id, , , , , email, firstName, lastName]) => {
                     if (id == hostId) {
@@ -52,5 +49,4 @@ export default class Advisor {
                 null
             )
         );
-    }
 }

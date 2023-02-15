@@ -19,12 +19,11 @@ export default class Student {
         this.abbrevGradYear = this.gradYear - 2000;
     }
 
-    public getFormattedName(): string {
-        return `${this.firstName} ${this.lastName} ‘${this.gradYear - 2000}`;
-    }
+    public getFormattedName = () =>
+        `${this.firstName} ${this.lastName} ‘${this.gradYear - 2000}`;
 
-    public static getByHostId(id: string) {
-        return State.getDataSheet()
+    public static getByHostId = (id: string) =>
+        State.getDataSheet()
             .getSheetByName('Advisor List')
             .getRange('AdvisorList_StudentData')
             .getValues()
@@ -43,11 +42,8 @@ export default class Student {
                 },
                 null
             );
-    }
 
-    public getAdvisor() {
-        return Advisor.getByAdvisee(this.hostId);
-    }
+    public getAdvisor = () => Advisor.getByAdvisee(this.hostId);
 
     public static getAll(): Student[] {
         const thisYear = CoursePlan.getCurrentSchoolYear();

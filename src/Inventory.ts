@@ -64,9 +64,7 @@ export default class Inventory {
         );
     }
 
-    public getRootFolder() {
-        return this.getFolder('ROOT');
-    }
+    public getRootFolder = () => this.getFolder('ROOT');
 
     private createFolder(key: Key): GoogleAppsScript.Drive.Folder {
         const folderName =
@@ -84,7 +82,5 @@ export default class Inventory {
         return plan;
     }
 
-    public getSheet() {
-        return this.inventorySheet;
-    }
+    public getSheet = () => this.inventorySheet;
 }

@@ -34,6 +34,19 @@ export default class CoursePlan {
     private anchor?: GoogleAppsScript.Spreadsheet.Range;
     private validationSheet?: GoogleAppsScript.Spreadsheet.Sheet;
 
+    public static bindTo = (
+        spreadsheetId: string,
+        hostId: InventoryKey
+    ): CoursePlan => new CoursePlan({ hostId, spreadsheetId });
+
+    public static for(student: Student) {
+        if (!CoursePlan.coursePlanInventory) {
+            CoursePlan.coursePlanInventory = new Inventory('Course Plan Inventory');
+        }
+        progress(`${student.getFormattedName()} (updating inventory)`);
+        return CoursePlan.coursePlanInventory.getCoursePlan(student);
+    }
+
     // FIXME CoursePlan constructor should be private to enforce inventory updates
     public constructor(arg: Student | { hostId; spreadsheetId }) {
         // TODO deal with GRACE course selection
@@ -58,24 +71,7 @@ export default class CoursePlan {
         this.setSpreadsheet(SpreadsheetApp.openById(spreadsheetId));
     }
 
-    public static bindTo(
-        spreadsheetId: string,
-        hostId: InventoryKey
-    ): CoursePlan {
-        return new CoursePlan({ hostId, spreadsheetId });
-    }
-
-    public static for(student: Student) {
-        if (!CoursePlan.coursePlanInventory) {
-            CoursePlan.coursePlanInventory = new Inventory('Course Plan Inventory');
-        }
-        progress(`${student.getFormattedName()} (updating inventory)`);
-        return CoursePlan.coursePlanInventory.getCoursePlan(student);
-    }
-
-    private getStudent() {
-        return this.student;
-    }
+    private getStudent = () => this.student;
 
     private setStudent(student: Student) {
         progress(`${student.getFormattedName()} (identifying student)`);
@@ -89,19 +85,13 @@ export default class CoursePlan {
         return this.advisor;
     }
 
-    public setAdvisor(advisor: Advisor) {
-        this.advisor = advisor;
-    }
+    public setAdvisor = (advisor: Advisor) => (this.advisor = advisor);
 
-    public getSpreadsheet() {
-        return this.spreadsheet;
-    }
+    public getSpreadsheet = () => this.spreadsheet;
 
-    private setSpreadsheet(
+    private setSpreadsheet = (
         spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet
-    ) {
-        this.spreadsheet = spreadsheet;
-    }
+    ) => (this.spreadsheet = spreadsheet);
 
     public getFile() {
         if (!this.file && this.spreadsheet) {
@@ -110,9 +100,7 @@ export default class CoursePlan {
         return this.file;
     }
 
-    private getWorkingCopy() {
-        return this.workingCopy;
-    }
+    private getWorkingCopy = () => this.workingCopy;
 
     private setWorkingCopy(sheet: GoogleAppsScript.Spreadsheet.Sheet) {
         this.workingCopy = sheet;
@@ -144,9 +132,7 @@ export default class CoursePlan {
         return this.validationSheet;
     }
 
-    private getNumDepartments() {
-        return this.getValidationSheet().getMaxColumns();
-    }
+    private getNumDepartments = () => this.getValidationSheet().getMaxColumns();
 
     private populateEnrollmentHistory() {
         progress(
@@ -223,12 +209,11 @@ export default class CoursePlan {
         this.insertAndMergeOptionsRows(values[0].length);
     }
 
-    private static applyFormat(format, data) {
-        return Object.keys(data).reduce(
+    private static applyFormat = (format, data) =>
+        Object.keys(data).reduce(
             (format, key) => format.replaceAll(`{{${key}}}`, data[key]),
             format
         );
-    }
 
     private static getFormFolderInventory() {
         if (!CoursePlan.formFolderInventory) {
@@ -243,15 +228,11 @@ export default class CoursePlan {
         return CoursePlan.formFolderInventory;
     }
 
-    private getFormFolder() {
-        return CoursePlan.getFormFolderInventory().getFolder(
-            this.getStudent().gradYear
-        );
-    }
+    private getFormFolder = () =>
+        CoursePlan.getFormFolderInventory().getFolder(this.getStudent().gradYear);
 
-    public static getFormFolderFor(student: Student) {
-        return CoursePlan.getFormFolderInventory().getFolder(student.gradYear);
-    }
+    public static getFormFolderFor = (student: Student) =>
+        CoursePlan.getFormFolderInventory().getFolder(student.gradYear);
 
     private static getAdvisorFolderInventory() {
         if (!CoursePlan.advisorFolderInventory) {
@@ -267,17 +248,13 @@ export default class CoursePlan {
         return CoursePlan.advisorFolderInventory;
     }
 
-    private getAdvisorFolder() {
-        return CoursePlan.getAdvisorFolderInventory().getFolder(
-            this.getAdvisor().email
-        );
-    }
+    private getAdvisorFolder = () =>
+        CoursePlan.getAdvisorFolderInventory().getFolder(this.getAdvisor().email);
 
-    public static getAdvisorFolderFor(student: Student) {
-        return CoursePlan.getAdvisorFolderInventory().getFolder(
+    public static getAdvisorFolderFor = (student: Student) =>
+        CoursePlan.getAdvisorFolderInventory().getFolder(
             student.getAdvisor().email
         );
-    }
 
     // TODO setValue() should really be dumped into @battis/google-apps-script-helpers
     private setValue(a1notation: string, value) {
@@ -331,6 +308,7 @@ export default class CoursePlan {
         this.setValue('Template_Years', years);
     }
 
+    // TODO extract to @battis/gas-lighter
     private replaceFunctionsWithDisplayValues() {
         const range = this.getWorkingCopy().getRange(
             1,
@@ -373,54 +351,48 @@ export default class CoursePlan {
         );
     }
 
-    private getGRACEEnrollmentsFunction(): string {
-        return (
-            '=' +
-            s.IFNA(
-                s.JOIN(
-                    s.CHAR(10),
-                    s.SORT(
-                        s.FILTER(
-                            'Enrollment_Title',
-                            s.eq('Enrollment_Host_ID', this.getStudent().hostId),
-                            s.eq('Enrollment_Department', 'GRACE')
-                        )
+    private getGRACEEnrollmentsFunction = () =>
+        '=' +
+        s.IFNA(
+            s.JOIN(
+                s.CHAR(10),
+                s.SORT(
+                    s.FILTER(
+                        'Enrollment_Title',
+                        s.eq('Enrollment_Host_ID', this.getStudent().hostId),
+                        s.eq('Enrollment_Department', 'GRACE')
                     )
-                ),
-                ''
-            )
+                )
+            ),
+            ''
         );
-    }
 
-    private getEnrollmentsFunctionBy(year: string, department: string): string {
-        return (
-            '=' +
-            s.IFNA(
-                s.JOIN(
-                    s.CHAR(10),
-                    s.UNIQUE(
-                        s.INDEX(
-                            s.SORT(
-                                s.FILTER(
-                                    '{Enrollment_Title, Enrollment_Order}',
-                                    s.eq('Enrollment_Host_ID', this.getStudent().hostId),
-                                    s.eq('Enrollment_Year', year),
-                                    s.eq('Enrollment_Department', department)
-                                ),
-                                2,
-                                true,
-                                1,
-                                true
+    private getEnrollmentsFunctionBy = (year: string, department: string) =>
+        '=' +
+        s.IFNA(
+            s.JOIN(
+                s.CHAR(10),
+                s.UNIQUE(
+                    s.INDEX(
+                        s.SORT(
+                            s.FILTER(
+                                '{Enrollment_Title, Enrollment_Order}',
+                                s.eq('Enrollment_Host_ID', this.getStudent().hostId),
+                                s.eq('Enrollment_Year', year),
+                                s.eq('Enrollment_Department', department)
                             ),
-                            '',
-                            1
-                        )
+                            2,
+                            true,
+                            1,
+                            true
+                        ),
+                        '',
+                        1
                     )
-                ),
-                ''
-            )
+                )
+            ),
+            ''
         );
-    }
 
     public static getCurrentSchoolYear() {
         const now = new Date();
@@ -480,6 +452,7 @@ export default class CoursePlan {
         }
     }
 
+    // TODO extract to @battis/gas-lighter
     private clearEditors(protection: GoogleAppsScript.Spreadsheet.Protection) {
         if (!CoursePlan.me) {
             CoursePlan.me = Session.getEffectiveUser();

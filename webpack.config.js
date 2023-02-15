@@ -1,3 +1,10 @@
 const config = require('@battis/webpack-typescript-gas');
 
-module.exports = config({ root: __dirname });
+const c = config({ root: __dirname });
+
+/*
+c.mode = 'development';
+c.devtool = 'inline-source-map';
+*/
+
+module.exports = c;
