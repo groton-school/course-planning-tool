@@ -25,7 +25,7 @@ global.action_createAll = () => {
     );
 };
 
-global.helper_createAll_getProgress = (thread) =>
+global.helper_createAll_getProgress = (thread: string) =>
     Terse.HtmlService.Element.Progress.getProgress(thread);
 
-export default 'action_createAll';
+export const getFunctionName = () => 'action_createAll';

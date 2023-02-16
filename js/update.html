@@ -1,0 +1,81 @@
+<script>
+  const thread = '<?= data.thread ?>';
+  var student;
+
+  function replaceContent(html) {
+    document.getElementById('content').innerHTML = html;
+  }
+
+  function attachEvent(element, event, handler) {
+    if (element.attachEvent) {
+      element.attachEvent(event, handler);
+    } else {
+      element.addEventListener(event, handler);
+    }
+  }
+
+  function showStudentPicker(students) {
+    replaceContent(`<form id="student-picker">
+          <p>Please select the student for whom to update their course plan enrollment history.</p>
+          <div>
+            <select id="student" name="student">
+              ${students.map(
+                (student) =>
+                  `<option value="${student.hostId}">${student.firstName} ${student.lastName} ‘${student.abbrevGradYear}</option>`
+              )}
+            </select>
+            <button class="create" type="submit">Update Course Plan</button>
+          </div>
+        </form>`);
+    attachEvent(
+      document.getElementById('student-picker'),
+      'submit',
+      handleSubmit
+    );
+  }
+
+  function showProgress() {
+    replaceContent(`Loading…`);
+    updateProgress();
+  }
+
+  function updateProgress() {
+    google.script.run
+      .withSuccessHandler((progress) => {
+        if (progress.complete) {
+          showResult(progress.complete);
+        } else {
+          replaceContent(progress.html);
+          updateProgress();
+        }
+      })
+      .helper_update_getProgress(thread);
+  }
+
+  function showResult(url) {
+    replaceContent(
+      `<div>Updated course plan for ${student}.</div>
+      <div><a id="button" class="button action" href="${url}" target="_blank">Open Plan</a></div>`
+    );
+    attachEvent(document.getElementById('button'), 'click', () =>
+      google.script.host.close()
+    );
+  }
+
+  function handleSubmit(e) {
+    if (e.preventDefault) {
+      e.preventDefault();
+    }
+    const s = document.getElementById('student');
+    student = document.querySelector(
+      `#student option[value="${s.value}"]`
+    ).innerHTML;
+    showProgress();
+    google.script.run.helper_update_update(s.value, thread);
+    return false;
+  }
+
+  google.script.run
+    .withSuccessHandler(showStudentPicker)
+    .helper_update_getAllStudents();
+</script>

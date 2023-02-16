@@ -22,6 +22,7 @@ export default class CoursePlan {
     private static readonly META_NUM_COMMENTS = `${Constants.PREFIX}.CoursePlan.numComments`;
     private static readonly META_NUM_OPTIONS_PER_DEPT = `${Constants.PREFIX}.CoursePlan.numOptionsPerDept`;
     private static readonly META_CURRENT_SCHOOL_YEAR = `${Constants.PREFIX}.CoursePlan.currentSchoolYear`;
+    private static readonly META_HISTORY_WIDTH = `${Constants.PREFIX}.CoursePlan.historyWidth`;
 
     private static formFolderInventory = new FolderInventory(
         'Form Folder Inventory',
@@ -71,7 +72,10 @@ export default class CoursePlan {
     }
 
     private setStatus(message: string) {
-        Terse.HtmlService.Element.Progress.setStatus(CoursePlan.thread, message);
+        Terse.HtmlService.Element.Progress.setStatus(
+            CoursePlan.thread,
+            `${this.getStudent().getFormattedName()} (${message})`
+        );
     }
 
     public constructor(arg: Student | { hostId; spreadsheetId }) {
@@ -106,8 +110,8 @@ export default class CoursePlan {
     private getStudent = () => this.student;
 
     private setStudent(student: Student) {
-        this.setStatus(`${student.getFormattedName()} (identifying student)`);
         this.student = student;
+        this.setStatus('identifying student');
     }
 
     private getAdvisor() {
@@ -166,10 +170,41 @@ export default class CoursePlan {
 
     private getNumDepartments = () => this.getValidationSheet().getMaxColumns();
 
+    // FIXME currently updating deletes history (probably merged cells?)
+    public updateEnrollmentHistory() {
+        this.setStatus('temporarily attaching plan to master data sheet');
+        this.setWorkingCopy(
+            this.getSpreadsheet()
+                .getSheetByName('Course Plan')
+                .copyTo(SpreadsheetApp.getActive())
+        );
+
+        this.populateEnrollmentHistory(false);
+
+        this.setStatus('restoring updated history to course plan');
+        const values = this.getAnchorOffset(
+            0,
+            0,
+            this.getNumDepartments() *
+            Terse.SpreadsheetApp.DeveloperMetadata.get(
+                this.getWorkingCopy(),
+                CoursePlan.META_NUM_OPTIONS_PER_DEPT
+            ),
+            Terse.SpreadsheetApp.DeveloperMetadata.get(
+                this.getWorkingCopy(),
+                CoursePlan.META_HISTORY_WIDTH
+            )
+        ).getValues();
+
+        this.setWorkingCopy(this.getSpreadsheet().getSheetByName('Course Plan'));
+        this.getAnchorOffset(0, 0, values.length, values[0].length).setValues(
+            values
+        );
+    }
+
     private populateEnrollmentHistory(create = true) {
         this.setStatus(
-            `${this.getStudent().getFormattedName()} (${create ? 'writing' : 'updating'
-            } course enrollment history)`
+            `${create ? 'writing' : 'updating'} course enrollment history`
         );
 
         const values = [];
@@ -231,19 +266,20 @@ export default class CoursePlan {
         const historyHeight = values.length;
         const historyWidth = values[0].length;
 
+        Terse.SpreadsheetApp.DeveloperMetadata.set(
+            this.getWorkingCopy(),
+            CoursePlan.META_HISTORY_WIDTH,
+            historyWidth
+        );
+
         this.getAnchorOffset(0, 0, historyHeight, historyWidth).setValues(values);
 
         this.replaceFunctionsWithDisplayValues();
 
         if (create) {
-            this.setStatus(
-                `${this.getStudent().getFormattedName()} (moving course plan into place)`
-            );
             this.moveToStudentCoursePlanSpreadsheet();
 
-            this.setStatus(
-                `${this.getStudent().getFormattedName()} (preparing course selection menus)`
-            );
+            this.setStatus('preparing course selection menus');
             if (validations[0].length) {
                 this.getAnchorOffset(
                     0,
@@ -253,9 +289,6 @@ export default class CoursePlan {
                 ).setDataValidations(validations);
             }
 
-            this.setStatus(
-                `${this.getStudent().getFormattedName()} (protecting data)`
-            );
             this.protectNonCommentRanges(historyWidth, historyHeight);
 
             this.insertAndMergeOptionsRows(values[0].length);
@@ -295,9 +328,7 @@ export default class CoursePlan {
     }
 
     private createFromTemplate() {
-        this.setStatus(
-            `${this.getStudent().getFormattedName()} (creating course plan from template)`
-        );
+        this.setStatus('creating course plan from template');
         const template = SpreadsheetApp.openByUrl(
             SheetParameters.getCoursePlanTemplate()
         );
@@ -321,9 +352,7 @@ export default class CoursePlan {
     }
 
     private populateHeaders() {
-        this.setStatus(
-            `${this.getStudent().getFormattedName()} (filling in the labels)`
-        );
+        this.setStatus('filling in the labels');
         this.setValue('Template_Names', [
             [this.getStudent().getFormattedName()],
             [`Advisor: ${this.getAdvisor().getFormattedName()}`],
@@ -349,6 +378,7 @@ export default class CoursePlan {
     }
 
     private moveToStudentCoursePlanSpreadsheet() {
+        this.setStatus('moving course plan into place');
         this.getSpreadsheet().deleteSheet(
             this.getSpreadsheet().getSheetByName(Constants.COURSE_PLAN)
         );
@@ -361,9 +391,7 @@ export default class CoursePlan {
     }
 
     private setPermissions() {
-        this.setStatus(
-            `${this.getStudent().getFormattedName()} (setting permissions)`
-        );
+        this.setStatus('setting permissions');
         this.getFile().moveTo(this.getFormFolder());
         this.getAdvisorFolder().createShortcut(this.getFile().getId());
         Helper.DriveApp.addPermission(
@@ -464,6 +492,7 @@ export default class CoursePlan {
     }
 
     private protectNonCommentRanges(historyWidth: number, historyHeight: number) {
+        this.setStatus('protecting data');
         const history = this.getAnchorOffset(0, 0, historyHeight, historyWidth);
         for (const range of [
             history.getA1Notation(),
@@ -483,9 +512,7 @@ export default class CoursePlan {
     }
 
     private prepareCommentBlanks() {
-        this.setStatus(
-            `${this.getStudent().getFormattedName()} (making room for comments)`
-        );
+        this.setStatus('making room for comments');
         const numComments = SheetParameters.getNumComments();
         const commentors = [
             {

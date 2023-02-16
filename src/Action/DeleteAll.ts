@@ -41,4 +41,4 @@ global.action_deleteAll = () => {
 
 global.helper_deleteAll_getProgress = (thread: string) =>
     Terse.HtmlService.Element.Progress.getProgress(thread);
-export default 'action_deleteAll';
+export const getFunctionName = () => 'action_deleteAll';
