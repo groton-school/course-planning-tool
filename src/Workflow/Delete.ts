@@ -2,7 +2,8 @@ import { Terse } from '@battis/gas-lighter';
 
 const P = Terse.HtmlService.Element.Progress;
 
-global.action_deleteAll = () => {
+export const All = () => 'deleteAll';
+global.deleteAll = () => {
     const thread = Utilities.getUuid();
     P.reset(thread);
     SpreadsheetApp.getUi().showModalDialog(
@@ -13,7 +14,7 @@ global.action_deleteAll = () => {
     );
 };
 
-global.helper_deleteAll_deleteAll = (thread) => {
+global.deleteAllConfirmed = (thread) => {
     const data = SpreadsheetApp.getActive();
     const plans = data.getSheetByName('Course Plan Inventory');
     const advisors = data.getSheetByName('Advisor Folder Inventory');
@@ -41,7 +42,3 @@ global.helper_deleteAll_deleteAll = (thread) => {
     plans.getRange('A2:C2').setValues([['', '', '']]);
     P.setComplete(thread, 'All course plans have been moved to the trash');
 };
-
-global.helper_deleteAll_getProgress = (thread: string) =>
-    Terse.HtmlService.Element.Progress.getProgress(thread);
-export const getFunctionName = () => 'action_deleteAll';

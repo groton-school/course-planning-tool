@@ -1,5 +1,4 @@
-
-export default class Advisor {
+export class Advisor {
     private static data?;
 
     public email: string;

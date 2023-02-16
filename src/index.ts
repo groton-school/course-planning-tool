@@ -1,7 +1,11 @@
 import { Terse } from '@battis/gas-lighter';
-import * as Editor from './Editor';
+import * as AddOn from './AddOn';
 
-global.onOpen = Editor.onOpen;
-global.onInstall = Editor.onInstall;
+// Editor add-on hooks
+global.onOpen = AddOn.onOpen;
+global.onInstall = AddOn.onInstall;
 
+// helper functions
 global.include = Terse.HtmlService.include;
+global.getProgress = (thread: string) =>
+    Terse.HtmlService.Element.Progress.getProgress(thread);

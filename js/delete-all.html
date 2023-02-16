@@ -1,6 +1,10 @@
 <script>
   const thread = '<?= data.thread ?>';
 
+  function replaceContent(html) {
+    document.getElementById('content').innerHTML = html;
+  }
+
   function attachEvent(element, event, handler) {
     if (element.attachEvent) {
       element.attachEvent(event, handler);
@@ -15,19 +19,20 @@
         if (progress.complete) {
           google.script.host.close();
         } else {
-          document.getElementById('content').innerHTML = progress.html;
+          replaceContent(progress.html);
           updateProgress();
         }
       })
-      .helper_deleteAll_getProgress(thread);
+      .getProgress(thread);
   }
 
   function deleteAll(e) {
     if (e.preventDefault) {
       e.preventDefault();
     }
+    replaceContent('Loading…');
     updateProgress();
-    google.script.run.helper_deleteAll_deleteAll(thread);
+    google.script.run.deleteAllConfirmed(thread);
     return false;
   }
 

@@ -1,12 +1,13 @@
 import { Helper, Terse } from '@battis/gas-lighter';
-import Advisor from '../Advisor';
-import * as Constants from '../Constants';
-import * as SheetParameters from '../SheetParameters';
-import Student from '../Student';
+import * as Role from '../Role';
 import FolderInventory from './FolderInventory';
 import Inventory, { Key as InventoryKey } from './Inventory';
+import * as SheetParameters from './SheetParameters';
 
 const s = Helper.SpreadsheetApp;
+const prefix = (...tokens: string[]) =>
+    `org.groton.CoursePlanning.CoursePlan.${tokens.join('.')}`;
+const COURSE_PLAN = 'Course Plan';
 
 class CoursePlanInventory extends Inventory<CoursePlan> {
     protected getter = (id: string, key?: InventoryKey): CoursePlan =>
@@ -14,15 +15,17 @@ class CoursePlanInventory extends Inventory<CoursePlan> {
 
     // added to Inventory by CoursePlan constructor directly
     protected creator = (key: InventoryKey): CoursePlan =>
-        new CoursePlan(Student.getByHostId(key.toString()));
+        new CoursePlan(Role.Student.getByHostId(key.toString()));
 }
 
 // TODO modify workflow to allow for updating enrollment history on existing course plans
 export default class CoursePlan {
-    private static readonly META_NUM_COMMENTS = `${Constants.PREFIX}.CoursePlan.numComments`;
-    private static readonly META_NUM_OPTIONS_PER_DEPT = `${Constants.PREFIX}.CoursePlan.numOptionsPerDept`;
-    private static readonly META_CURRENT_SCHOOL_YEAR = `${Constants.PREFIX}.CoursePlan.currentSchoolYear`;
-    private static readonly META_HISTORY_WIDTH = `${Constants.PREFIX}.CoursePlan.historyWidth`;
+    private static readonly META_NUM_COMMENTS = prefix('numComments');
+    private static readonly META_NUM_OPTIONS_PER_DEPT =
+        prefix('numOptionsPerDept');
+    private static readonly META_CURRENT_SCHOOL_YEAR =
+        prefix('currentSchoolYear');
+    private static readonly META_HISTORY_WIDTH = prefix('historyWidth');
 
     private static formFolderInventory = new FolderInventory(
         'Form Folder Inventory',
@@ -36,16 +39,15 @@ export default class CoursePlan {
         (email) =>
             CoursePlan.applyFormat(
                 SheetParameters.getAdvisorFolderNameFormat(),
-                Advisor.getByEmail(email.toString())
+                Role.Advisor.getByEmail(email.toString())
             )
     );
     private static coursePlanInventory = new CoursePlanInventory(
         'Course Plan Inventory'
     );
-    private static me?: GoogleAppsScript.Base.User;
 
-    private student: Student;
-    private advisor: Advisor;
+    private student: Role.Student;
+    private advisor: Role.Advisor;
     private spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet;
     private file: GoogleAppsScript.Drive.File;
     private workingCopy?: GoogleAppsScript.Spreadsheet.Sheet;
@@ -57,7 +59,7 @@ export default class CoursePlan {
         hostId: InventoryKey
     ): CoursePlan => new CoursePlan({ hostId, spreadsheetId });
 
-    public static for(student: Student) {
+    public static for(student: Role.Student) {
         Terse.HtmlService.Element.Progress.setStatus(
             CoursePlan.thread,
             `${student.getFormattedName()} (updating inventory)`
@@ -78,16 +80,16 @@ export default class CoursePlan {
         );
     }
 
-    public constructor(arg: Student | { hostId; spreadsheetId }) {
+    public constructor(arg: Role.Student | { hostId; spreadsheetId }) {
         // TODO deal with GRACE course selection
-        if (arg instanceof Student) {
+        if (arg instanceof Role.Student) {
             this.createFromStudent(arg);
         } else {
             this.bindToExistingSpreadsheet(arg);
         }
     }
 
-    private createFromStudent(student: Student) {
+    private createFromStudent(student: Role.Student) {
         this.setStudent(student);
         this.createFromTemplate();
         this.populateHeaders();
@@ -103,13 +105,13 @@ export default class CoursePlan {
 
     private bindToExistingSpreadsheet({ hostId, spreadsheetId }) {
         // TODO double check that this exists in inventory
-        this.setStudent(Student.getByHostId(hostId));
+        this.setStudent(Role.Student.getByHostId(hostId));
         this.setSpreadsheet(SpreadsheetApp.openById(spreadsheetId));
     }
 
     private getStudent = () => this.student;
 
-    private setStudent(student: Student) {
+    private setStudent(student: Role.Student) {
         this.student = student;
         this.setStatus('identifying student');
     }
@@ -121,7 +123,7 @@ export default class CoursePlan {
         return this.advisor;
     }
 
-    public setAdvisor = (advisor: Advisor) => (this.advisor = advisor);
+    public setAdvisor = (advisor: Role.Advisor) => (this.advisor = advisor);
 
     public getSpreadsheet = () => this.spreadsheet;
 
@@ -175,7 +177,7 @@ export default class CoursePlan {
         this.setStatus('temporarily attaching plan to master data sheet');
         this.setWorkingCopy(
             this.getSpreadsheet()
-                .getSheetByName('Course Plan')
+                .getSheetByName(COURSE_PLAN)
                 .copyTo(SpreadsheetApp.getActive())
         );
 
@@ -198,7 +200,7 @@ export default class CoursePlan {
 
         SpreadsheetApp.getActive().deleteSheet(this.getWorkingCopy());
 
-        this.setWorkingCopy(this.getSpreadsheet().getSheetByName('Course Plan'));
+        this.setWorkingCopy(this.getSpreadsheet().getSheetByName(COURSE_PLAN));
         this.getAnchorOffset(0, 0, values.length, values[0].length).setValues(
             values
         );
@@ -306,13 +308,13 @@ export default class CoursePlan {
     private getFormFolder = () =>
         CoursePlan.formFolderInventory.get(this.getStudent().gradYear);
 
-    public static getFormFolderFor = (student: Student) =>
+    public static getFormFolderFor = (student: Role.Student) =>
         CoursePlan.formFolderInventory.get(student.gradYear);
 
     private getAdvisorFolder = () =>
         CoursePlan.advisorFolderInventory.get(this.getAdvisor().email);
 
-    public static getAdvisorFolderFor = (student: Student) =>
+    public static getAdvisorFolderFor = (student: Role.Student) =>
         CoursePlan.advisorFolderInventory.get(student.getAdvisor().email);
 
     // TODO setValue() should really be dumped into @battis/google-apps-script-helpers
@@ -348,7 +350,7 @@ export default class CoursePlan {
         );
         this.setWorkingCopy(
             this.getSpreadsheet()
-                .getSheetByName(Constants.COURSE_PLAN)
+                .getSheetByName(COURSE_PLAN)
                 .copyTo(SpreadsheetApp.getActive()) // assumes Active() is the data sheet
         );
     }
@@ -382,12 +384,12 @@ export default class CoursePlan {
     private moveToStudentCoursePlanSpreadsheet() {
         this.setStatus('moving course plan into place');
         this.getSpreadsheet().deleteSheet(
-            this.getSpreadsheet().getSheetByName(Constants.COURSE_PLAN)
+            this.getSpreadsheet().getSheetByName(COURSE_PLAN)
         );
         const plan = this.getWorkingCopy().copyTo(this.getSpreadsheet());
         SpreadsheetApp.getActive().deleteSheet(this.getWorkingCopy()); // assumes Active() is the data sheet
         this.setWorkingCopy(plan);
-        this.getWorkingCopy().setName(Constants.COURSE_PLAN);
+        this.getWorkingCopy().setName(COURSE_PLAN);
         this.spreadsheet.setActiveSheet(this.getWorkingCopy());
         this.spreadsheet.moveActiveSheet(1);
     }

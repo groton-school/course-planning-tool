@@ -1,7 +1,7 @@
-import Advisor from './Advisor';
-import CoursePlan from './CoursePlan';
+import CoursePlan from '../CoursePlan';
+import { Advisor } from './Advisor';
 
-export default class Student {
+export class Student {
     public hostId: string;
     public email: string;
     public firstName: string;
@@ -55,3 +55,5 @@ export default class Student {
             .filter((student) => student.gradYear != thisYear); // TODO confirm filtering out seniors
     }
 }
+
+global.studentGetAll = Student.getAll;

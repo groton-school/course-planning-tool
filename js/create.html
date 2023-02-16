@@ -49,7 +49,7 @@
           updateProgress();
         }
       })
-      .helper_create_getProgress(thread);
+      .getProgress(thread);
   }
 
   function showResult(url) {
@@ -71,11 +71,9 @@
       `#student option[value="${s.value}"]`
     ).innerHTML;
     showProgress();
-    google.script.run.helper_create_create(s.value, thread);
+    google.script.run.createSingleFor(s.value, thread);
     return false;
   }
 
-  google.script.run
-    .withSuccessHandler(showStudentPicker)
-    .helper_create_getAllStudents();
+  google.script.run.withSuccessHandler(showStudentPicker).studentGetAll();
 </script>
