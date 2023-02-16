@@ -487,30 +487,32 @@ export default class CoursePlan {
             `${this.getStudent().getFormattedName()} (making room for comments)`
         );
         const numComments = SheetParameters.getNumComments();
-        const commentors = {
-            'Comments from Faculty Advisor': this.getAdvisor().email,
-            'Comments from Studies Committee': SheetParameters.getStudiesCommittee(),
-            'Comments from College Counseling Office':
-                SheetParameters.getCollegeCounseling(),
-        };
-        for (const commentor in commentors) {
-            // TODO extract finding a cell by content to @battis/google-apps-script-helpers
-            const row = this.getWorkingCopy()
-                .getRange(1, 2, this.getWorkingCopy().getMaxRows(), 1)
-                .getValues()
-                .findIndex(([cell]) => cell == commentor);
+        const commentors = [
+            {
+                name: 'Comments from Faculty Advisor',
+                range: 'Protect_Advisor',
+                editor: this.getAdvisor().email,
+            },
+            {
+                name: 'Comments from Studies Committee',
+                range: 'Protect_StudiesCommittee',
+                editor: SheetParameters.getStudiesCommittee(),
+            },
+
+            {
+                name: 'Comments from College Counseling Office',
+                range: 'Protect_CollegeCounselingOffice',
+                editor: SheetParameters.getCollegeCounseling(),
+            },
+        ];
+        for (const { name, range, editor } of commentors) {
             const protection = this.getWorkingCopy()
-                .getRange(
-                    row + 3,
-                    2,
-                    2,
-                    commentor == 'Comments from Faculty Advisor' ? 4 : 5
-                )
+                .getRange(range)
                 .protect()
-                .setDescription(commentor);
+                .setDescription(name);
             Terse.SpreadsheetApp.Protection.clearEditors(protection);
-            protection.addEditor(commentors[commentor]);
-            this.additionalComments(row + 3, numComments);
+            protection.addEditor(editor);
+            this.additionalComments(protection.getRange().getRow(), numComments);
         }
         Terse.SpreadsheetApp.DeveloperMetadata.set(
             this.getWorkingCopy(),
