@@ -21,7 +21,7 @@ class CoursePlanInventory extends Inventory<CoursePlan> {
 export default class CoursePlan {
     private static readonly META_NUM_COMMENTS = `${Constants.PREFIX}.CoursePlan.numComments`;
     private static readonly META_NUM_OPTIONS_PER_DEPT = `${Constants.PREFIX}.CoursePlan.numOptionsPerDept`;
-    private static readonly META_HISTORY_WIDTH = `${Constants.PREFIX}.CoursePlan.historyWidth`;
+    private static readonly META_CURRENT_SCHOOL_YEAR = `${Constants.PREFIX}.CoursePlan.currentSchoolYear`;
 
     private static formFolderInventory = new FolderInventory(
         'Form Folder Inventory',
@@ -166,22 +166,42 @@ export default class CoursePlan {
 
     private getNumDepartments = () => this.getValidationSheet().getMaxColumns();
 
-    private populateEnrollmentHistory() {
+    private populateEnrollmentHistory(create = true) {
         this.setStatus(
-            `${this.getStudent().getFormattedName()} (writing course enrollment history)`
+            `${this.getStudent().getFormattedName()} (${create ? 'writing' : 'updating'
+            } course enrollment history)`
         );
+
         const values = [];
         const validations = [];
 
-        for (var row = 0; row < this.getNumDepartments(); row++) {
+        let rowIncrement = 1;
+        let maxYear = CoursePlan.getCurrentSchoolYear();
+        if (create) {
+            Terse.SpreadsheetApp.DeveloperMetadata.set(
+                this.getWorkingCopy(),
+                CoursePlan.META_CURRENT_SCHOOL_YEAR,
+                CoursePlan.getCurrentSchoolYear()
+            );
+        } else {
+            rowIncrement = Terse.SpreadsheetApp.DeveloperMetadata.get(
+                this.getWorkingCopy(),
+                CoursePlan.META_NUM_OPTIONS_PER_DEPT
+            );
+            maxYear = Terse.SpreadsheetApp.DeveloperMetadata.get(
+                this.getWorkingCopy(),
+                CoursePlan.META_CURRENT_SCHOOL_YEAR
+            );
+        }
+
+        const numRows = this.getNumDepartments() * rowIncrement;
+
+        for (var row = 0; row < numRows; row += rowIncrement) {
             const rowValue = [];
             const rowValidation = [];
             for (var column = 0; column < 6; column++) {
                 const year = this.getAnchorOffset(-1, column).getValue();
-                if (
-                    (year.substr ? Number(year.substr(0, 4)) : year) <
-                    CoursePlan.getCurrentSchoolYear()
-                ) {
+                if ((year.substr ? Number(year.substr(0, 4)) : year) < maxYear) {
                     if (this.getAnchorOffset(-2, column).getValue() == 'GRACE') {
                         if (row == this.getNumDepartments() - 1) {
                             rowValue.push(this.getGRACEEnrollmentsFunction());
@@ -213,32 +233,33 @@ export default class CoursePlan {
 
         this.getAnchorOffset(0, 0, historyHeight, historyWidth).setValues(values);
 
-        Terse.SpreadsheetApp.DeveloperMetadata.set(
-            this.getWorkingCopy(),
-            CoursePlan.META_HISTORY_WIDTH,
-            historyWidth
-        );
-
         this.replaceFunctionsWithDisplayValues();
 
-        this.setStatus(
-            `${this.getStudent().getFormattedName()} (moving course plan into place)`
-        );
-        this.moveToStudentCoursePlanSpreadsheet();
+        if (create) {
+            this.setStatus(
+                `${this.getStudent().getFormattedName()} (moving course plan into place)`
+            );
+            this.moveToStudentCoursePlanSpreadsheet();
 
-        if (validations[0].length) {
-            this.getAnchorOffset(
-                0,
-                historyWidth,
-                validations.length,
-                validations[0].length
-            ).setDataValidations(validations);
+            this.setStatus(
+                `${this.getStudent().getFormattedName()} (preparing course selection menus)`
+            );
+            if (validations[0].length) {
+                this.getAnchorOffset(
+                    0,
+                    historyWidth,
+                    validations.length,
+                    validations[0].length
+                ).setDataValidations(validations);
+            }
+
+            this.setStatus(
+                `${this.getStudent().getFormattedName()} (protecting data)`
+            );
+            this.protectNonCommentRanges(historyWidth, historyHeight);
+
+            this.insertAndMergeOptionsRows(values[0].length);
         }
-
-        this.setStatus(`${this.getStudent().getFormattedName()} (protecting data)`);
-        this.protectNonCommentRanges(historyWidth, historyHeight);
-
-        this.insertAndMergeOptionsRows(values[0].length);
     }
 
     private static applyFormat = (format, data) =>
@@ -457,19 +478,7 @@ export default class CoursePlan {
                 .getRange(range)
                 .protect()
                 .setDescription('No Edits');
-            this.clearEditors(protection);
-        }
-    }
-
-    // TODO extract to @battis/gas-lighter
-    private clearEditors(protection: GoogleAppsScript.Spreadsheet.Protection) {
-        if (!CoursePlan.me) {
-            CoursePlan.me = Session.getEffectiveUser();
-        }
-        protection.addEditor(CoursePlan.me);
-        protection.removeEditors(protection.getEditors());
-        if (protection.canDomainEdit()) {
-            protection.setDomainEdit(false);
+            Terse.SpreadsheetApp.Protection.clearEditors(protection);
         }
     }
 
@@ -499,7 +508,7 @@ export default class CoursePlan {
                 )
                 .protect()
                 .setDescription(commentor);
-            this.clearEditors(protection);
+            Terse.SpreadsheetApp.Protection.clearEditors(protection);
             protection.addEditor(commentors[commentor]);
             this.additionalComments(row + 3, numComments);
         }
