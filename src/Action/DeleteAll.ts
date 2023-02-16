@@ -11,6 +11,9 @@ global.action_deleteAll = () => {
         }).setHeight(100),
         'Delete All Course Plans'
     );
+};
+
+global.helper_deleteAll_deleteAll = (thread) => {
     const data = SpreadsheetApp.getActive();
     const plans = data.getSheetByName('Course Plan Inventory');
     const advisors = data.getSheetByName('Advisor Folder Inventory');
