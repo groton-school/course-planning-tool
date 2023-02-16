@@ -196,6 +196,8 @@ export default class CoursePlan {
             )
         ).getValues();
 
+        SpreadsheetApp.getActive().deleteSheet(this.getWorkingCopy());
+
         this.setWorkingCopy(this.getSpreadsheet().getSheetByName('Course Plan'));
         this.getAnchorOffset(0, 0, values.length, values[0].length).setValues(
             values
