@@ -13,6 +13,7 @@ export default abstract class Inventory<T> {
     protected abstract creator(key: Key): T;
 
     private getData() {
+        // TODO reasonably, caching this should improve performance, no?
         return this.sheet
             .getRange(1, 1, this.sheet.getMaxRows(), this.sheet.getMaxColumns())
             .getValues();
