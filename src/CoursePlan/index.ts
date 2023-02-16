@@ -278,7 +278,7 @@ export default class CoursePlan {
 
         this.getAnchorOffset(0, 0, historyHeight, historyWidth).setValues(values);
 
-        this.replaceFunctionsWithDisplayValues();
+        Terse.SpreadsheetApp.replaceAllWithDisplayValues(this.getWorkingCopy());
 
         if (create) {
             this.moveToStudentCoursePlanSpreadsheet();
@@ -317,20 +317,6 @@ export default class CoursePlan {
     public static getAdvisorFolderFor = (student: Role.Student) =>
         CoursePlan.advisorFolderInventory.get(student.getAdvisor().email);
 
-    // TODO setValue() should really be dumped into @battis/google-apps-script-helpers
-    private setValue(a1notation: string, value) {
-        const range = this.getWorkingCopy().getRange(a1notation);
-
-        if (Array.isArray(value)) {
-            if (!Array.isArray(value[0])) {
-                value = [value];
-            }
-            range.setValues(value);
-        } else {
-            range.offset(0, 0, 1, 1).setValue(value);
-        }
-    }
-
     private createFromTemplate() {
         this.setStatus('creating course plan from template');
         const template = SpreadsheetApp.openByUrl(
@@ -357,7 +343,7 @@ export default class CoursePlan {
 
     private populateHeaders() {
         this.setStatus('filling in the labels');
-        this.setValue('Template_Names', [
+        Terse.SpreadsheetApp.setValue(this.getWorkingCopy(), 'Template_Names', [
             [this.getStudent().getFormattedName()],
             [`Advisor: ${this.getAdvisor().getFormattedName()}`],
         ]);
@@ -366,19 +352,11 @@ export default class CoursePlan {
             (value) => `${gradYear - value - 1} - ${gradYear - value}`
         );
         years.splice(2, 0, gradYear - 3);
-        this.setValue('Template_Years', years);
-    }
-
-    // TODO extract to @battis/gas-lighter
-    private replaceFunctionsWithDisplayValues() {
-        const range = this.getWorkingCopy().getRange(
-            1,
-            1,
-            this.getWorkingCopy().getMaxRows(),
-            this.getWorkingCopy().getMaxColumns()
+        Terse.SpreadsheetApp.setValue(
+            this.getWorkingCopy(),
+            'Template_Years',
+            years
         );
-        const display = range.getDisplayValues();
-        range.setValues(display);
     }
 
     private moveToStudentCoursePlanSpreadsheet() {
