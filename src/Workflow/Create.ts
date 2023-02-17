@@ -34,7 +34,7 @@ global.createAll = () => {
         students.length * CoursePlan.getStepCount()
     );
     SpreadsheetApp.getUi().showModalDialog(
-        Terse.HtmlService.createTemplateFromFile('templates/create-all', {
+        Terse.HtmlService.createTemplateFromFile('templates/progress', {
             thread,
         }).setHeight(100),
         'Create Course Plans'

@@ -12,7 +12,6 @@ global.updateSingle = () => {
     );
 };
 
-// TODO should pull from list of existing course plans, not all students
 global.updateSingleFor = (hostId: string, thread: string) => {
     Terse.HtmlService.Element.Progress.reset(thread);
     CoursePlan.setThread(thread);
@@ -24,5 +23,29 @@ global.updateSingleFor = (hostId: string, thread: string) => {
     );
 };
 
-// TODO add option to update all
+export const All = () => 'updateAll';
+global.updateAll = () => {
+    const thread = Utilities.getUuid();
+    Terse.HtmlService.Element.Progress.reset(thread);
+    CoursePlan.setThread(thread);
+    const plans = CoursePlan.getAll().map(([hostId]) => hostId);
+    Terse.HtmlService.Element.Progress.setMax(
+        thread,
+        plans.length * CoursePlan.getStepCount()
+    );
+    SpreadsheetApp.getUi().showModalDialog(
+        Terse.HtmlService.createTemplateFromFile('templates/progress', {
+            thread,
+        }).setHeight(100),
+        'Update Course Plans'
+    );
+    plans.forEach((hostId) =>
+        CoursePlan.for(Role.Student.getByHostId(hostId)).updateEnrollmentHistory()
+    );
+    Terse.HtmlService.Element.Progress.setComplete(
+        thread,
+        'All course plans updated'
+    );
+};
+
 // TODO add option to override comments with new enrollments?

@@ -16,6 +16,12 @@ class CoursePlanInventory extends Inventory<CoursePlan> {
     // added to Inventory by CoursePlan constructor directly
     protected creator = (key: InventoryKey): CoursePlan =>
         new CoursePlan(Role.Student.getByHostId(key.toString()));
+
+    public getAll() {
+        const plans = Terse.SpreadsheetApp.getSheetDisplayValues(this.getSheet());
+        plans.shift(); // remove column headings
+        return plans;
+    }
 }
 
 export default class CoursePlan {
@@ -67,6 +73,8 @@ export default class CoursePlan {
         );
         return CoursePlan.coursePlanInventory.get(student.hostId);
     }
+
+    public static getAll = () => CoursePlan.coursePlanInventory.getAll();
 
     private static thread = 'course-plan';
 
@@ -450,6 +458,7 @@ export default class CoursePlan {
         return now.getMonth() > 6 ? now.getFullYear() + 1 : now.getFullYear();
     }
 
+    // TODO adjust row height to accommodate actual content lines
     private insertAndMergeOptionsRows(valueWidth: number) {
         const numOptions = SheetParameters.getNumOptionsPerDepartment();
         for (
@@ -541,3 +550,5 @@ export default class CoursePlan {
         );
     }
 }
+
+global.coursePlanGetAll = CoursePlan.getAll;

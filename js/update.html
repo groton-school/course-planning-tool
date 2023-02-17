@@ -20,8 +20,11 @@
           <div>
             <select id="student" name="student">
               ${students.map(
-                (student) =>
-                  `<option value="${student.hostId}">${student.firstName} ${student.lastName} ‘${student.abbrevGradYear}</option>`
+                ([hostId, id, , , firstName, lastName, gradYear]) =>
+                  `<option value="${hostId}">${firstName} ${lastName} ‘${gradYear.substr(
+                    2,
+                    2
+                  )}</option>`
               )}
             </select>
             <button class="create" type="submit">Update Course Plan</button>
@@ -75,5 +78,5 @@
     return false;
   }
 
-  google.script.run.withSuccessHandler(showStudentPicker).studentGetAll();
+  google.script.run.withSuccessHandler(showStudentPicker).coursePlanGetAll();
 </script>

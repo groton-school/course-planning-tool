@@ -38,4 +38,6 @@ export default abstract class Inventory<T> {
     }
 
     public add = (entry: Entry) => this.sheet.appendRow(entry);
+
+    protected getSheet = () => this.sheet;
 }
