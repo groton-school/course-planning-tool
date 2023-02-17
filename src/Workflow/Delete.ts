@@ -20,11 +20,16 @@ global.deleteAllConfirmed = (thread) => {
     const advisors = data.getSheetByName('Advisor Folder Inventory');
     const forms = data.getSheetByName('Form Folder Inventory');
     P.setStatus(thread, 'Deleting advisor folders');
+    P.setMax(thread, advisors.getMaxRows() + forms.getMaxRows() - 1);
+    let counter = 0;
     if (advisors.getMaxRows() > 2) {
         advisors
             .getRange('B3:B')
             .getValues()
-            .forEach(([id]) => DriveApp.getFileById(id).setTrashed(true));
+            .forEach(([id]) => {
+                DriveApp.getFileById(id).setTrashed(true);
+                P.setValue(thread, ++counter);
+            });
         advisors.deleteRows(3, advisors.getMaxRows() - 2);
     }
     P.setStatus(thread, 'Deleting form folders');
@@ -32,7 +37,10 @@ global.deleteAllConfirmed = (thread) => {
         forms
             .getRange('B3:B')
             .getValues()
-            .forEach(([id]) => DriveApp.getFileById(id).setTrashed(true));
+            .forEach(([id]) => {
+                DriveApp.getFileById(id).setTrashed(true);
+                P.setValue(thread, ++counter);
+            });
         forms.deleteRows(3, forms.getMaxRows() - 2);
     }
     P.setStatus(thread, 'Cleaning up course plan inventory');

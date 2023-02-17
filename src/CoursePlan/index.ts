@@ -26,6 +26,8 @@ export default class CoursePlan {
         prefix('currentSchoolYear');
     private static readonly META_HISTORY_WIDTH = prefix('historyWidth');
 
+    public static getStepCount = () => 11;
+
     private static formFolderInventory = new FolderInventory(
         'Form Folder Inventory',
         (gradYear) =>
@@ -77,6 +79,7 @@ export default class CoursePlan {
             CoursePlan.thread,
             `${this.getStudent().getFormattedName()} (${message})`
         );
+        Terse.HtmlService.Element.Progress.incrementValue(CoursePlan.thread);
     }
 
     public constructor(arg: Role.Student | { hostId; spreadsheetId }) {
@@ -100,6 +103,7 @@ export default class CoursePlan {
             this.getSpreadsheet().getId(),
             this.getSpreadsheet().getUrl(),
         ]);
+        this.setStatus('finished');
     }
 
     private bindToExistingSpreadsheet({ hostId, spreadsheetId }) {
@@ -203,6 +207,7 @@ export default class CoursePlan {
         this.getAnchorOffset(0, 0, values.length, values[0].length).setValues(
             values
         );
+        Terse.HtmlService.Element.Progress.incrementValue(CoursePlan.thread, 6);
     }
 
     private populateEnrollmentHistory(create = true) {
@@ -283,7 +288,7 @@ export default class CoursePlan {
         this.getAnchorOffset(0, 0, historyHeight, historyWidth).setValues(values);
 
         if (create) {
-            this.setStatus('evaluating function');
+            this.setStatus('evaluating functions');
             Terse.SpreadsheetApp.replaceAllWithDisplayValues(this.getWorkingCopy());
 
             this.moveToStudentCoursePlanSpreadsheet();
@@ -364,6 +369,7 @@ export default class CoursePlan {
         );
     }
 
+    // TODO clean up named range duplication
     private moveToStudentCoursePlanSpreadsheet() {
         this.setStatus('moving course plan into place');
         this.getSpreadsheet().deleteSheet(

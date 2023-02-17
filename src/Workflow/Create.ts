@@ -14,6 +14,7 @@ global.createSingle = () => {
 
 global.createSingleFor = (hostId: string, thread: string) => {
     Terse.HtmlService.Element.Progress.reset(thread);
+    Terse.HtmlService.Element.Progress.setMax(thread, CoursePlan.getStepCount());
     CoursePlan.setThread(thread);
     const plan = CoursePlan.for(Role.Student.getByHostId(hostId));
     Terse.HtmlService.Element.Progress.setComplete(
@@ -28,7 +29,10 @@ global.createAll = () => {
     Terse.HtmlService.Element.Progress.reset(thread);
     CoursePlan.setThread(thread);
     const students = Role.Student.getAll();
-    Terse.HtmlService.Element.Progress.setMax(thread, students.length);
+    Terse.HtmlService.Element.Progress.setMax(
+        thread,
+        students.length * CoursePlan.getStepCount()
+    );
     SpreadsheetApp.getUi().showModalDialog(
         Terse.HtmlService.createTemplateFromFile('templates/create-all', {
             thread,

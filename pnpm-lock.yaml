@@ -7,7 +7,7 @@ specifiers:
   '@battis/webpack-typescript-gas': github:battis/webpack-typescript-gas
 
 dependencies:
-  '@battis/gas-lighter': github.com/battis/gas-lighter/8bbcdc099ef6e508017a384783c9be28af24e82f
+  '@battis/gas-lighter': github.com/battis/gas-lighter/9555db71a7c14509e583e83549a1a55c99c5748c
 
 devDependencies:
   '@battis/eslint-config': github.com/battis/eslint-config/bbec12cb1d9ceab8bb017c8494f38034c00fea24_olqzgoudjanskusljexhgqvvhe
@@ -761,8 +761,8 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
     dependencies:
-      caniuse-lite: 1.0.30001453
-      electron-to-chromium: 1.4.300
+      caniuse-lite: 1.0.30001456
+      electron-to-chromium: 1.4.301
       node-releases: 2.0.10
       update-browserslist-db: 1.0.10_browserslist@4.21.5
     dev: true
@@ -819,8 +819,8 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
-  /caniuse-lite/1.0.30001453:
-    resolution: {integrity: sha512-R9o/uySW38VViaTrOtwfbFEiBFUh7ST3uIG4OEymIG3/uKdHDO4xk/FaqfUw0d+irSUyFPy3dZszf9VvSTPnsA==}
+  /caniuse-lite/1.0.30001456:
+    resolution: {integrity: sha512-XFHJY5dUgmpMV25UqaD4kVq2LsiaU5rS8fb0f17pCoXQiQslzmFgnfOxfvo1bTpTqf7dwG/N/05CnLCnOEKmzA==}
     dev: true
 
   /chalk/2.4.2:
@@ -1106,8 +1106,8 @@ packages:
       safe-buffer: 5.2.1
     dev: true
 
-  /electron-to-chromium/1.4.300:
-    resolution: {integrity: sha512-tHLIBkKaxvG6NnDWuLgeYrz+LTwAnApHm2R3KBNcRrFn0qLmTrqQeB4X4atfN6YJbkOOOSdRBeQ89OfFUelnEQ==}
+  /electron-to-chromium/1.4.301:
+    resolution: {integrity: sha512-bz00ASIIDjcgszZKuEA1JEFhbDjqUNbQ/PEhNEl1wbixzYpeTp2H2QWjsQvAL2T1wJBdOwCF5hE896BoMwYKrA==}
     dev: true
 
   /emoji-regex/8.0.0:
@@ -3027,12 +3027,12 @@ packages:
       jest-worker: 27.5.1
       schema-utils: 3.1.1
       serialize-javascript: 6.0.1
-      terser: 5.16.3
+      terser: 5.16.4
       webpack: 5.75.0_webpack-cli@5.0.1
     dev: true
 
-  /terser/5.16.3:
-    resolution: {integrity: sha512-v8wWLaS/xt3nE9dgKEWhNUFP6q4kngO5B8eYFUuebsu7Dw/UNAnpUod6UHo04jSSkv8TzKHjZDSd7EXdDQAl8Q==}
+  /terser/5.16.4:
+    resolution: {integrity: sha512-5yEGuZ3DZradbogeYQ1NaGz7rXVBDWujWlx1PT8efXO6Txn+eWbfKqB2bTDVmFXmePFkoLU6XI8UektMIEA0ug==}
     engines: {node: '>=10'}
     hasBin: true
     dependencies:
@@ -3387,8 +3387,8 @@ packages:
       prettier: 2.8.4
     dev: true
 
-  github.com/battis/gas-lighter/8bbcdc099ef6e508017a384783c9be28af24e82f:
-    resolution: {tarball: https://codeload.github.com/battis/gas-lighter/tar.gz/8bbcdc099ef6e508017a384783c9be28af24e82f}
+  github.com/battis/gas-lighter/9555db71a7c14509e583e83549a1a55c99c5748c:
+    resolution: {tarball: https://codeload.github.com/battis/gas-lighter/tar.gz/9555db71a7c14509e583e83549a1a55c99c5748c}
     name: '@battis/gas-lighter'
     version: 0.1.0
     dev: false

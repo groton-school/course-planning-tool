@@ -12,6 +12,7 @@ global.updateSingle = () => {
     );
 };
 
+// TODO should pull from list of existing course plans, not all students
 global.updateSingleFor = (hostId: string, thread: string) => {
     Terse.HtmlService.Element.Progress.reset(thread);
     CoursePlan.setThread(thread);
