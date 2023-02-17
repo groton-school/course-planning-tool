@@ -9,6 +9,8 @@ const prefix = (...tokens: string[]) =>
     `org.groton.CoursePlanning.CoursePlan.${tokens.join('.')}`;
 const COURSE_PLAN = 'Course Plan';
 
+// TODO graduate seniors out of the inventories?
+// TODO archive departed advisors
 class CoursePlanInventory extends Inventory<CoursePlan> {
     protected getter = (id: string, key?: InventoryKey): CoursePlan =>
         CoursePlan.bindTo(id, key);
@@ -24,6 +26,7 @@ class CoursePlanInventory extends Inventory<CoursePlan> {
     }
 }
 
+// TODO decide on how plans should update
 export default class CoursePlan {
     private static readonly META_NUM_COMMENTS = prefix('numComments');
     private static readonly META_NUM_OPTIONS_PER_DEPT =
