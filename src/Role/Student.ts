@@ -50,7 +50,6 @@ export class Student {
             .getSheetByName('Advisor List')
             .getRange('AdvisorList_StudentData')
             .getValues()
-            .slice(0, 10) // FIXME remove when testing complete
             .map((row) => new Student(row))
             .filter((student) => student.gradYear != thisYear); // TODO confirm filtering out seniors
     }

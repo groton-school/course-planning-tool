@@ -22,3 +22,6 @@ global.updateSingleFor = (hostId: string, thread: string) => {
         plan.getSpreadsheet().getUrl()
     );
 };
+
+// TODO add option to update all
+// TODO add option to override comments with new enrollments?

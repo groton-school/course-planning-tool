@@ -18,7 +18,6 @@ class CoursePlanInventory extends Inventory<CoursePlan> {
         new CoursePlan(Role.Student.getByHostId(key.toString()));
 }
 
-// TODO modify workflow to allow for updating enrollment history on existing course plans
 export default class CoursePlan {
     private static readonly META_NUM_COMMENTS = prefix('numComments');
     private static readonly META_NUM_OPTIONS_PER_DEPT =
@@ -105,6 +104,7 @@ export default class CoursePlan {
 
     private bindToExistingSpreadsheet({ hostId, spreadsheetId }) {
         // TODO double check that this exists in inventory
+        // TODO add option to update when "created"?
         this.setStudent(Role.Student.getByHostId(hostId));
         this.setSpreadsheet(SpreadsheetApp.openById(spreadsheetId));
     }
@@ -172,7 +172,6 @@ export default class CoursePlan {
 
     private getNumDepartments = () => this.getValidationSheet().getMaxColumns();
 
-    // FIXME currently updating deletes history (probably merged cells?)
     public updateEnrollmentHistory() {
         this.setStatus('temporarily attaching plan to master data sheet');
         this.setWorkingCopy(
@@ -196,7 +195,7 @@ export default class CoursePlan {
                 this.getWorkingCopy(),
                 CoursePlan.META_HISTORY_WIDTH
             )
-        ).getValues();
+        ).getDisplayValues();
 
         SpreadsheetApp.getActive().deleteSheet(this.getWorkingCopy());
 
@@ -264,6 +263,11 @@ export default class CoursePlan {
                 }
             }
             values.push(rowValue);
+            if (!create) {
+                for (let i = 1; i < rowIncrement; i++) {
+                    values.push(Array.apply('', Array(rowValue.length)));
+                }
+            }
             validations.push(rowValidation);
         }
 
@@ -278,9 +282,10 @@ export default class CoursePlan {
 
         this.getAnchorOffset(0, 0, historyHeight, historyWidth).setValues(values);
 
-        Terse.SpreadsheetApp.replaceAllWithDisplayValues(this.getWorkingCopy());
-
         if (create) {
+            this.setStatus('evaluating function');
+            Terse.SpreadsheetApp.replaceAllWithDisplayValues(this.getWorkingCopy());
+
             this.moveToStudentCoursePlanSpreadsheet();
 
             this.setStatus('preparing course selection menus');
