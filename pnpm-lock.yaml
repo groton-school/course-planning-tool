@@ -7,7 +7,7 @@ specifiers:
   '@battis/webpack-typescript-gas': github:battis/webpack-typescript-gas
 
 dependencies:
-  '@battis/gas-lighter': github.com/battis/gas-lighter/eef9536167159333285d813caa416dbd5e5d618e
+  '@battis/gas-lighter': github.com/battis/gas-lighter/1dfe1e925d8aa781618c395f962eb2ce0a89f3dd
 
 devDependencies:
   '@battis/eslint-config': github.com/battis/eslint-config/bbec12cb1d9ceab8bb017c8494f38034c00fea24_olqzgoudjanskusljexhgqvvhe
@@ -3387,8 +3387,8 @@ packages:
       prettier: 2.8.4
     dev: true
 
-  github.com/battis/gas-lighter/eef9536167159333285d813caa416dbd5e5d618e:
-    resolution: {tarball: https://codeload.github.com/battis/gas-lighter/tar.gz/eef9536167159333285d813caa416dbd5e5d618e}
+  github.com/battis/gas-lighter/1dfe1e925d8aa781618c395f962eb2ce0a89f3dd:
+    resolution: {tarball: https://codeload.github.com/battis/gas-lighter/tar.gz/1dfe1e925d8aa781618c395f962eb2ce0a89f3dd}
     name: '@battis/gas-lighter'
     version: 0.1.0
     dev: false

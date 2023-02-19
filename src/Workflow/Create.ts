@@ -1,11 +1,11 @@
-import { Terse } from '@battis/gas-lighter';
+import * as g from '@battis/gas-lighter';
 import CoursePlan from '../CoursePlan';
 import * as Role from '../Role';
 
 export const Single = () => 'createSingle';
 global.createSingle = () => {
     SpreadsheetApp.getUi().showModalDialog(
-        Terse.HtmlService.createTemplateFromFile('templates/create', {
+        g.HtmlService.createTemplateFromFile('templates/create', {
             thread: Utilities.getUuid(),
         }).setHeight(100),
         'Create Course Plan'
@@ -13,11 +13,11 @@ global.createSingle = () => {
 };
 
 global.createSingleFor = (hostId: string, thread: string) => {
-    Terse.HtmlService.Element.Progress.reset(thread);
-    Terse.HtmlService.Element.Progress.setMax(thread, CoursePlan.getStepCount());
+    g.HtmlService.Element.Progress.reset(thread);
+    g.HtmlService.Element.Progress.setMax(thread, CoursePlan.getStepCount());
     CoursePlan.setThread(thread);
     const plan = CoursePlan.for(Role.Student.getByHostId(hostId));
-    Terse.HtmlService.Element.Progress.setComplete(
+    g.HtmlService.Element.Progress.setComplete(
         thread,
         plan.getSpreadsheet().getUrl()
     );
@@ -26,24 +26,22 @@ global.createSingleFor = (hostId: string, thread: string) => {
 export const All = () => 'createAll';
 global.createAll = () => {
     const thread = Utilities.getUuid();
-    Terse.HtmlService.Element.Progress.reset(thread);
+    g.HtmlService.Element.Progress.reset(thread);
     CoursePlan.setThread(thread);
     const students = Role.Student.getAll();
-    Terse.HtmlService.Element.Progress.setMax(
+    g.HtmlService.Element.Progress.setMax(
         thread,
         students.length * CoursePlan.getStepCount()
     );
     SpreadsheetApp.getUi().showModalDialog(
-        Terse.HtmlService.createTemplateFromFile('templates/progress', {
-            thread,
-        }).setHeight(100),
+        g.HtmlService.Element.Progress.getHtmlOutput(thread),
         'Create Course Plans'
     );
     students.forEach((student: Role.Student, i) => {
-        Terse.HtmlService.Element.Progress.setValue(thread, i + 1);
+        g.HtmlService.Element.Progress.setValue(thread, i + 1);
         CoursePlan.for(student);
     });
-    Terse.HtmlService.Element.Progress.setComplete(
+    g.HtmlService.Element.Progress.setComplete(
         thread,
         'All course plans created'
     );

@@ -1,13 +1,13 @@
-import { Terse } from '@battis/gas-lighter';
+import * as g from '@battis/gas-lighter';
 
-const P = Terse.HtmlService.Element.Progress;
+const P = g.HtmlService.Element.Progress;
 
 export const All = () => 'deleteAll';
 global.deleteAll = () => {
     const thread = Utilities.getUuid();
     P.reset(thread);
     SpreadsheetApp.getUi().showModalDialog(
-        Terse.HtmlService.createTemplateFromFile('templates/delete-all', {
+        g.HtmlService.createTemplateFromFile('templates/delete-all', {
             thread,
         }).setHeight(100),
         'Delete All Course Plans'

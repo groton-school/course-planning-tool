@@ -1,10 +1,10 @@
-import { Helper, Terse } from '@battis/gas-lighter';
+import * as g from '@battis/gas-lighter';
 import * as Role from '../Role';
 import FolderInventory from './FolderInventory';
 import Inventory, { Key as InventoryKey } from './Inventory';
 import * as SheetParameters from './SheetParameters';
 
-const s = Helper.SpreadsheetApp;
+const s = g.SpreadsheetApp.Function;
 const prefix = (...tokens: string[]) =>
     `org.groton.CoursePlanning.CoursePlan.${tokens.join('.')}`;
 const COURSE_PLAN = 'Course Plan';
@@ -20,7 +20,7 @@ class CoursePlanInventory extends Inventory<CoursePlan> {
         new CoursePlan(Role.Student.getByHostId(key.toString()));
 
     public getAll() {
-        const plans = Terse.SpreadsheetApp.getSheetDisplayValues(this.getSheet());
+        const plans = g.SpreadsheetApp.getSheetDisplayValues(this.getSheet());
         plans.shift(); // remove column headings
         return plans;
     }
@@ -70,7 +70,7 @@ export default class CoursePlan {
     ): CoursePlan => new CoursePlan({ hostId, spreadsheetId });
 
     public static for(student: Role.Student) {
-        Terse.HtmlService.Element.Progress.setStatus(
+        g.HtmlService.Element.Progress.setStatus(
             CoursePlan.thread,
             `${student.getFormattedName()} (updating inventory)`
         );
@@ -86,11 +86,11 @@ export default class CoursePlan {
     }
 
     private setStatus(message: string) {
-        Terse.HtmlService.Element.Progress.setStatus(
+        g.HtmlService.Element.Progress.setStatus(
             CoursePlan.thread,
             `${this.getStudent().getFormattedName()} (${message})`
         );
-        Terse.HtmlService.Element.Progress.incrementValue(CoursePlan.thread);
+        g.HtmlService.Element.Progress.incrementValue(CoursePlan.thread);
     }
 
     public constructor(arg: Role.Student | { hostId; spreadsheetId }) {
@@ -202,11 +202,11 @@ export default class CoursePlan {
             0,
             0,
             this.getNumDepartments() *
-            Terse.SpreadsheetApp.DeveloperMetadata.get(
+            g.SpreadsheetApp.DeveloperMetadata.get(
                 this.getWorkingCopy(),
                 CoursePlan.META_NUM_OPTIONS_PER_DEPT
             ),
-            Terse.SpreadsheetApp.DeveloperMetadata.get(
+            g.SpreadsheetApp.DeveloperMetadata.get(
                 this.getWorkingCopy(),
                 CoursePlan.META_HISTORY_WIDTH
             )
@@ -218,7 +218,7 @@ export default class CoursePlan {
         this.getAnchorOffset(0, 0, values.length, values[0].length).setValues(
             values
         );
-        Terse.HtmlService.Element.Progress.incrementValue(CoursePlan.thread, 6);
+        g.HtmlService.Element.Progress.incrementValue(CoursePlan.thread, 6);
     }
 
     private populateEnrollmentHistory(create = true) {
@@ -232,17 +232,17 @@ export default class CoursePlan {
         let rowIncrement = 1;
         let maxYear = CoursePlan.getCurrentSchoolYear();
         if (create) {
-            Terse.SpreadsheetApp.DeveloperMetadata.set(
+            g.SpreadsheetApp.DeveloperMetadata.set(
                 this.getWorkingCopy(),
                 CoursePlan.META_CURRENT_SCHOOL_YEAR,
                 CoursePlan.getCurrentSchoolYear()
             );
         } else {
-            rowIncrement = Terse.SpreadsheetApp.DeveloperMetadata.get(
+            rowIncrement = g.SpreadsheetApp.DeveloperMetadata.get(
                 this.getWorkingCopy(),
                 CoursePlan.META_NUM_OPTIONS_PER_DEPT
             );
-            maxYear = Terse.SpreadsheetApp.DeveloperMetadata.get(
+            maxYear = g.SpreadsheetApp.DeveloperMetadata.get(
                 this.getWorkingCopy(),
                 CoursePlan.META_CURRENT_SCHOOL_YEAR
             );
@@ -290,7 +290,7 @@ export default class CoursePlan {
         const historyHeight = values.length;
         const historyWidth = values[0].length;
 
-        Terse.SpreadsheetApp.DeveloperMetadata.set(
+        g.SpreadsheetApp.DeveloperMetadata.set(
             this.getWorkingCopy(),
             CoursePlan.META_HISTORY_WIDTH,
             historyWidth
@@ -300,7 +300,7 @@ export default class CoursePlan {
 
         if (create) {
             this.setStatus('evaluating functions');
-            Terse.SpreadsheetApp.replaceAllWithDisplayValues(this.getWorkingCopy());
+            g.SpreadsheetApp.Value.replaceAllWithDisplayValues(this.getWorkingCopy());
 
             this.moveToStudentCoursePlanSpreadsheet();
 
@@ -351,7 +351,7 @@ export default class CoursePlan {
                 )
             )
         );
-        Helper.SpreadsheetApp.addImportrangePermission(
+        g.SpreadsheetApp.Permission.addImportrangePermission(
             this.getSpreadsheet(),
             SpreadsheetApp.getActive() // assumes Active() is the data sheet
         );
@@ -364,7 +364,7 @@ export default class CoursePlan {
 
     private populateHeaders() {
         this.setStatus('filling in the labels');
-        Terse.SpreadsheetApp.setValue(this.getWorkingCopy(), 'Template_Names', [
+        g.SpreadsheetApp.Value.set(this.getWorkingCopy(), 'Template_Names', [
             [this.getStudent().getFormattedName()],
             [`Advisor: ${this.getAdvisor().getFormattedName()}`],
         ]);
@@ -373,11 +373,7 @@ export default class CoursePlan {
             (value) => `${gradYear - value - 1} - ${gradYear - value}`
         );
         years.splice(2, 0, gradYear - 3);
-        Terse.SpreadsheetApp.setValue(
-            this.getWorkingCopy(),
-            'Template_Years',
-            years
-        );
+        g.SpreadsheetApp.Value.set(this.getWorkingCopy(), 'Template_Years', years);
     }
 
     // TODO clean up named range duplication
@@ -398,18 +394,12 @@ export default class CoursePlan {
         this.setStatus('setting permissions');
         this.getFile().moveTo(this.getFormFolder());
         this.getAdvisorFolder().createShortcut(this.getFile().getId());
-        Helper.DriveApp.addPermission(
-            this.getFile().getId(),
-            this.getStudent().email
-        );
-        Helper.DriveApp.addPermission(
-            this.getFile().getId(),
-            this.getAdvisor().email
-        );
-        Helper.DriveApp.addPermission(
+        g.DriveApp.addPermission(this.getFile().getId(), this.getStudent().email);
+        g.DriveApp.addPermission(this.getFile().getId(), this.getAdvisor().email);
+        g.DriveApp.addPermission(
             this.getAdvisorFolder().getId(),
             this.getAdvisor().email,
-            Helper.DriveApp.Role.Reader
+            g.DriveApp.Role.Reader
         );
     }
 
@@ -480,7 +470,7 @@ export default class CoursePlan {
                 valueWidth + 1
             ).mergeVertically();
         }
-        Terse.SpreadsheetApp.DeveloperMetadata.set(
+        g.SpreadsheetApp.DeveloperMetadata.set(
             this.getWorkingCopy(),
             CoursePlan.META_NUM_OPTIONS_PER_DEPT,
             numOptions
@@ -512,7 +502,7 @@ export default class CoursePlan {
                 .getRange(range)
                 .protect()
                 .setDescription('No Edits');
-            Terse.SpreadsheetApp.Protection.clearEditors(protection);
+            g.SpreadsheetApp.Protection.clearEditors(protection);
         }
     }
 
@@ -542,11 +532,11 @@ export default class CoursePlan {
                 .getRange(range)
                 .protect()
                 .setDescription(name);
-            Terse.SpreadsheetApp.Protection.clearEditors(protection);
+            g.SpreadsheetApp.Protection.clearEditors(protection);
             protection.addEditor(editor);
             this.additionalComments(protection.getRange().getRow(), numComments);
         }
-        Terse.SpreadsheetApp.DeveloperMetadata.set(
+        g.SpreadsheetApp.DeveloperMetadata.set(
             this.getWorkingCopy(),
             CoursePlan.META_NUM_COMMENTS,
             numComments
