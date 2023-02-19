@@ -7,12 +7,12 @@ specifiers:
   '@battis/webpack-typescript-gas': github:battis/webpack-typescript-gas
 
 dependencies:
-  '@battis/gas-lighter': github.com/battis/gas-lighter/1dfe1e925d8aa781618c395f962eb2ce0a89f3dd
+  '@battis/gas-lighter': github.com/battis/gas-lighter/a5f8c7d6939b8b1f92ee101cdf87bb4dca55a575_233mpnshgondnicgpfxcgyo5ta
 
 devDependencies:
   '@battis/eslint-config': github.com/battis/eslint-config/bbec12cb1d9ceab8bb017c8494f38034c00fea24_olqzgoudjanskusljexhgqvvhe
   '@battis/prettier-config': github.com/battis/prettier-config/9daf9e290228c33473da8ff2fe608172c0269d97_prettier@2.8.4
-  '@battis/webpack-typescript-gas': github.com/battis/webpack-typescript-gas/6c59b38888ffae98a3ee21c4b5e0aa21c897f663_2aptmnpnjd7b7ohde5tooxr5dq
+  '@battis/webpack-typescript-gas': github.com/battis/webpack-typescript-gas/6c59b38888ffae98a3ee21c4b5e0aa21c897f663_aurfrwnlapcmwwrjhauqhnysru
 
 packages:
 
@@ -204,14 +204,13 @@ packages:
 
   /@tsconfig/recommended/1.0.2:
     resolution: {integrity: sha512-dbHBtbWBOjq0/otpopAE02NT2Cm05Qe2JsEKeCf/wjSYbI2hz8nCqnpnOJWHATgjDz4fd3dchs3Wy1gQGjfN6w==}
-    dev: true
 
   /@types/cacheable-request/6.0.3:
     resolution: {integrity: sha512-IQ3EbTzGxIigb1I3qPZc1rWJnH0BmSKv5QYTalEwweFvyBDLSAe24zP0le/hyi7ecGfZVlIVAg4BZqb8WBwKqw==}
     dependencies:
       '@types/http-cache-semantics': 4.0.1
       '@types/keyv': 3.1.4
-      '@types/node': 18.13.0
+      '@types/node': 18.14.0
       '@types/responselike': 1.0.0
     dev: true
 
@@ -235,7 +234,6 @@ packages:
 
   /@types/google-apps-script/1.0.57:
     resolution: {integrity: sha512-w06Yoh+SamGpS2kGVlGy/5JkmFkLrW6u3tbglyHEu9uC9lrzqr6FyLcgVsL95Tmq9L0q//D8seqd4GZGRPPKUw==}
-    dev: true
 
   /@types/http-cache-semantics/4.0.1:
     resolution: {integrity: sha512-SZs7ekbP8CN0txVG2xVRH6EgKmEm31BOxA07vkFaETzZz1xh+cbt8BcI0slpymvwhx5dlFnQG2rTlPVQn+iRPQ==}
@@ -248,7 +246,7 @@ packages:
   /@types/keyv/3.1.4:
     resolution: {integrity: sha512-BQ5aZNSCpj7D6K2ksrRCTmKRLEpnPvWDiLPfoGyhZ++8YtiK9d/3DBKPJgry359X/P1PfruyYwvnvwFjuEiEIg==}
     dependencies:
-      '@types/node': 18.13.0
+      '@types/node': 18.14.0
     dev: true
 
   /@types/mdast/3.0.10:
@@ -261,9 +259,8 @@ packages:
     resolution: {integrity: sha512-Klz949h02Gz2uZCMGwDUSDS1YBlTdDDgbWHi+81l29tQALUtvz4rAYi5uoVhE5Lagoq6DeqAUlbrHvW/mXDgdQ==}
     dev: true
 
-  /@types/node/18.13.0:
-    resolution: {integrity: sha512-gC3TazRzGoOnoKAhUx+Q0t8S9Tzs74z7m0ipwGpSqQrleP14hKxP4/JUeEQcD3W1/aIpnWl8pHowI7WokuZpXg==}
-    dev: true
+  /@types/node/18.14.0:
+    resolution: {integrity: sha512-5EWrvLmglK+imbCJY0+INViFWUHg1AHel1sq4ZVSfdcNqGy9Edv3UB9IIzzg+xPaUcAgZYcfVs2fBcwDeZzU0A==}
 
   /@types/normalize-package-data/2.4.1:
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
@@ -272,7 +269,7 @@ packages:
   /@types/responselike/1.0.0:
     resolution: {integrity: sha512-85Y2BjiufFzaMIlvJDvTTB8Fxl2xfLo4HgmHzVBz08w4wDePCTjYw66PdrolO0kzli3yam/YCgRufyo1DdQVTA==}
     dependencies:
-      '@types/node': 18.13.0
+      '@types/node': 18.14.0
     dev: true
 
   /@types/semver/7.3.13:
@@ -762,7 +759,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001456
-      electron-to-chromium: 1.4.301
+      electron-to-chromium: 1.4.302
       node-releases: 2.0.10
       update-browserslist-db: 1.0.10_browserslist@4.21.5
     dev: true
@@ -1106,8 +1103,8 @@ packages:
       safe-buffer: 5.2.1
     dev: true
 
-  /electron-to-chromium/1.4.301:
-    resolution: {integrity: sha512-bz00ASIIDjcgszZKuEA1JEFhbDjqUNbQ/PEhNEl1wbixzYpeTp2H2QWjsQvAL2T1wJBdOwCF5hE896BoMwYKrA==}
+  /electron-to-chromium/1.4.302:
+    resolution: {integrity: sha512-Uk7C+7aPBryUR1Fwvk9VmipBcN9fVsqBO57jV2ZjTm+IZ6BMNqu7EDVEg2HxCNufk6QcWlFsBkhQyQroB2VWKw==}
     dev: true
 
   /emoji-regex/8.0.0:
@@ -2000,7 +1997,7 @@ packages:
     resolution: {integrity: sha512-7vuh85V5cdDofPyxn58nrPjBktZo0u9x1g8WtjQol+jZDaE+fhN+cIvTj11GndBnMnyfrUOG1sZQxCdjKh+DKg==}
     engines: {node: '>= 10.13.0'}
     dependencies:
-      '@types/node': 18.13.0
+      '@types/node': 18.14.0
       merge-stream: 2.0.0
       supports-color: 8.1.1
     dev: true
@@ -3147,7 +3144,6 @@ packages:
     resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
     engines: {node: '>=4.2.0'}
     hasBin: true
-    dev: true
 
   /unist-util-stringify-position/2.0.3:
     resolution: {integrity: sha512-3faScn5I+hy9VleOq/qNbAd6pAx7iH5jYBMS9I1HgQVijz/4mv5Bvw5iw1sC/90CODiKo81G/ps8AJrISn687g==}
@@ -3387,14 +3383,25 @@ packages:
       prettier: 2.8.4
     dev: true
 
-  github.com/battis/gas-lighter/1dfe1e925d8aa781618c395f962eb2ce0a89f3dd:
-    resolution: {tarball: https://codeload.github.com/battis/gas-lighter/tar.gz/1dfe1e925d8aa781618c395f962eb2ce0a89f3dd}
+  github.com/battis/gas-lighter/a5f8c7d6939b8b1f92ee101cdf87bb4dca55a575_233mpnshgondnicgpfxcgyo5ta:
+    resolution: {tarball: https://codeload.github.com/battis/gas-lighter/tar.gz/a5f8c7d6939b8b1f92ee101cdf87bb4dca55a575}
+    id: github.com/battis/gas-lighter/a5f8c7d6939b8b1f92ee101cdf87bb4dca55a575
     name: '@battis/gas-lighter'
     version: 0.1.0
+    peerDependencies:
+      '@tsconfig/recommended': ^1.0.2
+      '@types/google-apps-script': ^1.0.57
+      '@types/node': ^18.11.19
+      typescript: ^4.9.5
+    dependencies:
+      '@tsconfig/recommended': 1.0.2
+      '@types/google-apps-script': 1.0.57
+      '@types/node': 18.14.0
+      typescript: 4.9.5
     dev: false
 
   github.com/battis/prettier-config/9daf9e290228c33473da8ff2fe608172c0269d97_prettier@2.8.4:
-    resolution: {commit: 9daf9e290228c33473da8ff2fe608172c0269d97, repo: git+ssh://git@github.com/battis/prettier-config.git, type: git}
+    resolution: {tarball: https://codeload.github.com/battis/prettier-config/tar.gz/9daf9e290228c33473da8ff2fe608172c0269d97}
     id: github.com/battis/prettier-config/9daf9e290228c33473da8ff2fe608172c0269d97
     name: '@battis/prettier-config'
     version: 1.0.0
@@ -3404,7 +3411,7 @@ packages:
       prettier: 2.8.4
     dev: true
 
-  github.com/battis/webpack-typescript-gas/6c59b38888ffae98a3ee21c4b5e0aa21c897f663_2aptmnpnjd7b7ohde5tooxr5dq:
+  github.com/battis/webpack-typescript-gas/6c59b38888ffae98a3ee21c4b5e0aa21c897f663_aurfrwnlapcmwwrjhauqhnysru:
     resolution: {tarball: https://codeload.github.com/battis/webpack-typescript-gas/tar.gz/6c59b38888ffae98a3ee21c4b5e0aa21c897f663}
     id: github.com/battis/webpack-typescript-gas/6c59b38888ffae98a3ee21c4b5e0aa21c897f663
     name: '@battis/webpack-typescript-gas'
@@ -3423,7 +3430,7 @@ packages:
       '@google/clasp': 2.4.2
       '@tsconfig/recommended': 1.0.2
       '@types/google-apps-script': 1.0.57
-      '@types/node': 18.13.0
+      '@types/node': 18.14.0
       gas-webpack-plugin: 2.3.0
       ts-loader: 9.4.2_hhrrucqyg4eysmfpujvov2ym5u
       typescript: 4.9.5
