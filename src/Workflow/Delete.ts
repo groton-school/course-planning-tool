@@ -1,4 +1,4 @@
-import * as g from '@battis/gas-lighter';
+import g from '@battis/gas-lighter';
 
 const P = g.HtmlService.Element.Progress;
 

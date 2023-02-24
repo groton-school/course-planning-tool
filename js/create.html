@@ -1,18 +1,7 @@
+<?!= include('lib', data) ?>
 <script>
-  const thread = '<?= data.thread ?>';
+  const thread = '<?!= data.thread ?>';
   var student;
-
-  function replaceContent(html) {
-    document.getElementById('content').innerHTML = html;
-  }
-
-  function attachEvent(element, event, handler) {
-    if (element.attachEvent) {
-      element.attachEvent(event, handler);
-    } else {
-      element.addEventListener(event, handler);
-    }
-  }
 
   function showStudentPicker(students) {
     replaceContent(`<form id="student-picker">

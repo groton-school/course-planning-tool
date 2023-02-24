@@ -1,4 +1,4 @@
-import * as g from '@battis/gas-lighter';
+import g from '@battis/gas-lighter';
 import * as Role from '../Role';
 import FolderInventory from './FolderInventory';
 import Inventory, { Key as InventoryKey } from './Inventory';
@@ -20,7 +20,7 @@ class CoursePlanInventory extends Inventory<CoursePlan> {
         new CoursePlan(Role.Student.getByHostId(key.toString()));
 
     public getAll() {
-        const plans = g.SpreadsheetApp.getSheetDisplayValues(this.getSheet());
+        const plans = g.SpreadsheetApp.Value.getSheetDisplayValues(this.getSheet());
         plans.shift(); // remove column headings
         return plans;
     }
@@ -394,12 +394,12 @@ export default class CoursePlan {
         this.setStatus('setting permissions');
         this.getFile().moveTo(this.getFormFolder());
         this.getAdvisorFolder().createShortcut(this.getFile().getId());
-        g.DriveApp.addPermission(this.getFile().getId(), this.getStudent().email);
-        g.DriveApp.addPermission(this.getFile().getId(), this.getAdvisor().email);
-        g.DriveApp.addPermission(
+        g.DriveApp.Permission.add(this.getFile().getId(), this.getStudent().email);
+        g.DriveApp.Permission.add(this.getFile().getId(), this.getAdvisor().email);
+        g.DriveApp.Permission.add(
             this.getAdvisorFolder().getId(),
             this.getAdvisor().email,
-            g.DriveApp.Role.Reader
+            g.DriveApp.Permission.Role.Reader
         );
     }
 

@@ -1,4 +1,4 @@
-import * as g from '@battis/gas-lighter';
+import g from '@battis/gas-lighter';
 import CoursePlan from '../CoursePlan';
 import * as Role from '../Role';
 
