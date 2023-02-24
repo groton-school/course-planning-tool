@@ -21,7 +21,7 @@
     "deploy": "npx clasp push"
   },
   "dependencies": {
-    "@battis/gas-lighter": "github:battis/gas-lighter#publish"
+    "@battis/gas-lighter": "github:battis/gas-lighter#dist"
   },
   "devDependencies": {
     "@battis/eslint-config": "github:battis/eslint-config",
