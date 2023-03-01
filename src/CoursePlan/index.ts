@@ -494,7 +494,6 @@ export default class CoursePlan {
             'Protect_LeftMargin',
             'Protect_RightMargin',
             'Protect_TopMargin',
-            'Protect_AdvisorInitials',
             'Protect_AfterAdvisor',
             'Protect_AfterStudiesCommittee',
         ]) {
