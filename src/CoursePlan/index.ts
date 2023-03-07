@@ -253,21 +253,11 @@ export default class CoursePlan {
         for (var row = 0; row < numRows; row += rowIncrement) {
             const rowValue = [];
             const rowValidation = [];
-            for (var column = 0; column < 6; column++) {
+            for (var column = 0; column < 5; column++) {
                 const year = this.getAnchorOffset(-1, column).getValue();
                 if ((year.substr ? Number(year.substr(0, 4)) : year) < maxYear) {
-                    if (this.getAnchorOffset(-2, column).getValue() == 'GRACE') {
-                        if (row == this.getNumDepartments() - 1) {
-                            rowValue.push(this.getGRACEEnrollmentsFunction());
-                        } else {
-                            rowValue.push('');
-                        }
-                    } else {
-                        const department = this.getAnchorOffset()
-                            .offset(row, -1)
-                            .getValue();
-                        rowValue.push(this.getEnrollmentsFunctionBy(year, department));
-                    }
+                    const department = this.getAnchorOffset().offset(row, -1).getValue();
+                    rowValue.push(this.getEnrollmentsFunctionBy(year, department));
                 } else {
                     rowValidation.push(
                         SpreadsheetApp.newDataValidation()
@@ -372,7 +362,6 @@ export default class CoursePlan {
         const years: (string | number)[] = [4, 3, 2, 1, 0].map(
             (value) => `${gradYear - value - 1} - ${gradYear - value}`
         );
-        years.splice(2, 0, gradYear - 3);
         g.SpreadsheetApp.Value.set(this.getWorkingCopy(), 'Template_Years', years);
     }
 
@@ -402,22 +391,6 @@ export default class CoursePlan {
             g.DriveApp.Permission.Role.Reader
         );
     }
-
-    private getGRACEEnrollmentsFunction = () =>
-        '=' +
-        s.IFNA(
-            s.JOIN(
-                s.CHAR(10),
-                s.SORT(
-                    s.FILTER(
-                        'Enrollment_Title',
-                        s.eq('Enrollment_Host_ID', this.getStudent().hostId),
-                        s.eq('Enrollment_Department', 'GRACE')
-                    )
-                )
-            ),
-            ''
-        );
 
     private getEnrollmentsFunctionBy = (year: string, department: string) =>
         '=' +
@@ -492,7 +465,6 @@ export default class CoursePlan {
         for (const range of [
             history.getA1Notation(),
             'Protect_LeftMargin',
-            'Protect_RightMargin',
             'Protect_TopMargin',
             'Protect_AfterAdvisor',
             'Protect_AfterStudiesCommittee',
