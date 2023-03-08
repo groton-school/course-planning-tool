@@ -1,8 +1,11 @@
+import g from '@battis/gas-lighter';
+
 export type Key = number | string;
 export type Entry = [Key, string, string];
 export type Formatter = (key: Key) => string;
 
 export default abstract class Inventory<T> {
+    private data?: any[][];
     private sheet: GoogleAppsScript.Spreadsheet.Sheet;
 
     constructor(sheetName: string) {
@@ -13,11 +16,26 @@ export default abstract class Inventory<T> {
     protected abstract creator(key: Key): T;
 
     private getData() {
-        // TODO reasonably, caching this should improve performance, no?
-        return this.sheet
-            .getRange(1, 1, this.sheet.getMaxRows(), this.sheet.getMaxColumns())
-            .getValues();
+        if (!this.data) {
+            this.data = g.SpreadsheetApp.Range.getEntireSheet(
+                this.getSheet()
+            ).getValues();
+        }
+        return this.data;
     }
+
+    public getMetadata = (key: Key, column: number) =>
+        this.getData().filter((row) => row[0] == key)[column - 1];
+
+    public setMetadata = (key: Key, column: number, value: any) =>
+        this.getData().forEach((entry, row: number) => {
+            if (entry[0] == key) {
+                entry[column - 1] = value;
+                this.getSheet()
+                    .getRange(row + 1, column)
+                    .setValue(value);
+            }
+        });
 
     public get(key: Key): T {
         const id = this.getData().reduce((id: string, [k, i]) => {
@@ -37,7 +55,10 @@ export default abstract class Inventory<T> {
         }
     }
 
-    public add = (entry: Entry) => this.sheet.appendRow(entry);
+    public add(entry: Entry) {
+        this.sheet.appendRow(entry);
+        this.data.push(entry);
+    }
 
     protected getSheet = () => this.sheet;
 }

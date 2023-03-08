@@ -1,7 +1,10 @@
+import g from '@battis/gas-lighter';
 import CoursePlan from '../CoursePlan';
 import { Advisor } from './Advisor';
 
 export class Student {
+    private static data?: any[][];
+
     public hostId: string;
     public email: string;
     public firstName: string;
@@ -21,35 +24,38 @@ export class Student {
     public getFormattedName = () =>
         `${this.firstName} ${this.lastName} ‘${this.gradYear - 2000}`;
 
+    protected static getData() {
+        if (!Student.data) {
+            Student.data = g.SpreadsheetApp.Range.getEntireSheet(
+                SpreadsheetApp.getActive().getSheetByName('Advisor List')
+            ).getValues();
+            Student.data.shift(); // strip column labels
+        }
+        return Student.data;
+    }
+
     public static getByHostId = (id: string) =>
-        SpreadsheetApp.getActive()
-            .getSheetByName('Advisor List')
-            .getRange('AdvisorList_StudentData')
-            .getValues()
-            .reduce(
-                (student: Student, [hostId, email, firstName, lastName, gradYear]) => {
-                    if (hostId == id) {
-                        return new Student({
-                            hostId,
-                            firstName,
-                            lastName,
-                            email,
-                            gradYear,
-                        });
-                    }
-                    return student;
-                },
-                null
-            );
+        Student.getData().reduce(
+            (student: Student, [hostId, email, firstName, lastName, gradYear]) => {
+                if (hostId == id) {
+                    return new Student({
+                        hostId,
+                        firstName,
+                        lastName,
+                        email,
+                        gradYear,
+                    });
+                }
+                return student;
+            },
+            null
+        );
 
     public getAdvisor = () => Advisor.getByAdvisee(this.hostId);
 
     public static getAll(): Student[] {
         const thisYear = CoursePlan.getCurrentSchoolYear();
-        return SpreadsheetApp.getActive()
-            .getSheetByName('Advisor List')
-            .getRange('AdvisorList_StudentData')
-            .getValues()
+        return Student.getData()
             .map((row) => new Student(row))
             .filter((student) => student.gradYear != thisYear);
     }

@@ -374,16 +374,30 @@ export default class CoursePlan {
     }
 
     private setPermissions() {
+        const ADVISOR_FOLDER_PERMISSION_COL = 6;
         this.setStatus('setting permissions');
         this.getFile().moveTo(this.getFormFolder());
         this.getAdvisorFolder().createShortcut(this.getFile().getId());
         g.DriveApp.Permission.add(this.getFile().getId(), this.getStudent().email);
         g.DriveApp.Permission.add(this.getFile().getId(), this.getAdvisor().email);
-        g.DriveApp.Permission.add(
-            this.getAdvisorFolder().getId(),
-            this.getAdvisor().email,
-            g.DriveApp.Permission.Role.Reader
-        );
+
+        if (
+            !CoursePlan.advisorFolderInventory.getMetadata(
+                this.getAdvisor().email,
+                ADVISOR_FOLDER_PERMISSION_COL
+            )
+        ) {
+            g.DriveApp.Permission.add(
+                this.getAdvisorFolder().getId(),
+                this.getAdvisor().email,
+                g.DriveApp.Permission.Role.Reader
+            );
+            CoursePlan.advisorFolderInventory.setMetadata(
+                this.getAdvisor().email,
+                ADVISOR_FOLDER_PERMISSION_COL,
+                true
+            );
+        }
     }
 
     private getEnrollmentsFunctionBy = (year: string, department: string) =>

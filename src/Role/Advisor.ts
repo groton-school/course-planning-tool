@@ -1,5 +1,7 @@
+import g from '@battis/gas-lighter';
+
 export class Advisor {
-    private static data?;
+    private static data?: any[][];
 
     public email: string;
     public firstName: string;
@@ -17,35 +19,25 @@ export class Advisor {
 
     private static getData() {
         if (!Advisor.data) {
-            const advisors =
-                SpreadsheetApp.getActive().getSheetByName('Advisor List');
-            Advisor.data = advisors
-                .getRange(1, 1, advisors.getMaxRows(), advisors.getMaxColumns())
-                .getValues();
+            Advisor.data = g.SpreadsheetApp.Range.getEntireSheet(
+                SpreadsheetApp.getActive().getSheetByName('Advisor List')
+            ).getValues();
+            Advisor.data.shift(); // strip column labels
         }
         return Advisor.data;
     }
 
-    public static getByEmail = (email: string) =>
-        new Advisor(
-            Advisor.getData().reduce((data, [, , , , , e, firstName, lastName]) => {
-                if (e == email) {
-                    return { email, firstName, lastName };
-                }
-                return data;
-            }, null)
-        );
+    public static getByEmail(email: string) {
+        const [, , , , , e, firstName, lastName] = Advisor.getData().filter(
+            ([, , , , , e]) => e == email
+        )[0];
+        return new Advisor({ email: e, firstName, lastName });
+    }
 
-    public static getByAdvisee = (hostId: string) =>
-        new Advisor(
-            Advisor.getData().reduce(
-                (data, [id, , , , , email, firstName, lastName]) => {
-                    if (id == hostId) {
-                        return { email, firstName, lastName };
-                    }
-                    return data;
-                },
-                null
-            )
-        );
+    public static getByAdvisee(hostId: string) {
+        const [, , , , , email, firstName, lastName] = Advisor.getData().filter(
+            ([id]) => id == hostId
+        )[0];
+        return new Advisor({ email, firstName, lastName });
+    }
 }
