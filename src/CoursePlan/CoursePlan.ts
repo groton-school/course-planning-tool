@@ -288,9 +288,6 @@ export default class CoursePlan {
         this.getAnchorOffset(0, 0, historyHeight, historyWidth).setValues(values);
 
         if (create) {
-            this.setStatus('evaluating functions');
-            g.SpreadsheetApp.Value.replaceAllWithDisplayValues(this.getWorkingCopy());
-
             this.moveToStudentCoursePlanSpreadsheet();
 
             this.setStatus('preparing course selection menus');
@@ -364,18 +361,16 @@ export default class CoursePlan {
         g.SpreadsheetApp.Value.set(this.getWorkingCopy(), 'Template_Years', years);
     }
 
-    // TODO clean up named range duplication
     private moveToStudentCoursePlanSpreadsheet() {
         this.setStatus('moving course plan into place');
-        this.getSpreadsheet().deleteSheet(
-            this.getSpreadsheet().getSheetByName(COURSE_PLAN)
+        const data = g.SpreadsheetApp.Value.getSheetDisplayValues(
+            this.getWorkingCopy()
         );
-        const plan = this.getWorkingCopy().copyTo(this.getSpreadsheet());
         SpreadsheetApp.getActive().deleteSheet(this.getWorkingCopy()); // assumes Active() is the data sheet
-        this.setWorkingCopy(plan);
-        this.getWorkingCopy().setName(COURSE_PLAN);
-        this.spreadsheet.setActiveSheet(this.getWorkingCopy());
-        this.spreadsheet.moveActiveSheet(1);
+        this.setWorkingCopy(this.getSpreadsheet().getSheetByName(COURSE_PLAN));
+        g.SpreadsheetApp.Range.getEntireSheet(this.getWorkingCopy()).setValues(
+            data
+        );
     }
 
     private setPermissions() {
