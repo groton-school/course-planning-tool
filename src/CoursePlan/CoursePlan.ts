@@ -72,7 +72,7 @@ export default class CoursePlan {
     public static for(student: Role.Student) {
         g.HtmlService.Element.Progress.setStatus(
             CoursePlan.thread,
-            `${student.getFormattedName()} (updating inventory)`
+            `${student.getFormattedName()} (consulting inventory)`
         );
         return CoursePlan.coursePlanInventory.get(student.hostId);
     }
@@ -117,7 +117,6 @@ export default class CoursePlan {
     }
 
     private bindToExistingSpreadsheet({ hostId, spreadsheetId }) {
-        // TODO double check that this exists in inventory
         // TODO add option to update when "created"?
         this.setStudent(Role.Student.getByHostId(hostId));
         this.setSpreadsheet(SpreadsheetApp.openById(spreadsheetId));
