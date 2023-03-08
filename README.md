@@ -6,7 +6,7 @@
 
 All workflows are available from the `Course Planning` menu in the [Course Planning Data sheet](./schema/sheets/Course%20Planning%20Data.xlsx).
 
-![Screenshot](./images/image1.png)
+![Screenshot](./images/screenshot.png)
 
 #### Create all course plans
 
