@@ -51,7 +51,7 @@ export class Student {
             .getRange('AdvisorList_StudentData')
             .getValues()
             .map((row) => new Student(row))
-            .filter((student) => student.gradYear != thisYear); // TODO confirm filtering out seniors
+            .filter((student) => student.gradYear != thisYear);
     }
 }
 

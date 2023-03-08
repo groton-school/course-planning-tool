@@ -94,7 +94,6 @@ export default class CoursePlan {
     }
 
     public constructor(arg: Role.Student | { hostId; spreadsheetId }) {
-        // TODO deal with GRACE course selection
         if (arg instanceof Role.Student) {
             this.createFromStudent(arg);
         } else {
