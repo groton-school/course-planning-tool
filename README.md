@@ -4,9 +4,9 @@
 
 ### Workflows
 
-All workflows are available from the `Course Planning` menu in the [Course Planning Data sheet](./schema/sheets/Course Planning Data.xlsx).
+All workflows are available from the `Course Planning` menu in the [Course Planning Data sheet](./schema/sheets/Course%20Planning%20Data.xlsx).
 
-![screenshot](./images/image1.png)
+![Screenshot](./images/image1.png)
 
 #### Create all course plans
 
@@ -36,7 +36,7 @@ Clears the Form Folder Inventory, Advisor Folder Inventory, and Course Plan Inve
 ## Technical Overview
 
 - The course planning tool resides in the `Course Planning` shared drive.
-- The data that drives it is stored in the [Course Planning Data sheet](./schema/sheets/Course Planning Data.xlsx).
+- The data that drives it is stored in the [Course Planning Data sheet](./schema/sheets/Course%20Planning%20Data.xlsx).
 - The code runs it is an Apps Script extension attached to the sheet, with [the source code managed on GitHub](https://github.com/groton-school/course-planning-tool).
 - Any outstanding issues with the code are also [tracked on GitHub](https://github.com/groton-school/course-planning-tool/issues).
 - Developing the code requires [node](https://nodejs.org/), [clasp](https://github.com/google/clasp#install), and [pnpm](https://pnpm.io/installation#using-npm) to install and manage dependencies and to compile and deploy the project.
@@ -56,17 +56,17 @@ Clears the Form Folder Inventory, Advisor Folder Inventory, and Course Plan Inve
 
 ### File Management
 
-- All course plans are copies of the [Course Plan Template](./schema/sheets/Course Plan Template.xlsx) spreadsheet.
+- All course plans are copies of the [Course Plan Template](./schema/sheets/Course%20Plan%20Template.xlsx) spreadsheet.
 - The original course plans are stored by form in the `Forms` folder.
-- The Courses by Department sheet of each course plan is imported dynamically (using `IMPORTRANGE()` from the [Course Planning Data](./schema/sheets/Course Planning Data.xlsx) sheet, so edits to that list should be made in [Course Planning Data](./schema/sheets/Course Planning Data.xlsx) and will simultaneously affect all Course Plans).
+- The Courses by Department sheet of each course plan is imported dynamically (using `IMPORTRANGE()` from the [Course Planning Data](./schema/sheets/Course%20Planning%20Data.xlsx) sheet, so edits to that list should be made in [Course Planning Data](./schema/sheets/Course%20Planning%20Data.xlsx) and will simultaneously affect all Course Plans).
 - Shortcuts to the course plans are stored by advisory group in the `Advisory Groups` folder, with each advisory group folder shared with the advisor (without notification).
-- Links to each course plan, form folder, and advisory group folder are maintained in their respective inventory sheets in [Course Planning Data](./schema/sheets/Course Planning Data.xlsx)
+- Links to each course plan, form folder, and advisory group folder are maintained in their respective inventory sheets in [Course Planning Data](./schema/sheets/Course%20Planning%20Data.xlsx)
 
 ### Data Sources
 
-- Data in [Course Planning Data](./schema/sheets/Course Planning Data.xlsx) is pulled from [advanced list queries](./schema/queries) in Blackbaud
+- Data in [Course Planning Data](./schema/sheets/Course%20Planning%20Data.xlsx) is pulled from [advanced list queries](./schema/queries) in Blackbaud
 - Historical Enrollment, Advisor List, and Course List sheets each align with an advanced list in the Course Planning category, and can be synced using Seth’s experimental [Blackbaud Lists](https://github.com/groton-school/blackbaud-to-google-lists) Google Workspace Add-on. (Or manually with a lot of copying and pasting.)
-- Other sheets in [Course Planning Data](./schema/sheets/Course Planning Data.xlsx) are generated from either these data sources or as a result of scripted workflows in the app.
+- Other sheets in [Course Planning Data](./schema/sheets/Course%20Planning%20Data.xlsx) are generated from either these data sources or as a result of scripted workflows in the app.
 
 ## Setup
 
