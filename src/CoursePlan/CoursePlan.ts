@@ -409,6 +409,7 @@ export default class CoursePlan {
                         s.SORT(
                             s.FILTER(
                                 '{Enrollment_Title, Enrollment_Order}',
+                                'Enrollment_Include',
                                 s.eq('Enrollment_Host_ID', this.getStudent().hostId),
                                 s.eq('Enrollment_Year', year),
                                 s.eq('Enrollment_Department', department)
