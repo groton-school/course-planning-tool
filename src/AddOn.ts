@@ -4,6 +4,7 @@ export function onOpen() {
     SpreadsheetApp.getUi()
         .createMenu('Course Planning')
         .addItem('Create all course plans', Workflow.Create.All())
+        .addItem('Create course plans by form…', Workflow.Create.ByForm())
         .addItem(
             'Update all course plan enrollment histories',
             Workflow.Update.All()

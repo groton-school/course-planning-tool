@@ -59,6 +59,21 @@ export class Student {
             .map((row) => new Student(row))
             .filter((student) => student.gradYear != thisYear);
     }
+
+    public static getByForm(gradYear: number): Student[] {
+        return Student.getAll().filter((student) => student.gradYear == gradYear);
+    }
+
+    public static getForms(): number[] {
+        return Student.getData().reduce((forms, [, , , , gradYear]) => {
+            if (!forms.includes(gradYear)) {
+                forms.push(gradYear);
+                forms.sort();
+            }
+            return forms;
+        }, []);
+    }
 }
 
 global.studentGetAll = Student.getAll;
+global.studentGetForms = Student.getForms;
