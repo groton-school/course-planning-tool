@@ -19,30 +19,28 @@ global.deleteAllConfirmed = (thread) => {
     const plans = data.getSheetByName('Course Plan Inventory');
     const advisors = data.getSheetByName('Advisor Folder Inventory');
     const forms = data.getSheetByName('Form Folder Inventory');
-    P.setStatus(thread, 'Deleting advisor folders');
+
     P.setMax(thread, advisors.getMaxRows() + forms.getMaxRows() - 1);
-    let counter = 0;
-    if (advisors.getMaxRows() > 2) {
-        advisors
-            .getRange('B3:B')
-            .getValues()
-            .forEach(([id]) => {
-                DriveApp.getFileById(id).setTrashed(true);
-                P.setValue(thread, ++counter);
-            });
-        advisors.deleteRows(3, advisors.getMaxRows() - 2);
-    }
-    P.setStatus(thread, 'Deleting form folders');
-    if (forms.getMaxRows() > 2) {
-        forms
-            .getRange('B3:B')
-            .getValues()
-            .forEach(([id]) => {
-                DriveApp.getFileById(id).setTrashed(true);
-                P.setValue(thread, ++counter);
-            });
-        forms.deleteRows(3, forms.getMaxRows() - 2);
-    }
+
+    const emptyFolder = (sheet: GoogleAppsScript.Spreadsheet.Sheet) => {
+        if (sheet.getMaxRows() > 2) {
+            sheet
+                .getRange('B3:B')
+                .getValues()
+                .forEach(([id]) => {
+                    const folder = DriveApp.getFolderById(id);
+                    const files = folder.getFiles();
+                    P.setStatus(thread, `Emptying “${folder.getName()}”`);
+                    while (files.hasNext()) {
+                        files.next().setTrashed(true);
+                    }
+                    P.incrementValue(thread);
+                });
+        }
+    };
+    emptyFolder(advisors);
+    emptyFolder(forms);
+
     P.setStatus(thread, 'Cleaning up course plan inventory');
     if (plans.getMaxRows() > 2) {
         plans.deleteRows(3, plans.getMaxRows() - 2);
