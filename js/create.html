@@ -24,18 +24,18 @@
   }
 
   function showProgress() {
-    replaceContent(`Loading…`);
-    updateProgress();
+    replaceContent(progressPlaceholder());
+    updateProgressThenShowResult();
   }
 
-  function updateProgress() {
+  function updateProgressThenShowResult() {
     google.script.run
       .withSuccessHandler((progress) => {
         if (progress.complete) {
           showResult(progress.complete);
         } else {
           replaceContent(progress.html);
-          updateProgress();
+          updateProgressThenShowResult();
         }
       })
       .getProgress(thread);

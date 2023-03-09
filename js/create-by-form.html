@@ -22,21 +22,8 @@
   }
 
   function showProgress() {
-    replaceContent(`Loading…`);
+    replaceContent(progressPlaceholder());
     updateProgress();
-  }
-
-  function updateProgress() {
-    google.script.run
-      .withSuccessHandler((progress) => {
-        if (progress.complete) {
-          google.script.host.close();
-        } else {
-          replaceContent(progress.html);
-          updateProgress();
-        }
-      })
-      .getProgress(thread);
   }
 
   function showResult(url) {

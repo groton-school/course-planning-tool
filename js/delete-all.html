@@ -2,24 +2,11 @@
 <script>
   const thread = '<?!= data.thread ?>';
 
-  function updateProgress() {
-    google.script.run
-      .withSuccessHandler((progress) => {
-        if (progress.complete) {
-          google.script.host.close();
-        } else {
-          replaceContent(progress.html);
-          updateProgress();
-        }
-      })
-      .getProgress(thread);
-  }
-
   function deleteAll(e) {
     if (e.preventDefault) {
       e.preventDefault();
     }
-    replaceContent('Loading…');
+    replaceContent(progressPlaceholder());
     updateProgress();
     google.script.run.deleteAllConfirmed(thread);
     return false;
