@@ -76,9 +76,9 @@ To rebuild this project from scratch…
 
 - Create Google Groups to represent CCO and SC (ideally not receiving email, etc. Nothing matters other than membership from the perspective of this script.)
 - Create a shared drive to hold the project (CCO and SC have Viewer access)
-- Create a spreadsheet (doesn’t have to be on the shared drive) from Course Planning Data schema (includes named ranges, sheets, functions, etc.)
+- Create a spreadsheet (doesn’t have to be on the shared drive) from [Course Planning Data schema](./schema/sheets/Course%20Planning%20Data.xlsx) (includes named ranges, sheets, functions, etc.)
 - Populate the Historical Enrollment, Advisor List, and Course Lists sheets of the Course Planning Data sheet from Blackbaud queries of the same name (easiest is to use [Blackbaud to Google Lists](https://github.com/groton-school/blackbaud-to-google-lists), which requires a little setup of its own – at Groton it’s already deployed to the workspace)
-- Create a Spreadsheet from the Course Plan Template schema (includes named ranges, again, doesn’t necessarily have to be on the shared drive)
+- Create a Spreadsheet from the [Course Plan Template schema](./schema/sheets/Course%20Plan%20Template.xlsx) (includes named ranges, again, doesn’t necessarily have to be on the shared drive)
 - Update the Parameters sheet of the Course Planning data spreadsheet with…
   - CCO and SC group emails
   - URL of the Course Plan Template
