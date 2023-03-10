@@ -72,4 +72,31 @@ Clears the Form Folder Inventory, Advisor Folder Inventory, and Course Plan Inve
 
 ## Setup
 
-[Enable Drive Service](https://developers.google.com/apps-script/guides/services/advanced#enable_advanced_services)
+To rebuild this project from scratch…
+
+- Create Google Groups to represent CCO and SC (ideally not receiving email, etc. Nothing matters other than membership from the perspective of this script.)
+- Create a shared drive to hold the project (CCO and SC have Viewer access)
+- Create a spreadsheet (doesn’t have to be on the shared drive) from Course Planning Data schema (includes named ranges, sheets, functions, etc.)
+- Populate the Historical Enrollment, Advisor List, and Course Lists sheets of the Course Planning Data sheet from Blackbaud queries of the same name (easiest is to use [Blackbaud to Google Lists](https://github.com/groton-school/blackbaud-to-google-lists), which requires a little setup of its own – at Groton it’s already deployed to the workspace)
+- Create a Spreadsheet from the Course Plan Template schema (includes named ranges, again, doesn’t necessarily have to be on the shared drive)
+- Update the Parameters sheet of the Course Planning data spreadsheet with…
+  - CCO and SC group emails
+  - URL of the Course Plan Template
+- Create a folder on the shared drive to hold all form folders, and update the ID and URL columns of the Form Folders Inventory sheet row for Form ROOT with that folder’s ID and URL.
+- Create a folder on the shared drive to hold all advisory group folders, and update the ID and URL columns of the Advisor Folder Inventory sheet row for Advisor Email ROOT with that folder’s ID and URL.
+- In the Course Planning Data spreadsheet, go to Extensions > Apps Script to open the embedded script for that sheet
+  - Copy the ID of the script
+  - [Enable Drive Service](https://developers.google.com/apps-script/guides/services/advanced#enable_advanced_services) for the script
+- In your development workspace (answer yes when asked about over-writing your `appsscript.json` file)…
+
+  ```bash
+  git clone https://github.com/groton-school/course-planning-tool.git <project directory>
+  cd <project directory>
+  pnpm install
+  npx clasp clone <script ID>
+  git checkout appsscript.json
+  npx run build
+  npx run deploy
+  ```
+
+- Force-refresh the Course Planning Data spreadsheet to reload the newly-deployed script, and you’re all set.
