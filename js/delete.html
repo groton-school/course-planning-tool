@@ -6,8 +6,7 @@
     if (e.preventDefault) {
       e.preventDefault();
     }
-    replaceContent(progressPlaceholder());
-    updateProgress();
+    showProgress();
     google.script.run.deleteAllConfirmed(thread);
     return false;
   }

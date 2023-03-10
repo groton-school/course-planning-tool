@@ -7,7 +7,7 @@ global.deleteAll = () => {
     const thread = Utilities.getUuid();
     P.reset(thread);
     SpreadsheetApp.getUi().showModalDialog(
-        g.HtmlService.createTemplateFromFile('templates/delete-all', {
+        g.HtmlService.createTemplateFromFile('templates/delete', {
             thread,
         }).setHeight(100),
         'Delete All Course Plans'

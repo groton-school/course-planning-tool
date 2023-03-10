@@ -122,14 +122,14 @@ export default class CoursePlan {
         this.setSpreadsheet(SpreadsheetApp.openById(spreadsheetId));
     }
 
-    private getStudent = () => this.student;
+    public getStudent = () => this.student;
 
     private setStudent(student: Role.Student) {
         this.student = student;
         this.setStatus('identifying student');
     }
 
-    private getAdvisor() {
+    public getAdvisor() {
         if (!this.advisor && this.student) {
             this.advisor = this.getStudent().getAdvisor();
         }

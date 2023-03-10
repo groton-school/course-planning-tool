@@ -17,10 +17,12 @@ global.updateSingleFor = (hostId: string, thread: string) => {
     CoursePlan.setThread(thread);
     const plan = CoursePlan.for(Role.Student.getByHostId(hostId));
     plan.updateEnrollmentHistory();
-    g.HtmlService.Element.Progress.setComplete(
-        thread,
-        plan.getSpreadsheet().getUrl()
-    );
+    g.HtmlService.Element.Progress.setComplete(thread, {
+        html: `<div>Updated course plan for ${plan.getStudent()}.</div>
+          <div><a id="button" class="button action" href="${plan
+                .getSpreadsheet()
+                .getUrl()}" target="_blank">Open Plan</a></div>`,
+    });
 };
 
 export const All = () => 'updateAll';
@@ -40,10 +42,7 @@ global.updateAll = () => {
     plans.forEach((hostId) =>
         CoursePlan.for(Role.Student.getByHostId(hostId)).updateEnrollmentHistory()
     );
-    g.HtmlService.Element.Progress.setComplete(
-        thread,
-        'All course plans updated'
-    );
+    g.HtmlService.Element.Progress.setComplete(thread, true);
 };
 
 // TODO add option to override comments with new enrollments?

@@ -26,34 +26,6 @@
     );
   }
 
-  function showProgress() {
-    replaceContent(progressPlaceholder());
-    updateProgressThenShowResult();
-  }
-
-  function updateProgressThenShowResult() {
-    google.script.run
-      .withSuccessHandler((progress) => {
-        if (progress.complete) {
-          showResult(progress.complete);
-        } else {
-          replaceContent(progress.html);
-          updateProgressThenShowResult();
-        }
-      })
-      .getProgress(thread);
-  }
-
-  function showResult(url) {
-    replaceContent(
-      `<div>Updated course plan for ${student}.</div>
-      <div><a id="button" class="button action" href="${url}" target="_blank">Open Plan</a></div>`
-    );
-    attachEvent(document.getElementById('button'), 'click', () =>
-      google.script.host.close()
-    );
-  }
-
   function handleSubmit(e) {
     if (e.preventDefault) {
       e.preventDefault();
