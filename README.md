@@ -45,8 +45,9 @@ Clears the Form Folder Inventory, Advisor Folder Inventory, and Course Plan Inve
 ### Permissions
 
 - The project is owned by the `tech` account
-- The groups `all-technology`, `cp-cco`, and `cp-sc` have general access to the files.
+- The groups `all-technology`, `cp-cco`, `cp-ao`, and `cp-sc` have general access to the files.
   - `cp-cco` represents the College Counseling Office
+  - `cp-ao` represents the Academics Office
   - `cp-sc` represents the Studies Committee
 - `cp-cco` and `cp-sc` have read/write access to the `Forms` and `Advisory Groups` folders
 - Within each course plan, areas of the main Course Plan sheet are protected such that:
