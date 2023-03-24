@@ -49,6 +49,7 @@ Clears the Form Folder Inventory, Advisor Folder Inventory, and Course Plan Inve
   - `cp-cco` represents the College Counseling Office
   - `cp-ao` represents the Academics Office
   - `cp-sc` represents the Studies Committee
+- `cp-ao` has limited edit access to the [Course Planning Data sheet](./schema/sheets/Course%20Planning%20Data.xlsx), specificallty the checkboxes in the Available Courses worksheet to adjust what courses appear in the course plan drop-down menus.
 - `cp-cco` and `cp-sc` have read/write access to the `Forms` and `Advisory Groups` folders
 - Within each course plan, areas of the main Course Plan sheet are protected such that:
   - Only advisors, the college counseling office, and the studies committee can add comments in their respective comment sections
