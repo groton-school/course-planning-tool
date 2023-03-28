@@ -474,8 +474,7 @@ export default class CoursePlan {
             history.getA1Notation(),
             'Protect_LeftMargin',
             'Protect_TopMargin',
-            'Protect_AfterAdvisor',
-            'Protect_AfterStudiesCommittee',
+            'Protect_BetweenComments',
         ]) {
             const protection = this.getWorkingCopy()
                 .getRange(range)
@@ -494,12 +493,6 @@ export default class CoursePlan {
                 range: 'Protect_Advisor',
                 editor: this.getAdvisor().email,
             },
-            {
-                name: 'Comments from Studies Committee',
-                range: 'Protect_StudiesCommittee',
-                editor: SheetParameters.getStudiesCommittee(),
-            },
-
             {
                 name: 'Comments from College Counseling Office',
                 range: 'Protect_CollegeCounselingOffice',
