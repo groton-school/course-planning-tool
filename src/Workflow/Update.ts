@@ -18,7 +18,9 @@ global.updateSingleFor = (hostId: string, thread: string) => {
     const plan = CoursePlan.for(Role.Student.getByHostId(hostId));
     plan.updateEnrollmentHistory();
     g.HtmlService.Element.Progress.setComplete(thread, {
-        html: `<div>Updated course plan for ${plan.getStudent()}.</div>
+        html: `<div>Updated course plan for ${plan
+            .getStudent()
+            .getFormattedName()}.</div>
           <div><a id="button" class="button action" href="${plan
                 .getSpreadsheet()
                 .getUrl()}" target="_blank">Open Plan</a></div>`,

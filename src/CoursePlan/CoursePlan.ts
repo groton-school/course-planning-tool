@@ -230,6 +230,7 @@ export default class CoursePlan {
         let rowIncrement = 1;
         let maxYear = CoursePlan.getCurrentSchoolYear();
         if (create) {
+            // FIXME `META_CURRENT_SCHOOL_YEAR` seems not to have been set when course plans were created
             g.SpreadsheetApp.DeveloperMetadata.set(
                 this.getWorkingCopy(),
                 CoursePlan.META_CURRENT_SCHOOL_YEAR,
@@ -240,10 +241,11 @@ export default class CoursePlan {
                 this.getWorkingCopy(),
                 CoursePlan.META_NUM_OPTIONS_PER_DEPT
             );
-            maxYear = g.SpreadsheetApp.DeveloperMetadata.get(
-                this.getWorkingCopy(),
-                CoursePlan.META_CURRENT_SCHOOL_YEAR
-            );
+            maxYear =
+                g.SpreadsheetApp.DeveloperMetadata.get(
+                    this.getWorkingCopy(),
+                    CoursePlan.META_CURRENT_SCHOOL_YEAR
+                ) || maxYear;
         }
 
         const numRows = this.getNumDepartments() * rowIncrement;
@@ -256,7 +258,7 @@ export default class CoursePlan {
                 if ((year.substr ? Number(year.substr(0, 4)) : year) < maxYear) {
                     const department = this.getAnchorOffset().offset(row, -1).getValue();
                     rowValue.push(this.getEnrollmentsFunctionBy(year, department));
-                } else {
+                } else if (create) {
                     rowValidation.push(
                         SpreadsheetApp.newDataValidation()
                             .requireValueInRange(
@@ -267,12 +269,13 @@ export default class CoursePlan {
                 }
             }
             values.push(rowValue);
-            if (!create) {
+            if (create) {
+                validations.push(rowValidation);
+            } else {
                 for (let i = 1; i < rowIncrement; i++) {
                     values.push(Array.apply('', Array(rowValue.length)));
                 }
             }
-            validations.push(rowValidation);
         }
 
         const historyHeight = values.length;

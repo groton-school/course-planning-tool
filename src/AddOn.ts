@@ -12,7 +12,7 @@ export function onOpen() {
         .addSeparator()
         .addItem('Create a single course plan…', Workflow.Create.Single())
         .addItem(
-            'Update a course plan enrollment history…',
+            'Update a single course plan enrollment history…',
             Workflow.Update.Single()
         )
         .addSeparator()
