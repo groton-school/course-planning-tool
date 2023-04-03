@@ -27,7 +27,7 @@
     "@battis/eslint-config": "github:battis/eslint-config",
     "@battis/prettier-config": "github:battis/prettier-config",
     "@battis/webpack-typescript-gas": "github:battis/webpack-typescript-gas",
-    "rimraf": "^4.4.0"
+    "rimraf": "^4.4.1"
   },
   "prettier": "@battis/prettier-config",
   "eslintConfig": {
