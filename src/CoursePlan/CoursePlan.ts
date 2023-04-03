@@ -186,7 +186,7 @@ export default class CoursePlan {
     private getNumDepartments = () => this.getValidationSheet().getMaxColumns();
 
     public updateEnrollmentHistory() {
-        this.setStatus('temporarily attaching plan to master data sheet');
+        this.setStatus('temporarily attaching plan to the data sheet');
         this.setWorkingCopy(
             this.getSpreadsheet()
                 .getSheetByName(COURSE_PLAN)
