@@ -2,6 +2,12 @@
 
 ## How to Use
 
+### Annual Updates
+
+Queries or functions that need to be updated annually are listed here:
+
+1. [Historical Enrollment](./schema/queries/historical-enrollment.md#filters)
+
 ### Workflows
 
 All workflows are available from the `Course Planning` menu in the [Course Planning Data sheet](./schema/sheets/Course%20Planning%20Data.xlsx).
