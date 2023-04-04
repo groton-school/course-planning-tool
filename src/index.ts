@@ -8,4 +8,4 @@ global.onInstall = AddOn.onInstall;
 // helper functions
 global.include = g.HtmlService.include;
 global.getProgress = (thread: string) =>
-    g.HtmlService.Element.Progress.getProgress(thread);
+  g.HtmlService.Element.Progress.getProgress(thread);
