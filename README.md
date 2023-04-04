@@ -6,7 +6,10 @@
 
 Queries or functions that need to be updated annually are listed here:
 
-1. [Historical Enrollment](./schema/queries/historical-enrollment.md#filters)
+1. [Historical Enrollment](./schema/queries/historical-enrollment.md#filters) needs to be updated, as noted.
+2. Advisor List, Course List, and Historical Enrollment sheets in Course Planning Data all need to be updated to current values (recommend using [Blackbaud Lists](https://github.com/groton-school/blackbaud-to-google-lists) add-on)
+3. Available Courses needs to be reviewed for accuracy.
+
 
 ### Workflows
 
