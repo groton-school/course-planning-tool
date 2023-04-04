@@ -37,7 +37,7 @@ export default class CoursePlan {
     prefix('currentSchoolYear');
   private static readonly META_HISTORY_WIDTH = prefix('historyWidth');
 
-  public static getStepCount = () => 11;
+  public static getStepCount = () => 12;
 
   private static formFolderInventory = new FolderInventory(
     'Form Folder Inventory',
@@ -304,6 +304,12 @@ export default class CoursePlan {
           validations.length,
           validations[0].length
         ).setDataValidations(validations);
+
+        /*
+         * TODO #74
+         *    temporary fix while `IMPORTRANGE()` is misbehaving
+         */
+        this.updateCourseList();
       }
 
       this.protectNonCommentRanges(historyWidth, historyHeight);
