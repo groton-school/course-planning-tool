@@ -24,6 +24,8 @@ class CoursePlanInventory extends Inventory<CoursePlan> {
         plans.shift(); // remove column headings
         return plans;
     }
+
+    public getSpreadsheet = () => this.getSheet().getParent();
 }
 
 // TODO decide on how plans should update
@@ -55,6 +57,8 @@ export default class CoursePlan {
     private static coursePlanInventory = new CoursePlanInventory(
         'Course Plan Inventory'
     );
+
+    private static coursesByDepartment;
 
     private student: Role.Student;
     private advisor: Role.Advisor;
@@ -516,6 +520,23 @@ export default class CoursePlan {
             CoursePlan.META_NUM_COMMENTS,
             numComments
         );
+    }
+
+    private static getCoursesByDepartment(): string[][] {
+        if (!this.coursesByDepartment) {
+            this.coursesByDepartment = g.SpreadsheetApp.Value.getSheetDisplayValues(this.coursePlanInventory.getSpreadsheet().getSheetByName('Courses by Department'));
+        }
+        return this.coursesByDepartment;
+    }
+
+    public updateCourseList() {
+        this.setStatus('updating course list');
+        const source = CoursePlan.getCoursesByDepartment();
+        const destination = this.spreadsheet.getSheetByName('Courses by Department');
+        if (destination.getMaxRows() < source.length) {
+            destination.insertRowsAfter(destination.getMaxRows(), source.length - destination.getMaxRows());
+        }
+        g.SpreadsheetApp.Value.set(destination, destination.getRange(1, 1, source.length, source[0].length).getA1Notation(), source);
     }
 }
 

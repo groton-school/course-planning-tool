@@ -15,6 +15,7 @@ export function onOpen() {
             'Update a single course plan enrollment history…',
             Workflow.Update.Single()
         )
+        .addItem("Update a single course plan's course list …", Workflow.UpdateCourseList.Single())
         .addSeparator()
         .addItem('Delete all course plans', Workflow.Delete.All())
         .addToUi();
