@@ -21,13 +21,29 @@ All workflows are available from the `Course Planning` menu in the [Course Plann
 
 Creates a new course plan for all students in the Advisor List sheet who do not already have a course plan registered in the Course Plan Inventory sheet, updating permissions and the Course Plan Inventory.
 
+#### Create course plans by form…
+
+Presents a dialog to choose a form by class year. Upon selection, it will create a new course plan for each student in the form in the Advisor List sheet who do not already have a course plan registered in the Course Plan Inventory sheet, updating permissions and the Course Plan Inventory.
+
+#### Update all course plan enrollment histories
+
+Updates all course plans in the Course Plan Inventory to reflect updated enrollment history. See note on [Update a single course plan's enrollment history](#update-a-single-course-plans-enrollment-history) below.
+
+#### Update all course plan course lists
+
+Updates the Courses by Department sheet of all course plans in the Course Plan Inventory to match the Courses by Department sheet of the Course Planning Data sheet.
+
 #### Create a single course plan…
 
 Presents a dialog to choose a student from the list of students in the Advisor List sheet. Upon selection, it will create a new course plan for that student if there is not one already registered in the Course Plan Inventory sheet, updating permissions and the Course Plan Inventory. At the end, you will be presented with a direct link to the student course plan (either pre-existing or newly created).
 
-#### Update a course plan enrollment history…
+#### Update a single course plan's enrollment history…
 
 Updates a specific course plan to reflect updated enrollment history. This does not expand the enrollment history beyond the original scope (i.e., if created in the spring of 2023, and then updated in spring of 2024, it will _not_ add 2024 courses in and will _not_ overwrite plans/comments).
+
+#### Update a single course plan's course list…
+
+Updates a specific course plan's Courses by Department sheet to match the Course Planning Data Courses by Department sheet.
 
 #### Delete all course plans
 
