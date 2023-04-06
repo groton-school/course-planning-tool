@@ -1,50 +1,28 @@
 import g from '@battis/gas-lighter';
+import CoursePlan from '../CoursePlan';
+import * as Role from '../Role';
 
-const P = g.HtmlService.Element.Progress;
-
-export const All = () => 'deleteAll';
-global.deleteAll = () => {
-  const thread = Utilities.getUuid();
-  P.reset(thread);
+export const Single = () => 'deleteSingle';
+global.deleteSingle = () => {
   SpreadsheetApp.getUi().showModalDialog(
-    g.HtmlService.createTemplateFromFile('templates/delete', {
-      thread
+    g.HtmlService.createTemplateFromFile('templates/restructure', {
+      thread: Utilities.getUuid(),
+      studentPicker: {
+        message: 'Please select a student course plan to delete',
+        actionName: 'Delete Course Plan',
+        confirmation:
+          'Are you sure that you want to delete this course plan? Recovery from this can be time-consuming.',
+        callback: 'deleteSingleFor'
+      }
     }).setHeight(100),
-    'Delete All Course Plans'
+    'Delete Course Plan'
   );
 };
 
-global.deleteAllConfirmed = (thread) => {
-  const data = SpreadsheetApp.getActive();
-  const plans = data.getSheetByName('Course Plan Inventory');
-  const advisors = data.getSheetByName('Advisor Folder Inventory');
-  const forms = data.getSheetByName('Plans Form Folder Inventory');
-
-  P.setMax(thread, advisors.getMaxRows() + forms.getMaxRows() - 1);
-
-  const emptyFolder = (sheet: GoogleAppsScript.Spreadsheet.Sheet) => {
-    if (sheet.getMaxRows() > 2) {
-      sheet
-        .getRange('B3:B')
-        .getValues()
-        .forEach(([id]) => {
-          const folder = DriveApp.getFolderById(id);
-          const files = folder.getFiles();
-          P.setStatus(thread, `Emptying “${folder.getName()}”`);
-          while (files.hasNext()) {
-            files.next().setTrashed(true);
-          }
-          P.incrementValue(thread);
-        });
-    }
-  };
-  emptyFolder(advisors);
-  emptyFolder(forms);
-
-  P.setStatus(thread, 'Cleaning up course plan inventory');
-  if (plans.getMaxRows() > 2) {
-    plans.deleteRows(3, plans.getMaxRows() - 2);
-  }
-  plans.getRange('A2:C2').setValues([['', '', '']]);
-  P.setComplete(thread, 'All course plans have been moved to the trash');
+global.deleteSingleFor = (hostId: string, thread: string) => {
+  g.HtmlService.Element.Progress.reset(thread);
+  const student = Role.Student.getByHostId(hostId);
+  g.HtmlService.Element.Progress.setMax(thread, 4);
+  CoursePlan.for(student).delete();
+  g.HtmlService.Element.Progress.setComplete(thread, true);
 };

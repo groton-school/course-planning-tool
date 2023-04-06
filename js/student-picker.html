@@ -1,29 +1,67 @@
 <?!= include('lib', data) ?>
 <script>
-  const studentPickerMessage = '<?!= data.studentPicker.message ?>';
-  const getStudentList =
-    '<?!= data.studentPicker.list || "coursePlanGetAll" ?>';
-  const studentPickerCallback = '<?!= data.studentPicker.callback ?>';
+  if (!window.thread) {
+    const thread = '<?!= data.thread ?>';
+  }
 
-  console.log({studentPickerMessage,getStudentList,studentPickerCallback});
+  const studentPicker = {
+    message: '<?!= data.studentPicker.message || "Please select a student" ?>',
+    list: '<?!= data.studentPicker.list || "coursePlanGetAll" ?>',
+    actionName: '<?!= data.studentPicker.actionName || "Select" ?>',
+    callback: '<?!= data.studentPicker.callback || "" ?>',
+    confirmation: '<?!= data.studentPicker.confirmation || "" ?>',
+    confirm:
+      '<?!= data.studentPicker.confirm || data.studentPicker.actionName || "Confirm" ?>'
+  };
+
+  let studentName;
+  let hostId;
 
   if (!window.STUDENT_PICKER) {
+    window.displayConfirmation = () => {
+      replaceContent(`
+            <form id="confirmation">
+            <div><strong>${studentName}:</strong> ${studentPicker.confirmation}</div>
+            <div class="form-group bottom-right">
+              <button id="cancel" type="cancel" class="button">Cancel</button>
+              <button id="confirm" type="submit" class="red button">
+                ${studentPicker.confirm}
+              </button>
+            </div>
+            </form>
+        `);
+      attachEvent(document.getElementById('confirmation'), 'submit', (e) => {
+        e.preventDefault();
+        showProgress();
+        google.script.run[studentPicker.callback](hostId, thread);
+      });
+      attachEvent(document.getElementById('cancel'), 'click', () => {
+        google.script.host.close();
+      });
+    };
+
     window.handleStudentPickerSubmit = (e) => {
       if (e.preventDefault) {
         e.preventDefault();
       }
-      const s = document.getElementById('student');
-      student = document.querySelector(
+      s = document.getElementById('student');
+      hostId = s.value;
+      studentName = document.querySelector(
         `#student option[value="${s.value}"]`
       ).innerHTML;
-      showProgress();
-      google.script.run[studentPickerCallback](s.value, thread);
+      if (studentPicker.confirmation.length) {
+        window.displayConfirmation();
+      } else {
+        showProgress();
+        google.script.run[studentPicker.callback](hostid, thread);
+      }
       return false;
     };
 
     window.displayStudentPicker = (students) => {
-      replaceContent(`<form id="student-picker">
-                <p>${studentPickerMessage}</p>
+      if (studentPicker.callback.length) {
+        replaceContent(`<form id="student-picker">
+                <p>${studentPicker.message}</p>
                 <div>
                   <select id="student" name="student">
                     ${students.map(
@@ -34,20 +72,31 @@
                         )}</option>`
                     )}
                   </select>
-                  <button class="create" type="submit">Update Course Plan</button>
+                  <button class="blue button" type="submit">${
+                    studentPicker.actionName
+                  }</button>
                 </div>
               </form>`);
-      attachEvent(
-        document.getElementById('student-picker'),
-        'submit',
-        window.handleStudentPickerSubmit
-      );
+        attachEvent(
+          document.getElementById('student-picker'),
+          'submit',
+          window.handleStudentPickerSubmit
+        );
+      } else {
+        replaceContent(`
+          <div><strong>Error:</strong> <code>data.studentPicker.callback</code> is not defined.</div>
+          <button id="cancel">Cancel</button>
+      `);
+        attachEvent(document.getElementById('#cancel'), () =>
+          google.script.host.close()
+        );
+      }
     };
 
     window.showStudentPicker = () => {
       google.script.run
         .withSuccessHandler(window.displayStudentPicker)
-        [getStudentList]();
+        [studentPicker.list]();
     };
 
     window.STUDENT_PICKER = true;

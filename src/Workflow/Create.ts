@@ -17,7 +17,10 @@ global.createSingle = () => {
 
 global.createSingleFor = (hostId: string, thread: string) => {
   g.HtmlService.Element.Progress.reset(thread);
-  g.HtmlService.Element.Progress.setMax(thread, CoursePlan.getStepCount());
+  g.HtmlService.Element.Progress.setMax(
+    thread,
+    CoursePlan.getCreateStepCount()
+  );
   CoursePlan.setThread(thread);
   const plan = CoursePlan.for(Role.Student.getByHostId(hostId));
   g.HtmlService.Element.Progress.setComplete(thread, {
@@ -53,7 +56,7 @@ global.createAll = (gradYear?: number, thread?: string) => {
     : Role.Student.getAll();
   g.HtmlService.Element.Progress.setMax(
     thread,
-    students.length * CoursePlan.getStepCount()
+    students.length * CoursePlan.getCreateStepCount()
   );
   if (!gradYear) {
     // modal already open for selection if not creating all

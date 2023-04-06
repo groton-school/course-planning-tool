@@ -35,7 +35,7 @@ global.updateAll = () => {
   const plans = CoursePlan.getAll().map(([hostId]) => hostId);
   g.HtmlService.Element.Progress.setMax(
     thread,
-    plans.length * CoursePlan.getStepCount()
+    plans.length * CoursePlan.getCreateStepCount()
   );
   SpreadsheetApp.getUi().showModalDialog(
     g.HtmlService.Element.Progress.getHtmlOutput(thread),

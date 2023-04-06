@@ -47,7 +47,7 @@ export default class CoursePlan {
     prefix('currentSchoolYear');
   private static readonly META_HISTORY_WIDTH = prefix('historyWidth');
 
-  public static getStepCount = () => 13;
+  public static getCreateStepCount = () => 13;
 
   private static formFolderInventoryForPlans = new FolderInventory(
     'Plans Form Folder Inventory',
@@ -416,8 +416,14 @@ export default class CoursePlan {
 
   private createStudentFolder() {
     this.setStatus('creating student folder');
+    const creating = !CoursePlan.studentFolderInventory.has(
+      this.getStudent().hostId
+    );
     const studentFolder = this.getStudentFolder();
     studentFolder.createShortcut(this.getFile().getId());
+    if (creating) {
+      this.getAdvisorFolder().createShortcut(this.getStudentFolder().getId());
+    }
     g.DriveApp.Permission.add(
       studentFolder.getId(),
       this.getStudent().email,
@@ -454,7 +460,6 @@ export default class CoursePlan {
     const ADVISOR_FOLDER_PERMISSION_COL = 6;
     this.setStatus('setting permissions');
     this.getFile().moveTo(this.getFormFolderForPlan());
-    this.getAdvisorFolder().createShortcut(this.getStudentFolder().getId());
     g.DriveApp.Permission.add(this.getFile().getId(), this.getStudent().email);
     g.DriveApp.Permission.add(this.getFile().getId(), this.getAdvisor().email);
 
@@ -623,6 +628,26 @@ export default class CoursePlan {
         .getA1Notation(),
       source
     );
+  }
+
+  public delete() {
+    const file = this.getFile();
+    this.setStatus('removing from inventory');
+    CoursePlan.coursePlanInventory.remove(this.getStudent().hostId);
+
+    this.setStatus('trashing shortcuts to plan');
+    const shortcuts = this.getStudentFolder().getFilesByType(
+      'application/vnd.google-apps.shortcut'
+    );
+    while (shortcuts.hasNext()) {
+      const shortcut = shortcuts.next();
+      if (shortcut.getTargetId() == file.getId()) {
+        shortcut.setTrashed(true);
+      }
+    }
+
+    this.setStatus('trashing plan');
+    file.setTrashed(true);
   }
 }
 

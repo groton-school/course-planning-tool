@@ -38,7 +38,7 @@ export default abstract class Inventory<T> {
     });
 
   public has = (key: Key): boolean =>
-    this.getData().find(([k]) => k == key) !== undefined;
+    this.getData().findIndex(([k]) => k == key) >= 0;
 
   public get(key: Key): T {
     const id = this.getData().reduce((id: string, [k, i]) => {
@@ -61,6 +61,12 @@ export default abstract class Inventory<T> {
   public add(entry: Entry) {
     this.sheet.appendRow(entry);
     this.data.push(entry);
+  }
+
+  public remove(key) {
+    const row = this.getData().findIndex(([k]) => k == key);
+    this.data = this.data.splice(row, 1);
+    this.getSheet().deleteRow(row + 1);
   }
 
   protected getSheet = () => this.sheet;
