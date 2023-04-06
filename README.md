@@ -31,7 +31,7 @@ Updates a specific course plan to reflect updated enrollment history. This does 
 
 #### Delete all course plans
 
-Clears the Form Folder Inventory, Advisor Folder Inventory, and Course Plan Inventory, deleting all referenced folders and course plans. A global reset.
+Clears the Plans Form Folder Inventory, Advisor Folder Inventory, and Course Plan Inventory, deleting all referenced folders and course plans. A global reset.
 
 ### A student changes advisor (manual update)
 
@@ -58,9 +58,11 @@ Clears the Form Folder Inventory, Advisor Folder Inventory, and Course Plan Inve
   - `cp-cco` represents the College Counseling Office
   - `cp-ao` represents the Academics Office
   - `cp-sc` represents the Studies Committee
+- `cp-ao`, `cp-sc`, and `cp-cco` have read access to the entire shared drive.
 - Only `tech` and `all-technology` have Content Manager access to the shared drive, which means that all other users have to ask permission before re-sharing files on the drive.
 - `cp-ao` has limited edit access to the [Course Planning Data sheet](./schema/sheets/Course%20Planning%20Data.xlsx), specifically the checkboxes in the Available Courses worksheet to adjust what courses appear in the course plan drop-down menus.
-- `cp-cco` has read/write access and `cp-ao` and `cp-sc` have read access to the `Forms` and `Advisory Groups` folders
+- `cp-cco` has read/write access to the `Course Plans by Forms` folder
+- `cp-cco` has read/write/delete access to the `Student Folders by Form` folder.
 - Within each course plan, areas of the main Course Plan sheet are protected such that:
   - Only advisors and the college counseling office can add comments in their respective comment sections
   - All labels and headings are not editable by any users
@@ -71,10 +73,10 @@ Clears the Form Folder Inventory, Advisor Folder Inventory, and Course Plan Inve
 ### File Management
 
 - All course plans are copies of the [Course Plan Template](./schema/sheets/Course%20Plan%20Template.xlsx) spreadsheet.
-- The original course plans are stored by form in the `Forms` folder.
-- The Courses by Department sheet of each course plan is imported dynamically (using `IMPORTRANGE()` from the [Course Planning Data](./schema/sheets/Course%20Planning%20Data.xlsx) sheet, so edits to that list should be made in [Course Planning Data](./schema/sheets/Course%20Planning%20Data.xlsx) and will simultaneously affect all Course Plans).
-- Shortcuts to the course plans are stored by advisory group in the `Advisory Groups` folder, with each advisory group folder shared with the advisor (without notification).
-- Links to each course plan, form folder, and advisory group folder are maintained in their respective inventory sheets in [Course Planning Data](./schema/sheets/Course%20Planning%20Data.xlsx)
+- The original course plans are stored by form in the `Course Plans by Form` folder.
+- Shortcuts to the course plans are stored in student folders by form in the `Student Folders by Form` folder
+- Shortcuts to the student folders are stored by advisory group in the `Student Folders by Advisor`, with each advisory group folder shared with the advisor (without notification).
+- Links to each course plan, student folder, course plans form folder, student folder form folder, and advisory group folder are maintained in their respective inventory sheets in [Course Planning Data](./schema/sheets/Course%20Planning%20Data.xlsx)
 
 ### Data Sources
 
@@ -94,8 +96,9 @@ To rebuild this project from scratch…
 - Update the Parameters sheet of the Course Planning data spreadsheet with…
   - CCO and SC group emails
   - URL of the Course Plan Template
-- Create a folder on the shared drive to hold all form folders, and update the ID and URL columns of the Form Folders Inventory sheet row for Form ROOT with that folder’s ID and URL.
+- Create a folder on the shared drive to hold all course plan form folders, giving CCO Contributor access, and update the ID and URL columns of the Plan Form Folders Inventory sheet row for Form ROOT with that folder’s ID and URL.
 - Create a folder on the shared drive to hold all advisory group folders, and update the ID and URL columns of the Advisor Folder Inventory sheet row for Advisor Email ROOT with that folder’s ID and URL.
+- Create a folder on the shared drive to hold all student folder form folders, giving CCO Content Manager access, and update the ID and URL columns of the Folder Form Folders Inventory sheet row for Form ROOT with that folder's ID and URl/
 - In the Course Planning Data spreadsheet, go to Extensions > Apps Script to open the embedded script for that sheet
   - Copy the ID of the script
   - [Enable Drive Service](https://developers.google.com/apps-script/guides/services/advanced#enable_advanced_services) for the script
