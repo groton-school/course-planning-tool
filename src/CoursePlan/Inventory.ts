@@ -37,6 +37,9 @@ export default abstract class Inventory<T> {
       }
     });
 
+  public has = (key: Key): boolean =>
+    this.getData().find(([k]) => k == key) !== undefined;
+
   public get(key: Key): T {
     const id = this.getData().reduce((id: string, [k, i]) => {
       if (k == key) {

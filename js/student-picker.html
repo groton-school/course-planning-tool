@@ -1,0 +1,55 @@
+<?!= include('lib', data) ?>
+<script>
+  const studentPickerMessage = '<?!= data.studentPicker.message ?>';
+  const getStudentList =
+    '<?!= data.studentPicker.list || "coursePlanGetAll" ?>';
+  const studentPickerCallback = '<?!= data.studentPicker.callback ?>';
+
+  console.log({studentPickerMessage,getStudentList,studentPickerCallback});
+
+  if (!window.STUDENT_PICKER) {
+    window.handleStudentPickerSubmit = (e) => {
+      if (e.preventDefault) {
+        e.preventDefault();
+      }
+      const s = document.getElementById('student');
+      student = document.querySelector(
+        `#student option[value="${s.value}"]`
+      ).innerHTML;
+      showProgress();
+      google.script.run[studentPickerCallback](s.value, thread);
+      return false;
+    };
+
+    window.displayStudentPicker = (students) => {
+      replaceContent(`<form id="student-picker">
+                <p>${studentPickerMessage}</p>
+                <div>
+                  <select id="student" name="student">
+                    ${students.map(
+                      ([hostId, id, , , firstName, lastName, gradYear]) =>
+                        `<option value="${hostId}">${firstName} ${lastName} ‘${gradYear.substr(
+                          2,
+                          2
+                        )}</option>`
+                    )}
+                  </select>
+                  <button class="create" type="submit">Update Course Plan</button>
+                </div>
+              </form>`);
+      attachEvent(
+        document.getElementById('student-picker'),
+        'submit',
+        window.handleStudentPickerSubmit
+      );
+    };
+
+    window.showStudentPicker = () => {
+      google.script.run
+        .withSuccessHandler(window.displayStudentPicker)
+        [getStudentList]();
+    };
+
+    window.STUDENT_PICKER = true;
+  }
+</script>

@@ -356,7 +356,7 @@ export default class CoursePlan {
   public static getFormFolderForStudentFolderFor = (student: Role.Student) =>
     CoursePlan.formFolderInventoryForFolders.get(student.gradYear);
 
-  private getStudentFolder = () =>
+  public getStudentFolder = () =>
     CoursePlan.studentFolderInventory.get(this.getStudent().hostId);
 
   private getAdvisorFolder = () =>
@@ -428,6 +428,26 @@ export default class CoursePlan {
       this.getAdvisor().email,
       g.DriveApp.Permission.Role.Reader
     );
+  }
+
+  public createStudentFolderIfMissing() {
+    if (!CoursePlan.studentFolderInventory.has(this.getStudent().hostId)) {
+      this.createStudentFolder();
+
+      this.setStatus(
+        'replacing plan shortcut with folder shortcut in advisor folder'
+      );
+      const shortcuts = this.getAdvisorFolder().getFilesByName(
+        CoursePlan.applyFormat(
+          SheetParameters.getCoursePlanNameFormat(),
+          this.getStudent()
+        )
+      );
+      while (shortcuts.hasNext()) {
+        shortcuts.next().setTrashed(true);
+      }
+      this.getAdvisorFolder().createShortcut(this.getStudentFolder().getId());
+    }
   }
 
   private setPermissions() {

@@ -24,6 +24,16 @@ export function onOpen() {
       Workflow.UpdateCourseList.Single()
     )
     .addSeparator()
+    .addItem(
+      'Create a missing student folder…',
+      Workflow.Restructure.CreateMissingStudentFolder()
+    )
+    .addItem(
+      'Create all missing student folders',
+      Workflow.Restructure.CreateAllMissingStudentFolders()
+    )
+    .addSeparator()
+    .addItem('Delete a single course plan…', Workflow.Delete.Single())
     .addItem('Delete all course plans', Workflow.Delete.All())
     .addToUi();
 }
