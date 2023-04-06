@@ -28,6 +28,11 @@ export const getFormFolderNameFormat = getParam.bind(
   'Param_FormFolderNameFormat'
 );
 
+export const getStudentFolderNameFormat = getParam.bind(
+  null,
+  'Param_StudentFolderNameFormat'
+);
+
 export const getAdvisorFolderNameFormat = getParam.bind(
   null,
   'Param_AdvisorFolderNameFormat'
