@@ -1,4 +1,4 @@
-# [<img src="/logo.png" style="float: right; height: 1.5em;"/>](https://thenounproject.com/icon/diploma-1167133/) Course Planning Tool
+# Course Planning Tool
 
 ## How to Use
 
