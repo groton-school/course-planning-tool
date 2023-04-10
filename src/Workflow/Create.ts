@@ -27,7 +27,7 @@ global.createSingleFor = (hostId: string, thread: string) => {
     html: `<div>Created course plan for ${plan
       .getStudent()
       .getFormattedName()}.</div>
-              <div><a id="button" class="button action" href="${plan
+              <div><a id="button" class="button action" onclick="google.script.host.close()" href="${plan
                 .getSpreadsheet()
                 .getUrl()}" target="_blank">Open Plan</a></div>`
   });
@@ -69,8 +69,5 @@ global.createAll = (gradYear?: number, thread?: string) => {
     g.HtmlService.Element.Progress.setValue(thread, i + 1);
     CoursePlan.for(student);
   });
-  g.HtmlService.Element.Progress.setComplete(
-    thread,
-    'All course plans created'
-  );
+  g.HtmlService.Element.Progress.setComplete(thread, true);
 };

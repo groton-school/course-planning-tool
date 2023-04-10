@@ -21,7 +21,7 @@ global.updateSingleFor = (hostId: string, thread: string) => {
     html: `<div>Updated course plan for ${plan
       .getStudent()
       .getFormattedName()}.</div>
-          <div><a id="button" class="button action" href="${plan
+          <div><a id="button" class="button action" onclick="google.script.host.close()" href="${plan
             .getSpreadsheet()
             .getUrl()}" target="_blank">Open Plan</a></div>`
   });

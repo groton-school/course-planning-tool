@@ -33,6 +33,11 @@ export function onOpen() {
       Workflow.Restructure.CreateAllMissingStudentFolders()
     )
     .addItem('Delete a single course plan…', Workflow.Delete.Single())
+    .addSeparator()
+    .addItem(
+      'Download expurgated XLSX',
+      Workflow.Documentation.DownloadExpurgatedCoursePlanningData()
+    )
     .addToUi();
 }
 
