@@ -104,7 +104,7 @@ Downloads an XLSX file that contains all of the formatting and unctions, but non
 
 </th></thead><tbody><tr><td>
 
-##### Refresh Historical Enrollments
+##### Refresh Historical Enrollment
 
 1. Go to the Historical Enrollment list in Academics > Grades > Report card grades list
 2. Adjust the filters and export CSV files of the list for…
