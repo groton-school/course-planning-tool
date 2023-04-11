@@ -6,7 +6,7 @@
 
 Queries or functions that need to be updated annually are listed here:
 
-1. [Historical Enrollment](./schema/queries/historical-enrollment.md#filters) needs to be updated, as noted.
+1. [Historical Enrollment](#refresh-historical-enrollment) needs to be updated, as noted.
 2. Advisor List, Course List, and Historical Enrollment sheets in Course Planning Data all need to be updated to current values (recommend using [Blackbaud Lists](https://github.com/groton-school/blackbaud-to-google-lists) add-on)
 3. Available Courses needs to be reviewed for accuracy.
 4. Review `cp-cco`, `cp-ao`, `cp-sc` group memberships for accuracy.
@@ -34,11 +34,11 @@ Presents a dialog to choose a form by class year. Upon selection, it will create
 
 ##### Update all course plan enrollment histories
 
-Updates all course plans in the Course Plan Inventory to reflect updated enrollment history. See note on [Update a single course plan's enrollment history](#update-a-single-course-plans-enrollment-history) below.
+Updates all course plans in the Course Plan Inventory to reflect updated enrollment history. See note on [Update a single course plan's enrollment history](#update-a-single-course-plans-enrollment-history) below. Note that this likely requires [refreshing Historical Enrollments first](#refresh-historical-enrollments).
 
 ##### Update all course plan course lists
 
-Updates the Courses by Department sheet of all course plans in the Course Plan Inventory to match the Courses by Department sheet of the Course Planning Data sheet.
+Updates the Courses by Department sheet of all course plans in the Course Plan Inventory to match the Courses by Department sheet of the Course Planning Data sheet. Note that this likely requires [refreshing Historical Enrollments first](#refresh-historical-enrollments).
 
 </td></tr></tbody></table>
 <table><thead><th>
@@ -103,6 +103,22 @@ Downloads an XLSX file that contains all of the formatting and unctions, but non
 #### Manual Updates
 
 </th></thead><tbody><tr><td>
+
+##### Refresh Historical Enrollments
+
+1. Go to the Historical Enrollment list in Academics > Grades > Report card grades list
+2. Adjust the filters and export CSV files of the list for…
+  - Current year, forms 2, 3, 4, 5
+  - 1 year ago, forms 2, 3, 4
+  - 2 years ago, forms 2, 3
+  - 3 years ago, form 2
+3. Open the current year CSV in Google Sheets (largest file -- too large to copy and paste)
+4. Paste the data from the other three exports into that same sheet
+5. Create a sheet that gets just the `UNIQUE()` records from that combined CSV export
+6. Replace the unique records with a copy-and-paste-by-value to reduce dependency overhead
+7. `IMPORTRANGE()` that list into the Historical Enrollment worksheet in Course Planning Data
+8. Replace the imported range with a copy-and-paste-by-value to reduce dependency overhead
+
 
 ##### A student changes advisor
 
