@@ -1,13 +1,14 @@
 import g from '@battis/gas-lighter';
+import * as SheetParameters from '../CoursePlan/SheetParameters';
 
-export const DownloadExpurgatedCoursePlanningData = () =>
-  'downloadExpurgatedCoursePlanningData';
-global.downloadExpurgatedCoursePlanningData = () => {
+export const DownloadEmptyCoursePlanningData = () =>
+  'downloadEmptyCoursePlanningData';
+global.downloadEmptyCoursePlanningData = () => {
   const progress = g.HtmlService.Element.Progress.bindTo(Utilities.getUuid());
   progress.reset();
   SpreadsheetApp.getUi().showModalDialog(
     progress.getHtmlOutput(),
-    'Get Clean Copy'
+    'Download clean copy of Course Planning Data'
   );
 
   const inventories = {
@@ -85,12 +86,72 @@ global.downloadExpurgatedCoursePlanningData = () => {
   const ieh = cleanCopy.getSheetByName('Individual Enrollment History');
   ieh.getRange('A1:A2').setValues([[''], ['']]);
 
+  const cleanUp = g.HtmlService.Element.Progress.bindTo(Utilities.getUuid());
+  cleanUp.setStatus('Cleaning up…');
+
   progress.setComplete({
-    html: `<a class="button action" target="_blank" onclick="google.script.host.close()" href="${cleanCopy
-      .getUrl()
-      .replace(
-        /\/edit.*/,
-        '/export?format=xlsx'
-      )}">Download ${cleanCopy.getName()}.xlsx</a>`
+    html: `
+            <a
+                id="download"
+                class="button action"
+                target="_blank"
+                href="${cleanCopy
+                  .getUrl()
+                  .replace(/\/edit.*/, '/export?format=xlsx')}"
+            >
+                Download ${cleanCopy.getName()}
+            </a>
+            <script>
+                document.querySelector('#download').addEventListener('click', () => {
+                    replaceContent(${JSON.stringify(cleanUp.getHtml())});
+                    google.script.run.withSuccessHandler(() => google.script.host.close()).documentationDeleteTempFile('${cleanCopy.getId()}')
+                });
+            </script>
+    `
   });
+};
+
+global.documentationDeleteTempFile = (
+  id: string,
+  delayInSeconds: number = 5
+) => {
+  Utilities.sleep(delayInSeconds * 1000);
+  DriveApp.getFileById(id).setTrashed(true);
+};
+
+export const DownloadEmptyCoursePlanTemplate = () =>
+  'documentationDownloadEmptyCoursePlanTemplate';
+global.documentationDownloadEmptyCoursePlanTemplate = () => {
+  const template = SpreadsheetApp.openByUrl(
+    SheetParameters.getCoursePlanTemplate()
+  );
+  SpreadsheetApp.getUi().showModalDialog(
+    g.HtmlService.createTemplate(
+      `
+        <html>
+          <head>
+            <?!= include('style', data) ?>
+          </head>
+          <body>
+            <div id="content">
+                <a
+                    id="download"
+                    class="button action"
+                    target="_blank"
+                    href="${template
+                      .getUrl()
+                      .replace(/\/edit.*/, '/export?format=xlsx')}"
+                >
+                    Download ${template.getName()}
+                </a>
+                <script>
+                    document.querySelector('#download').addEventListener('click', () => google.script.host.close());
+                </script>
+            </div>
+        </body>
+        </html>
+        `
+    ).setHeight(100),
+    'Download clean copy of Course Plan Template'
+  );
 };

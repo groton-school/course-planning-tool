@@ -35,8 +35,12 @@ export function onOpen() {
     .addItem('Delete a single course plan…', Workflow.Delete.Single())
     .addSeparator()
     .addItem(
-      'Download expurgated XLSX',
-      Workflow.Documentation.DownloadExpurgatedCoursePlanningData()
+      'Download clean copy of Course Planning Data',
+      Workflow.Documentation.DownloadEmptyCoursePlanningData()
+    )
+    .addItem(
+      'Download clean copy of Course Plan Template',
+      Workflow.Documentation.DownloadEmptyCoursePlanTemplate()
     )
     .addToUi();
 }

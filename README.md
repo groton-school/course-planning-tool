@@ -18,39 +18,93 @@ All workflows are available from the `Course Planning` menu in the [Course Plann
 
 ![Screenshot](./images/screenshot.png)
 
-#### Create all course plans
+<table><thead><th>
+  
+#### Management
+
+</th></thead><tbody><tr><td>
+        
+##### Create all course plans
 
 Creates a new course plan for all students in the Advisor List sheet who do not already have a course plan registered in the Course Plan Inventory sheet, updating permissions and the Course Plan Inventory.
 
-#### Create course plans by form…
+##### Create course plans by form…
 
 Presents a dialog to choose a form by class year. Upon selection, it will create a new course plan for each student in the form in the Advisor List sheet who do not already have a course plan registered in the Course Plan Inventory sheet, updating permissions and the Course Plan Inventory.
 
-#### Update all course plan enrollment histories
+##### Update all course plan enrollment histories
 
 Updates all course plans in the Course Plan Inventory to reflect updated enrollment history. See note on [Update a single course plan's enrollment history](#update-a-single-course-plans-enrollment-history) below.
 
-#### Update all course plan course lists
+##### Update all course plan course lists
 
 Updates the Courses by Department sheet of all course plans in the Course Plan Inventory to match the Courses by Department sheet of the Course Planning Data sheet.
 
-#### Create a single course plan…
+</td></tr></tbody></table>
+<table><thead><th>
+  
+#### Troubleshooting
+
+</th></thead><tbody><tr><td>
+
+##### Create a single course plan…
 
 Presents a dialog to choose a student from the list of students in the Advisor List sheet. Upon selection, it will create a new course plan for that student if there is not one already registered in the Course Plan Inventory sheet, updating permissions and the Course Plan Inventory. At the end, you will be presented with a direct link to the student course plan (either pre-existing or newly created).
 
-#### Update a single course plan's enrollment history…
+##### Update a single course plan's enrollment history…
 
 Updates a specific course plan to reflect updated enrollment history. This does not expand the enrollment history beyond the original scope (i.e., if created in the spring of 2023, and then updated in spring of 2024, it will _not_ add 2024 courses in and will _not_ overwrite plans/comments).
 
-#### Update a single course plan's course list…
+##### Update a single course plan's course list…
 
 Updates a specific course plan's Courses by Department sheet to match the Course Planning Data Courses by Department sheet.
 
-#### Delete all course plans
+##### Delete a single course plan…
 
-Clears the Plans Form Folder Inventory, Advisor Folder Inventory, and Course Plan Inventory, deleting all referenced folders and course plans. A global reset.
+Select a the student whose course plan to delete. This will leave all containers (student folder, advisor folder, form folders) and shortcuts, deleting only the course plan.
 
-### A student changes advisor (manual update)
+</td></tr></tbody></table>
+<table><thead><th colspan="2">
+  
+#### Restructuring
+
+</th></thead><tbody><tr><th>
+  
+##### v0.2.0
+  
+</th><td>
+
+##### Create a single missing student folder…
+
+Select the student who already has a course plan for whom to check for a missing student folder, and create it (if missing), updating inventories and reorganizing the existing course plan and shortcuts.
+
+##### Create all missing student folders
+
+Check all students who have course plans for a missing student folder, and create it (if missing), updating inventories and reorganizing the existing course plan and shortcuts.
+
+</td></tr></tbody></table>
+<table><thead><th>
+
+#### Documentation
+
+</th></thead><tbody><tr><td>
+
+##### Download a clean copy of Course Planning Data
+
+Downloads an XLSX file that contains all of the formatting and functions, but none of the data in the Course Planning Data sheet. (Useful for documentation.)
+
+##### Download a clean copy of Course Plan Template
+
+Downloads an XLSX file that contains all of the formatting and unctions, but none of the data in the Course Plan Template sheet. (Useful for documenation.)
+
+</td></tr></tbody></table>
+<table><thead><th>
+  
+#### Manual Updates
+
+</th></thead><tbody><tr><td>
+
+##### A student changes advisor
 
 1. Add the new advisor as an editor on the course plan
 2. On the Course Plan sheet, adjust the Protected Ranges (under Data)
@@ -58,6 +112,8 @@ Clears the Plans Form Folder Inventory, Advisor Folder Inventory, and Course Pla
    2. Remove the old advisor from Comments from Faculty Advisor
 3. Remove the old advisor as an editor on the spreadsheet
 4. Move the shortcut to the course plan from the old advisory group folder to the new advisory group folder
+
+</td></tr></tbody></table>
 
 ## Technical Overview
 
