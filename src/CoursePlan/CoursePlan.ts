@@ -114,7 +114,6 @@ export default class CoursePlan {
   }
 
   private bindToExistingSpreadsheet({ hostId, spreadsheetId }) {
-    // TODO add option to update when "created"?
     this.setStudent(Role.Student.getByHostId(hostId));
     this.setSpreadsheet(SpreadsheetApp.openById(spreadsheetId));
   }

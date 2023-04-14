@@ -47,5 +47,3 @@ global.updateAll = () => {
     );
     g.HtmlService.Element.Progress.setComplete(thread, true);
 };
-
-// TODO add option to override comments with new enrollments?
