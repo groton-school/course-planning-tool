@@ -11,7 +11,6 @@ Queries or functions that need to be updated annually are listed here:
 3. Available Courses needs to be reviewed for accuracy.
 4. Review `cp-cco`, `cp-ao`, `cp-sc` group memberships for accuracy.
 
-
 ### Workflows
 
 All workflows are available from the `Course Planning` menu in the [Course Planning Data sheet](./schema/sheets/Course%20Planning%20Data.xlsx).
@@ -108,17 +107,18 @@ Downloads an XLSX file that contains all of the formatting and unctions, but non
 
 1. Go to the Historical Enrollment list in Academics > Grades > Report card grades list
 2. Adjust the filters and export CSV files of the list for…
-  - Current year, forms 2, 3, 4, 5
-  - 1 year ago, forms 2, 3, 4
-  - 2 years ago, forms 2, 3
-  - 3 years ago, form 2
+
+- Current year, forms 2, 3, 4, 5
+- 1 year ago, forms 2, 3, 4
+- 2 years ago, forms 2, 3
+- 3 years ago, form 2
+
 3. Open the current year CSV in Google Sheets (largest file -- too large to copy and paste)
 4. Paste the data from the other three exports into that same sheet
 5. Create a sheet that gets just the `UNIQUE()` records from that combined CSV export
 6. Replace the unique records with a copy-and-paste-by-value to reduce dependency overhead
 7. `IMPORTRANGE()` that list into the Historical Enrollment worksheet in Course Planning Data
 8. Replace the imported range with a copy-and-paste-by-value to reduce dependency overhead
-
 
 ##### A student changes advisor
 

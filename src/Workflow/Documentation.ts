@@ -96,8 +96,8 @@ global.downloadEmptyCoursePlanningData = () => {
                 class="button action"
                 target="_blank"
                 href="${cleanCopy
-                  .getUrl()
-                  .replace(/\/edit.*/, '/export?format=xlsx')}"
+        .getUrl()
+        .replace(/\/edit.*/, '/export?format=xlsx')}"
             >
                 Download ${cleanCopy.getName()}
             </a>
@@ -111,10 +111,7 @@ global.downloadEmptyCoursePlanningData = () => {
   });
 };
 
-global.documentationDeleteTempFile = (
-  id: string,
-  delayInSeconds: number = 5
-) => {
+global.documentationDeleteTempFile = (id: string, delayInSeconds = 5) => {
   Utilities.sleep(delayInSeconds * 1000);
   DriveApp.getFileById(id).setTrashed(true);
 };
@@ -139,8 +136,8 @@ global.documentationDownloadEmptyCoursePlanTemplate = () => {
                     class="button action"
                     target="_blank"
                     href="${template
-                      .getUrl()
-                      .replace(/\/edit.*/, '/export?format=xlsx')}"
+        .getUrl()
+        .replace(/\/edit.*/, '/export?format=xlsx')}"
                 >
                     Download ${template.getName()}
                 </a>

@@ -1,15 +1,15 @@
 <?!= include('lib', data) ?>
 <script>
   const thread = '<?!= data.thread ?>';
-  var student;
 
+  // eslint-disable-next-line no-redeclare
   function showStudentPicker(students) {
     replaceContent(`<form id="student-picker">
           <p>Please select the student for whom to update their course plan enrollment history.</p>
           <div>
             <select id="student" name="student">
               ${students.map(
-                ([hostId, id, , , firstName, lastName, gradYear]) =>
+                ([hostId, , , , firstName, lastName, gradYear]) =>
                   `<option value="${hostId}">${firstName} ${lastName} ‘${gradYear.substr(
                     2,
                     2
@@ -30,12 +30,11 @@
     if (e.preventDefault) {
       e.preventDefault();
     }
-    const s = document.getElementById('student');
-    student = document.querySelector(
-      `#student option[value="${s.value}"]`
-    ).innerHTML;
     showProgress();
-    google.script.run.updateSingleFor(s.value, thread);
+    google.script.run.updateSingleFor(
+      document.getElementById('student').value,
+      thread
+    );
     return false;
   }
 

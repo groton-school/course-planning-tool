@@ -8,7 +8,7 @@ dependencies:
 devDependencies:
   '@battis/eslint-config':
     specifier: github:battis/eslint-config
-    version: github.com/battis/eslint-config/9ec8b951d0db9ff7e6243cc25d0590700fcb13da(@tsconfig/recommended@1.0.2)(@typescript-eslint/eslint-plugin@5.58.0)(@typescript-eslint/parser@5.58.0)(eslint-config-prettier@8.8.0)(eslint-plugin-html@7.1.0)(eslint-plugin-markdown@3.0.0)(eslint-plugin-tsdoc@0.2.17)(eslint@8.38.0)(prettier@2.8.7)
+    version: github.com/battis/eslint-config/2b7b90a746a58bdccbf5094e52815e683aeb6acd(@tsconfig/recommended@1.0.2)(@typescript-eslint/eslint-plugin@5.58.0)(@typescript-eslint/parser@5.58.0)(eslint-config-prettier@8.8.0)(eslint-plugin-html@7.1.0)(eslint-plugin-markdown@3.0.0)(eslint-plugin-tsdoc@0.2.17)(eslint@8.38.0)(prettier@2.8.7)
   '@battis/prettier-config':
     specifier: github:battis/prettier-config
     version: github.com/battis/prettier-config/a475934b67f82eac8e5e0b7c53fc1ab58c33e946(@prettier/plugin-xml@2.2.0)(prettier-plugin-sql@0.13.0)(prettier@2.8.7)
@@ -805,7 +805,7 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
     dependencies:
-      caniuse-lite: 1.0.30001478
+      caniuse-lite: 1.0.30001479
       electron-to-chromium: 1.4.365
       node-releases: 2.0.10
       update-browserslist-db: 1.0.11(browserslist@4.21.5)
@@ -863,8 +863,8 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
-  /caniuse-lite@1.0.30001478:
-    resolution: {integrity: sha512-gMhDyXGItTHipJj2ApIvR+iVB5hd0KP3svMWWXDvZOmjzJJassGLMfxRkQCSYgGd2gtdL/ReeiyvMSFD1Ss6Mw==}
+  /caniuse-lite@1.0.30001479:
+    resolution: {integrity: sha512-6nuRFim5dx8Eu2tO+KJ9PiBdPHs7WB5Hdf+klDcyefyEuOAcfhihIv7pS+JFknJLUiNQbm1AJYKm0c9QOlQS/Q==}
     dev: true
 
   /chalk@2.4.2:
@@ -3511,9 +3511,9 @@ packages:
     engines: {node: '>=12.20'}
     dev: true
 
-  github.com/battis/eslint-config/9ec8b951d0db9ff7e6243cc25d0590700fcb13da(@tsconfig/recommended@1.0.2)(@typescript-eslint/eslint-plugin@5.58.0)(@typescript-eslint/parser@5.58.0)(eslint-config-prettier@8.8.0)(eslint-plugin-html@7.1.0)(eslint-plugin-markdown@3.0.0)(eslint-plugin-tsdoc@0.2.17)(eslint@8.38.0)(prettier@2.8.7):
-    resolution: {tarball: https://codeload.github.com/battis/eslint-config/tar.gz/9ec8b951d0db9ff7e6243cc25d0590700fcb13da}
-    id: github.com/battis/eslint-config/9ec8b951d0db9ff7e6243cc25d0590700fcb13da
+  github.com/battis/eslint-config/2b7b90a746a58bdccbf5094e52815e683aeb6acd(@tsconfig/recommended@1.0.2)(@typescript-eslint/eslint-plugin@5.58.0)(@typescript-eslint/parser@5.58.0)(eslint-config-prettier@8.8.0)(eslint-plugin-html@7.1.0)(eslint-plugin-markdown@3.0.0)(eslint-plugin-tsdoc@0.2.17)(eslint@8.38.0)(prettier@2.8.7):
+    resolution: {tarball: https://codeload.github.com/battis/eslint-config/tar.gz/2b7b90a746a58bdccbf5094e52815e683aeb6acd}
+    id: github.com/battis/eslint-config/2b7b90a746a58bdccbf5094e52815e683aeb6acd
     name: '@battis/eslint-config'
     version: 1.0.0
     peerDependencies:

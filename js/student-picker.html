@@ -1,7 +1,7 @@
 <?!= include('lib', data) ?>
 <script>
   if (!window.thread) {
-    const thread = '<?!= data.thread ?>';
+    window.thread = '<?!= data.thread ?>';
   }
 
   const studentPicker = {
@@ -33,7 +33,7 @@
       attachEvent(document.getElementById('confirmation'), 'submit', (e) => {
         e.preventDefault();
         showProgress();
-        google.script.run[studentPicker.callback](hostId, thread);
+        google.script.run[studentPicker.callback](hostId, window.thread);
       });
       attachEvent(document.getElementById('cancel'), 'click', () => {
         google.script.host.close();
@@ -44,8 +44,8 @@
       if (e.preventDefault) {
         e.preventDefault();
       }
-      s = document.getElementById('student');
-      hostId = s.value;
+      const s = document.getElementById('student');
+      const hostId = s.value;
       studentName = document.querySelector(
         `#student option[value="${s.value}"]`
       ).innerHTML;
@@ -53,7 +53,7 @@
         window.displayConfirmation();
       } else {
         showProgress();
-        google.script.run[studentPicker.callback](hostid, thread);
+        google.script.run[studentPicker.callback](hostId, window.thread);
       }
       return false;
     };
@@ -65,7 +65,7 @@
                 <div>
                   <select id="student" name="student">
                     ${students.map(
-                      ([hostId, id, , , firstName, lastName, gradYear]) =>
+                      ([hostId, , , , firstName, lastName, gradYear]) =>
                         `<option value="${hostId}">${firstName} ${lastName} ‘${gradYear.substr(
                           2,
                           2

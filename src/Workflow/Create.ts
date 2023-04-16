@@ -28,8 +28,8 @@ global.createSingleFor = (hostId: string, thread: string) => {
       .getStudent()
       .getFormattedName()}.</div>
               <div><a id="button" class="button action" onclick="google.script.host.close()" href="${plan
-                .getSpreadsheet()
-                .getUrl()}" target="_blank">Open Plan</a></div>`
+        .getSpreadsheet()
+        .getUrl()}" target="_blank">Open Plan</a></div>`
   });
 };
 
