@@ -14,7 +14,7 @@ devDependencies:
     version: github.com/battis/prettier-config/a475934b67f82eac8e5e0b7c53fc1ab58c33e946(@prettier/plugin-xml@2.2.0)(prettier-plugin-sql@0.13.0)(prettier@2.8.7)
   '@battis/webpack-typescript-gas':
     specifier: github:battis/webpack-typescript-gas
-    version: github.com/battis/webpack-typescript-gas/5648d2da133bb35df66e03408957bf8b80f2273d(@google/clasp@2.4.2)(@tsconfig/recommended@1.0.2)(@types/google-apps-script@1.0.59)(@types/node@18.15.11)(gas-webpack-plugin@2.3.0)(ts-loader@9.4.2)(typescript@4.9.5)(webpack-cli@5.0.1)(webpack@5.79.0)
+    version: github.com/battis/webpack-typescript-gas/7da81093eea61f5b13d303fb4c02c8467d3a5a17(@google/clasp@2.4.2)(@tsconfig/recommended@1.0.2)(@types/google-apps-script@1.0.59)(@types/node@18.15.11)(gas-webpack-plugin@2.3.0)(ts-loader@9.4.2)(typescript@4.9.5)(webpack-cli@5.0.1)(webpack@5.79.0)
   rimraf:
     specifier: ^4.4.1
     version: 4.4.1
@@ -3570,9 +3570,9 @@ packages:
       prettier-plugin-sql: 0.13.0(prettier@2.8.7)
     dev: true
 
-  github.com/battis/webpack-typescript-gas/5648d2da133bb35df66e03408957bf8b80f2273d(@google/clasp@2.4.2)(@tsconfig/recommended@1.0.2)(@types/google-apps-script@1.0.59)(@types/node@18.15.11)(gas-webpack-plugin@2.3.0)(ts-loader@9.4.2)(typescript@4.9.5)(webpack-cli@5.0.1)(webpack@5.79.0):
-    resolution: {tarball: https://codeload.github.com/battis/webpack-typescript-gas/tar.gz/5648d2da133bb35df66e03408957bf8b80f2273d}
-    id: github.com/battis/webpack-typescript-gas/5648d2da133bb35df66e03408957bf8b80f2273d
+  github.com/battis/webpack-typescript-gas/7da81093eea61f5b13d303fb4c02c8467d3a5a17(@google/clasp@2.4.2)(@tsconfig/recommended@1.0.2)(@types/google-apps-script@1.0.59)(@types/node@18.15.11)(gas-webpack-plugin@2.3.0)(ts-loader@9.4.2)(typescript@4.9.5)(webpack-cli@5.0.1)(webpack@5.79.0):
+    resolution: {tarball: https://codeload.github.com/battis/webpack-typescript-gas/tar.gz/7da81093eea61f5b13d303fb4c02c8467d3a5a17}
+    id: github.com/battis/webpack-typescript-gas/7da81093eea61f5b13d303fb4c02c8467d3a5a17
     name: '@battis/webpack-typescript-gas'
     version: 1.0.0
     peerDependencies:
