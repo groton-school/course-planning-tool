@@ -108,8 +108,16 @@ export default class CoursePlan {
       this.getSpreadsheet().getId(),
       this.getSpreadsheet().getUrl()
     ]);
-    CoursePlan.coursePlanInventory.setMetadata(this.getHostId(), Inventory.CoursePlan.COL_NUM_OPTIONS_PER_DEPT, this.getNumOptionsPerDepartment());
-    CoursePlan.coursePlanInventory.setMetadata(this.getHostId(), Inventory.CoursePlan.COL_NUM_COMMENTS, this.getNumComments());
+    CoursePlan.coursePlanInventory.setMetadata(
+      this.getHostId(),
+      Inventory.CoursePlan.COL_NUM_OPTIONS_PER_DEPT,
+      this.getNumOptionsPerDepartment()
+    );
+    CoursePlan.coursePlanInventory.setMetadata(
+      this.getHostId(),
+      Inventory.CoursePlan.COL_NUM_COMMENTS,
+      this.getNumComments()
+    );
     this.setStatus('finished'); // #create
   }
 
@@ -188,16 +196,22 @@ export default class CoursePlan {
     return this.validationSheet;
   }
 
-  private getIndividualEnrollmentHistory = () => SpreadsheetApp.getActive().getSheetByName('Individual Enrollment History');
+  private getIndividualEnrollmentHistory = () =>
+    SpreadsheetApp.getActive().getSheetByName('Individual Enrollment History');
 
   private getNumDepartments = () => this.getValidationSheet().getMaxColumns();
 
   private getNumOptionsPerDepartment(): number {
     if (this.numOptionsPerDepartment === null) {
       if (CoursePlan.coursePlanInventory.has(this.getHostId())) {
-        this.numOptionsPerDepartment = CoursePlan.coursePlanInventory.getMetadata(this.getHostId(), Inventory.CoursePlan.COL_NUM_OPTIONS_PER_DEPT);
+        this.numOptionsPerDepartment =
+          CoursePlan.coursePlanInventory.getMetadata(
+            this.getHostId(),
+            Inventory.CoursePlan.COL_NUM_OPTIONS_PER_DEPT
+          );
       } else {
-        this.numOptionsPerDepartment = SheetParameters.getNumOptionsPerDepartment();
+        this.numOptionsPerDepartment =
+          SheetParameters.getNumOptionsPerDepartment();
       }
     }
     return this.numOptionsPerDepartment;
@@ -206,7 +220,10 @@ export default class CoursePlan {
   private getNumComments(): number {
     if (this.numComments === null) {
       if (CoursePlan.coursePlanInventory.has(this.getHostId())) {
-        this.numComments = CoursePlan.coursePlanInventory.getMetadata(this.getHostId(), Inventory.CoursePlan.COL_NUM_COMMENTS);
+        this.numComments = CoursePlan.coursePlanInventory.getMetadata(
+          this.getHostId(),
+          Inventory.CoursePlan.COL_NUM_COMMENTS
+        );
       } else {
         this.numComments = SheetParameters.getNumComments();
       }
@@ -224,11 +241,22 @@ export default class CoursePlan {
     this.setStatus('calculating enrollment history'); // #create, #update
     const ieh = this.getIndividualEnrollmentHistory();
     ieh.getRange('IEH_HostID_Selector').setValue(this.getHostId());
-    const values = ieh.getRange('IEH_EnrollmentHistory').offset(0, 0, ieh.getRange('IEH_Departments').getNumRows(), 5 - (this.getStudent().gradYear - CoursePlan.getCurrentSchoolYear())).getDisplayValues();
+    const values = ieh
+      .getRange('IEH_EnrollmentHistory')
+      .offset(
+        0,
+        0,
+        ieh.getRange('IEH_Departments').getNumRows(),
+        5 - (this.getStudent().gradYear - CoursePlan.getCurrentSchoolYear())
+      )
+      .getDisplayValues();
     this.setWorkingCopy(this.getPlanSheet());
 
     const validations = [];
-    const start = ieh.getRange('IEH_NumericalYears').getDisplayValues()[0].findIndex(y => parseInt(y) > CoursePlan.getCurrentSchoolYear());
+    const start = ieh
+      .getRange('IEH_NumericalYears')
+      .getDisplayValues()[0]
+      .findIndex((y) => parseInt(y) > CoursePlan.getCurrentSchoolYear());
     if (create) {
       for (var row = 0; row < this.getNumDepartments(); row++) {
         const rowValidation = [];
@@ -250,14 +278,24 @@ export default class CoursePlan {
       this.protectNonCommentRanges(values[0].length, values.length);
 
       this.setStatus('configuring data validation'); // #create
-      this.getAnchorOffset(0, values[0].length, validations.length, validations[0].length).setDataValidations(validations);
+      this.getAnchorOffset(
+        0,
+        values[0].length,
+        validations.length,
+        validations[0].length
+      ).setDataValidations(validations);
 
       this.insertAndMergeOptionsRows(values[0].length);
     }
 
-    this.setStatus('publishing enrollment history') // #create, #update
+    this.setStatus('publishing enrollment history'); // #create, #update
     for (let row = 0; row < values.length; row++) {
-      const target = this.getAnchorOffset(row * this.getNumOptionsPerDepartment(), 0, 1, values[row].length);
+      const target = this.getAnchorOffset(
+        row * this.getNumOptionsPerDepartment(),
+        0,
+        1,
+        values[row].length
+      );
       target.clearDataValidations();
       target.setValues([values[row]]);
     }
@@ -307,14 +345,18 @@ export default class CoursePlan {
       [this.getStudent().getFormattedName()],
       [`Advisor: ${this.getAdvisor().getFormattedName()}`]
     ]);
-    g.SpreadsheetApp.Value.set(this.getWorkingCopy(), 'Template_Years', this.getIndividualEnrollmentHistory().getRange('IEH_Years').getDisplayValues());
+    g.SpreadsheetApp.Value.set(
+      this.getWorkingCopy(),
+      'Template_Years',
+      this.getIndividualEnrollmentHistory()
+        .getRange('IEH_Years')
+        .getDisplayValues()
+    );
   }
 
   private createStudentFolder() {
     this.setStatus('creating student folder'); // #create
-    const creating = !CoursePlan.studentFolderInventory.has(
-      this.getHostId()
-    );
+    const creating = !CoursePlan.studentFolderInventory.has(this.getHostId());
     const studentFolder = this.getStudentFolder();
     studentFolder.createShortcut(this.getFile().getId());
     if (creating) {
@@ -378,11 +420,11 @@ export default class CoursePlan {
     }
   }
 
-
   public static getCurrentSchoolYear() {
     if (CoursePlan.currentSchoolyear === null) {
       const now = new Date();
-      CoursePlan.currentSchoolyear = now.getMonth() > 6 ? now.getFullYear() + 1 : now.getFullYear();
+      CoursePlan.currentSchoolyear =
+        now.getMonth() > 6 ? now.getFullYear() + 1 : now.getFullYear();
     }
     return CoursePlan.currentSchoolyear;
   }
