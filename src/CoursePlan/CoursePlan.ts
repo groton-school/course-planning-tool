@@ -5,7 +5,7 @@ import * as SheetParameters from './SheetParameters';
 
 export default class CoursePlan {
     // these can be calculated by searching for #X where X is getXStepCount
-    public static getCreateStepCount = () => 13;
+    public static getCreateStepCount = () => 12;
     public static getUpdateStepCount = () => 5;
     public static getDeleteStepCount = () => 4;
 
@@ -118,7 +118,6 @@ export default class CoursePlan {
             Inventory.CoursePlan.COL_NUM_COMMENTS,
             this.getNumComments()
         );
-        this.setStatus('finished'); // #create
     }
 
     private bindToExistingSpreadsheet({ hostId, spreadsheetId }) {
