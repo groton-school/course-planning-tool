@@ -7,7 +7,7 @@ export function onOpen() {
     .addItem('Create course plans by form…', Workflow.Create.ByForm())
     .addItem(
       'Update all course plan enrollment histories',
-      Workflow.Update.All()
+      Workflow.UpdateEnrollmentHistory.All()
     )
     .addItem(
       'Update all course plan course lists',
@@ -17,7 +17,7 @@ export function onOpen() {
     .addItem('Create a single course plan…', Workflow.Create.Single())
     .addItem(
       "Update a single course plan's enrollment history…",
-      Workflow.Update.Single()
+      Workflow.UpdateEnrollmentHistory.Single()
     )
     .addItem(
       "Update a single course plan's course list …",

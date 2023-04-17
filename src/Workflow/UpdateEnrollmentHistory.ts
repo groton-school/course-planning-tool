@@ -5,18 +5,25 @@ import * as Role from '../Role';
 export const Single = () => 'updateSingle';
 global.updateSingle = () => {
   SpreadsheetApp.getUi().showModalDialog(
-    g.HtmlService.createTemplateFromFile('templates/update', {
-      thread: Utilities.getUuid()
+    g.HtmlService.createTemplateFromFile('templates/plan-picker', {
+      thread: Utilities.getUuid(),
+      studentPicker: {
+        message:
+          'Please choose a student for whom to update their enrollment history',
+        actionName: 'Update Enrollment History',
+        callback: updateSingleFor
+      }
     }).setHeight(100),
-    'Update Course Plan'
+    'Update Enrollment History'
   );
 };
 
-global.updateSingleFor = (hostId: string, thread: string) => {
+const updateSingleFor = 'updateEnrollmentHistorySingleFor';
+global.updateEnrollmentHistorySingleFor = (hostId: string, thread: string) => {
   g.HtmlService.Element.Progress.reset(thread);
   g.HtmlService.Element.Progress.setMax(
     thread,
-    CoursePlan.getUpdateStepCount()
+    CoursePlan.getUpdateEnrollmentHistoryStepCount()
   );
   CoursePlan.setThread(thread);
   const plan = CoursePlan.for(Role.Student.getByHostId(hostId));
@@ -31,19 +38,19 @@ global.updateSingleFor = (hostId: string, thread: string) => {
   });
 };
 
-export const All = () => 'updateAll';
-global.updateAll = () => {
+export const All = () => 'updateEnrollmentHistoryAll';
+global.updateEnrollmentHistoryAll = () => {
   const thread = Utilities.getUuid();
   g.HtmlService.Element.Progress.reset(thread);
   CoursePlan.setThread(thread);
   const plans = CoursePlan.getAll().map(([hostId]) => hostId);
   g.HtmlService.Element.Progress.setMax(
     thread,
-    plans.length * CoursePlan.getUpdateStepCount()
+    plans.length * CoursePlan.getUpdateEnrollmentHistoryStepCount()
   );
   SpreadsheetApp.getUi().showModalDialog(
     g.HtmlService.Element.Progress.getHtmlOutput(thread),
-    'Update Course Plans'
+    'Update Enrollment Histories'
   );
   plans.forEach((hostId) =>
     CoursePlan.for(Role.Student.getByHostId(hostId)).updateEnrollmentHistory()
