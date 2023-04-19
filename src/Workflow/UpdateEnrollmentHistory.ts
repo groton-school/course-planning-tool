@@ -1,34 +1,30 @@
 import g from '@battis/gas-lighter';
 import CoursePlan from '../CoursePlan';
-import * as Role from '../Role';
+import * as Picker from './Picker';
 
-export const Single = () => 'updateSingle';
-global.updateSingle = () => {
-  SpreadsheetApp.getUi().showModalDialog(
-    g.HtmlService.createTemplateFromFile('templates/plan-picker', {
-      thread: Utilities.getUuid(),
-      studentPicker: {
-        message:
-          'Please choose a student for whom to update their enrollment history',
-        actionName: 'Update Enrollment History',
-        callback: updateSingleFor
-      }
-    }).setHeight(100),
+export const pickPlan = () => 'h';
+global.h = () =>
+  g.HtmlService.Element.Picker.showModalDialog(
+    SpreadsheetApp,
+    {
+      list: Picker.allPlans(),
+      message:
+        'Please choose a student for whom to update their enrollment history',
+      actionName: 'Update Enrollment History',
+      callback: updateEnrollmentHistoryFor()
+    },
     'Update Enrollment History'
   );
-};
 
-const updateSingleFor = 'updateEnrollmentHistorySingleFor';
-global.updateEnrollmentHistorySingleFor = (hostId: string, thread: string) => {
-  g.HtmlService.Element.Progress.reset(thread);
-  g.HtmlService.Element.Progress.setMax(
-    thread,
-    CoursePlan.getUpdateEnrollmentHistoryStepCount()
-  );
+const updateEnrollmentHistoryFor = () => 'i';
+global.i = (hostId: string, thread: string) => {
+  const progress = g.HtmlService.Element.Progress.bindTo(thread);
+  progress.reset();
+  progress.setMax(CoursePlan.getUpdateEnrollmentHistoryStepCount());
   CoursePlan.setThread(thread);
-  const plan = CoursePlan.for(Role.Student.getByHostId(hostId));
+  const plan = CoursePlan.getByHostId(hostId);
   plan.updateEnrollmentHistory();
-  g.HtmlService.Element.Progress.setComplete(thread, {
+  progress.setComplete({
     html: `<div>Updated course plan for ${plan
       .getStudent()
       .getFormattedName()}.</div>
@@ -38,22 +34,18 @@ global.updateEnrollmentHistorySingleFor = (hostId: string, thread: string) => {
   });
 };
 
-export const All = () => 'updateEnrollmentHistoryAll';
-global.updateEnrollmentHistoryAll = () => {
-  const thread = Utilities.getUuid();
-  g.HtmlService.Element.Progress.reset(thread);
-  CoursePlan.setThread(thread);
-  const plans = CoursePlan.getAll().map(([hostId]) => hostId);
-  g.HtmlService.Element.Progress.setMax(
-    thread,
+export const all = () => 'j';
+global.j = () => {
+  const progress = g.HtmlService.Element.Progress.bindTo(Utilities.getUuid());
+  progress.reset();
+  progress.showModalDialog(SpreadsheetApp, 'Update Enrollment Histories');
+  CoursePlan.setThread(progress.getThread());
+  const plans = CoursePlan.getAll();
+  progress.setMax(
     plans.length * CoursePlan.getUpdateEnrollmentHistoryStepCount()
   );
-  SpreadsheetApp.getUi().showModalDialog(
-    g.HtmlService.Element.Progress.getHtmlOutput(thread),
-    'Update Enrollment Histories'
+  plans.forEach(([hostId]) =>
+    CoursePlan.getByHostId(hostId).updateEnrollmentHistory()
   );
-  plans.forEach((hostId) =>
-    CoursePlan.for(Role.Student.getByHostId(hostId)).updateEnrollmentHistory()
-  );
-  g.HtmlService.Element.Progress.setComplete(thread, true);
+  progress.setComplete(true);
 };

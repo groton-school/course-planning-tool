@@ -61,19 +61,25 @@ export class Student {
   }
 
   public static getByForm(gradYear: number): Student[] {
-    return Student.getAll().filter((student) => student.gradYear == gradYear);
+    return Student.getData()
+      .map((row) => new Student(row))
+      .filter((student) => student.gradYear == gradYear);
   }
 
-  public static getForms(): number[] {
-    return Student.getData().reduce((forms, [, , , , gradYear]) => {
-      if (!forms.includes(gradYear)) {
-        forms.push(gradYear);
-        forms.sort();
-      }
-      return forms;
-    }, []);
-  }
+  public static getForms: g.HtmlService.Element.Picker.OptionsCallback = () => {
+    return Student.getData()
+      .reduce((forms, [, , , , gradYear]) => {
+        if (!forms.includes(gradYear)) {
+          forms.push(gradYear);
+          forms.sort();
+        }
+        return forms;
+      }, [])
+      .map(
+        (form): g.HtmlService.Element.Picker.Option => ({
+          name: `Class of ${form}`,
+          value: form.toString()
+        })
+      );
+  };
 }
-
-global.studentGetAll = Student.getAll;
-global.studentGetForms = Student.getForms;

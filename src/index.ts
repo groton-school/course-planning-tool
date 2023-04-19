@@ -6,6 +6,6 @@ global.onOpen = AddOn.onOpen;
 global.onInstall = AddOn.onInstall;
 
 // helper functions
-global.include = g.HtmlService.include;
+global.include = g.HtmlService.Template.include;
 global.getProgress = (thread: string) =>
     g.HtmlService.Element.Progress.getProgress(thread);

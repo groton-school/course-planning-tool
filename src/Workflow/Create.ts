@@ -1,29 +1,28 @@
 import g from '@battis/gas-lighter';
 import CoursePlan from '../CoursePlan';
 import * as Role from '../Role';
+import * as Picker from './Picker';
 
-export const Single = () => 'createSingle';
-global.createSingle = () => {
-  SpreadsheetApp.getUi().showModalDialog(
-    g.HtmlService.createTemplateFromFile('templates/create', {
-      thread: Utilities.getUuid(),
-      picker: 'showStudentPicker',
-      pickerCallback: 'studentGetAll',
-      createCallback: 'createSingleFor'
-    }).setHeight(100),
+export const pickStudent = () => 'a';
+global.a = () =>
+  g.HtmlService.Element.Picker.showModalDialog(
+    SpreadsheetApp,
+    {
+      list: Picker.allStudents(),
+      message: 'Please choose a student for whom to create a course plan',
+      actionName: 'Create Course Plan',
+      callback: createPlanFor()
+    },
     'Create Course Plan'
   );
-};
 
-global.createSingleFor = (hostId: string, thread: string) => {
-  g.HtmlService.Element.Progress.reset(thread);
-  g.HtmlService.Element.Progress.setMax(
-    thread,
-    CoursePlan.getCreateStepCount()
-  );
+const createPlanFor = () => 'b';
+global.b = (hostId: string, thread: string) => {
+  const progress = g.HtmlService.Element.Progress.bindTo(thread);
+  progress.setMax(CoursePlan.getCreateStepCount());
   CoursePlan.setThread(thread);
-  const plan = CoursePlan.for(Role.Student.getByHostId(hostId));
-  g.HtmlService.Element.Progress.setComplete(thread, {
+  const plan = CoursePlan.getByHostId(hostId);
+  progress.setComplete({
     html: `<div>Created course plan for ${plan
       .getStudent()
       .getFormattedName()}.</div>
@@ -33,41 +32,35 @@ global.createSingleFor = (hostId: string, thread: string) => {
   });
 };
 
-export const ByForm = () => 'createByForm';
-global.createByForm = () => {
-  SpreadsheetApp.getUi().showModalDialog(
-    g.HtmlService.createTemplateFromFile('templates/create', {
-      thread: Utilities.getUuid(),
-      picker: 'showFormPicker',
-      pickerCallback: 'studentGetForms',
-      createCallback: 'createAll'
-    }).setHeight(100),
+export const pickForm = () => 'c';
+global.c = () =>
+  g.HtmlService.Element.Picker.showModalDialog(
+    SpreadsheetApp,
+    {
+      list: Picker.allForms(),
+      message: 'Please choose a form for which to create course plans',
+      actionName: 'Create Course Plans',
+      callback: 'createAll'
+    },
     'Create Course Plans'
   );
-};
 
-export const All = () => 'createAll';
-global.createAll = (gradYear?: number, thread?: string) => {
+export const all = () => 'd';
+global.d = (gradYear?: number, thread?: string) => {
   thread = thread || Utilities.getUuid();
-  g.HtmlService.Element.Progress.reset(thread);
+  const progress = g.HtmlService.Element.Progress.bindTo(thread);
+  progress.reset();
+  if (!gradYear) {
+    progress.showModalDialog(SpreadsheetApp, 'Create Course Plans');
+  }
   CoursePlan.setThread(thread);
   const students = gradYear
     ? Role.Student.getByForm(gradYear)
     : Role.Student.getAll();
-  g.HtmlService.Element.Progress.setMax(
-    thread,
-    students.length * CoursePlan.getCreateStepCount()
-  );
-  if (!gradYear) {
-    // modal already open for selection if not creating all
-    SpreadsheetApp.getUi().showModalDialog(
-      g.HtmlService.Element.Progress.getHtmlOutput(thread),
-      `Create Course Plans${gradYear ? ` (Class of ${gradYear})` : ''}`
-    );
-  }
+  progress.setMax(students.length * CoursePlan.getCreateStepCount());
   students.forEach((student: Role.Student, i) => {
-    g.HtmlService.Element.Progress.setValue(thread, i + 1);
+    progress.setValue(i + 1);
     CoursePlan.for(student);
   });
-  g.HtmlService.Element.Progress.setComplete(thread, true);
+  progress.setComplete(true);
 };

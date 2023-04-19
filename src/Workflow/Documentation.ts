@@ -1,9 +1,8 @@
 import g from '@battis/gas-lighter';
 import * as SheetParameters from '../CoursePlan/SheetParameters';
 
-export const DownloadEmptyCoursePlanningData = () =>
-  'downloadEmptyCoursePlanningData';
-global.downloadEmptyCoursePlanningData = () => {
+export const downloadEmptyCoursePlanningData = () => 'n';
+global.n = () => {
   const progress = g.HtmlService.Element.Progress.bindTo(Utilities.getUuid());
   progress.reset();
   SpreadsheetApp.getUi().showModalDialog(
@@ -104,26 +103,26 @@ global.downloadEmptyCoursePlanningData = () => {
             <script>
                 document.querySelector('#download').addEventListener('click', () => {
                     replaceContent(${JSON.stringify(cleanUp.getHtml())});
-                    google.script.run.withSuccessHandler(() => google.script.host.close()).documentationDeleteTempFile('${cleanCopy.getId()}')
+                    google.script.run.withSuccessHandler(() => google.script.host.close()).${deleteTempFile()}('${cleanCopy.getId()}')
                 });
             </script>
     `
   });
 };
 
-global.documentationDeleteTempFile = (id: string, delayInSeconds = 5) => {
+const deleteTempFile = () => 'p';
+global.p = (id: string, delayInSeconds = 5) => {
   Utilities.sleep(delayInSeconds * 1000);
   DriveApp.getFileById(id).setTrashed(true);
 };
 
-export const DownloadEmptyCoursePlanTemplate = () =>
-  'documentationDownloadEmptyCoursePlanTemplate';
-global.documentationDownloadEmptyCoursePlanTemplate = () => {
+export const downloadEmptyCoursePlanTemplate = () => 'o';
+global.o = () => {
   const template = SpreadsheetApp.openByUrl(
     SheetParameters.getCoursePlanTemplate()
   );
   SpreadsheetApp.getUi().showModalDialog(
-    g.HtmlService.createTemplate(
+    g.HtmlService.Template.createTemplate(
       `
         <html>
           <head>

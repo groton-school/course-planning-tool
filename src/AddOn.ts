@@ -3,44 +3,44 @@ import * as Workflow from './Workflow';
 export function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('Course Planning')
-    .addItem('Create all course plans', Workflow.Create.All())
-    .addItem('Create course plans by form…', Workflow.Create.ByForm())
+    .addItem('Create all course plans', Workflow.Create.all())
+    .addItem('Create course plans by form…', Workflow.Create.pickForm())
     .addItem(
       'Update all course plan enrollment histories',
-      Workflow.UpdateEnrollmentHistory.All()
+      Workflow.UpdateEnrollmentHistory.all()
     )
     .addItem(
       'Update all course plan course lists',
-      Workflow.UpdateCourseList.All()
+      Workflow.UpdateCourseList.all()
     )
     .addSeparator()
-    .addItem('Create a single course plan…', Workflow.Create.Single())
+    .addItem('Create a single course plan…', Workflow.Create.pickStudent())
     .addItem(
       "Update a single course plan's enrollment history…",
-      Workflow.UpdateEnrollmentHistory.Single()
+      Workflow.UpdateEnrollmentHistory.pickPlan()
     )
     .addItem(
       "Update a single course plan's course list …",
-      Workflow.UpdateCourseList.Single()
+      Workflow.UpdateCourseList.pickPlan()
     )
     .addSeparator()
     .addItem(
       'Create a single missing student folder…',
-      Workflow.Restructure.CreateMissingStudentFolder()
+      Workflow.Restructure.pickStudentMissingFolder()
     )
     .addItem(
       'Create all missing student folders',
-      Workflow.Restructure.CreateAllMissingStudentFolders()
+      Workflow.Restructure.createAllMissingStudentFolders()
     )
-    .addItem('Delete a single course plan…', Workflow.Delete.Single())
+    .addItem('Delete a single course plan…', Workflow.Delete.pickPlan())
     .addSeparator()
     .addItem(
       'Download clean copy of Course Planning Data',
-      Workflow.Documentation.DownloadEmptyCoursePlanningData()
+      Workflow.Documentation.downloadEmptyCoursePlanningData()
     )
     .addItem(
       'Download clean copy of Course Plan Template',
-      Workflow.Documentation.DownloadEmptyCoursePlanTemplate()
+      Workflow.Documentation.downloadEmptyCoursePlanTemplate()
     )
     .addToUi();
 }
