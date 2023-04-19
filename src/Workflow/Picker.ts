@@ -18,8 +18,21 @@ global.t = () =>
 export const allPlans = () => 'u';
 global.u = () =>
   CoursePlan.getAll().map(
-    ([hostId]): g.HtmlService.Element.Picker.Option => ({
-      name: Role.Student.getByHostId(hostId).getFormattedName(),
+    ([
+      hostId,
+      ,
+      ,
+      ,
+      firstName,
+      lastName,
+      gradYear
+    ]): g.HtmlService.Element.Picker.Option => ({
+      name: new Role.Student({
+        hostId,
+        firstName,
+        lastName,
+        gradYear
+      }).getFormattedName(),
       value: hostId
     })
   );
