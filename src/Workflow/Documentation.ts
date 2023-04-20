@@ -92,7 +92,7 @@ global.n = () => {
     html: `
             <a
                 id="download"
-                class="button action"
+                class="btn btn-primary"
                 target="_blank"
                 href="${cleanCopy
         .getUrl()
@@ -132,7 +132,7 @@ global.o = () => {
             <div id="content">
                 <a
                     id="download"
-                    class="button action"
+                    class="btn btn-primary"
                     target="_blank"
                     href="${template
         .getUrl()
