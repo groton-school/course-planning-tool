@@ -161,26 +161,46 @@ export default class CoursePlan {
     return this.file;
   }
 
-  private getWorkingCopy = () => this.workingCopy;
+  private getWorkingCopy() {
+    if (!this.workingCopy) {
+      this.workingCopy = this.getPlanSheet();
+    }
+    return this.workingCopy;
+  }
 
   private setWorkingCopy(sheet: GoogleAppsScript.Spreadsheet.Sheet) {
     this.workingCopy = sheet;
     this.anchor = null;
   }
 
-  private getAnchorOffset(...offset: number[]) {
+  private getAnchorOffset(): GoogleAppsScript.Spreadsheet.Range;
+  private getAnchorOffset(
+    rowOffset: number,
+    columnOffset: number
+  ): GoogleAppsScript.Spreadsheet.Range;
+  private getAnchorOffset(
+    rowOffset: number,
+    columnOffset: number,
+    numRows: number,
+    numColumns: number
+  ): GoogleAppsScript.Spreadsheet.Range;
+  private getAnchorOffset(
+    rowOffset?: number,
+    columnOffset?: number,
+    numRows?: number,
+    numColumns?: number
+  ): GoogleAppsScript.Spreadsheet.Range {
     if (!this.anchor && this.workingCopy) {
       this.anchor = this.getWorkingCopy().getRange('Template_Anchor');
     }
-    const [rowOffset, columnOffset, numRows, numColumns] = offset;
-    switch (offset.length) {
-      case 2:
-        return this.anchor.offset(rowOffset, columnOffset);
-      case 4:
+    if (rowOffset !== undefined && columnOffset !== undefined) {
+      if (numRows !== undefined && numColumns !== undefined) {
         return this.anchor.offset(rowOffset, columnOffset, numRows, numColumns);
-      case 0:
-      default:
-        return this.anchor;
+      } else {
+        return this.anchor.offset(rowOffset, columnOffset);
+      }
+    } else {
+      return this.anchor;
     }
   }
 
