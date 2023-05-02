@@ -554,4 +554,27 @@ export default class CoursePlan {
     this.setStatus('trashing plan'); // #delete
     file.setTrashed(true);
   }
+
+  public expandDeptOptionsIfFewerThanParams() {
+    this.setWorkingCopy(this.getPlanSheet());
+    const current = this.getNumOptionsPerDepartment();
+    const target = SheetParameters.getNumOptionsPerDepartment();
+    if (current < target) {
+      for (
+        let row =
+          this.getAnchorOffset().getRow() +
+          this.getNumDepartments() * current -
+          1;
+        row > this.getAnchorOffset().getRow();
+        row -= current
+      ) {
+        this.getPlanSheet().insertRowsAfter(row, target - current);
+      }
+    }
+    CoursePlan.coursePlanInventory.setMetadata(
+      this.getHostId(),
+      Inventory.CoursePlan.COL_NUM_OPTIONS_PER_DEPT,
+      target
+    );
+  }
 }

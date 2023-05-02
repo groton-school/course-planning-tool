@@ -32,6 +32,14 @@ export function onOpen() {
       'Create all missing student folders',
       Workflow.Restructure.createAllMissingStudentFolders()
     )
+    .addItem(
+      "Expand a single course plan's dept. options…",
+      Workflow.Restructure.pickStudentExpandDeptOptions()
+    )
+    .addItem(
+      'Expand all dept options',
+      Workflow.Restructure.expandAllDeptOptions()
+    )
     .addItem('Delete a single course plan…', Workflow.Delete.pickPlan())
     .addSeparator()
     .addItem(
