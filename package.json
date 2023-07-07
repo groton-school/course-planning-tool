@@ -16,39 +16,20 @@
     "url": "https://github.com/groton-school/course-planning-tool/issues"
   },
   "scripts": {
-    "clean": "rimraf build",
-    "build": "npx webpack",
-    "deploy": "npx clasp push"
+    "clean": "shx rm -rf build",
+    "build": "webpack",
+    "deploy": "clasp push"
   },
   "dependencies": {
-    "@battis/gas-lighter": "github:battis/gas-lighter#dist"
+    "@battis/gas-lighter": "latest"
   },
   "devDependencies": {
-    "@battis/eslint-config": "github:battis/eslint-config",
-    "@battis/prettier-config": "github:battis/prettier-config",
-    "rimraf": "^4.4.1"
+    "@battis/eslint-config": "latest",
+    "@battis/prettier-config": "latest",
+    "shx": "^0.3.4"
   },
   "prettier": "@battis/prettier-config",
   "eslintConfig": {
-    "extends": [
-      "@battis/eslint-config"
-    ],
-    "overrides": [
-      {
-        "files": "*.html",
-        "env": {
-          "browser": true,
-          "node": false
-        },
-        "globals": {
-          "google": "readonly",
-          "replaceContent": "readonly",
-          "attachEvent": "readonly",
-          "showProgress": "readonly",
-          "showStudentPicker": "readonly",
-          "showFormPicker": "readonly"
-        }
-      }
-    ]
+    "extends": "@battis/gas-lighter/.eslintrc.json"
   }
 }

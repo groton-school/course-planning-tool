@@ -21,7 +21,7 @@
   "addOns": {
     "common": {
       "name": "Course Planning",
-      "logoUrl": "https://drive.google.com/uc?id=1_U2uk7ZyOMiRjyJmZQ-s_o5LrHSAPRUj"
+      "logoUrl": "https://groton-school.github.io/course-planning-tool/logo.png"
     },
     "sheets": {}
   }
