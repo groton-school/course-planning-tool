@@ -24,7 +24,7 @@
     "deploy:push": "clasp push"
   },
   "dependencies": {
-    "@battis/gas-lighter": "latest"
+    "@battis/gas-lighter": "^0.2.0"
   },
   "devDependencies": {
     "@battis/eslint-config": "latest",
