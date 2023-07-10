@@ -120,6 +120,15 @@ Downloads an XLSX file that contains all of the formatting and unctions, but non
 7. `IMPORTRANGE()` that list into the Historical Enrollment worksheet in Course Planning Data
 8. Replace the imported range with a copy-and-paste-by-value to reduce dependency overhead
 
+##### Creating new student course plans midsummer
+
+…before advisor data is entered in myGroton.
+
+1. In the Advisor List sheet, add the student information as known in all pink fields. (An arbitrary advisor will need to be chosen.)
+2. Use the `Create a single course plan` workflow to generate that student's course plan, folder, etc.
+
+When the student's advisor is finalized, they will have to go through the `A student changes adivsor` workflow below.
+
 ##### A student changes advisor
 
 1. Add the new advisor as an editor on the course plan
