@@ -19,6 +19,7 @@ global.n = () => {
   };
   const imports = {
     'Advisor List': 8,
+    'Advisor List (Previous Year)': 8,
     'Course List': 5,
     'Historical Enrollment': 14
   };
