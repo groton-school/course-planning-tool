@@ -51,7 +51,8 @@ export class Student {
       null
     );
 
-  public getAdvisor = () => Advisor.getByAdvisee(this.hostId);
+  public getAdvisor = (year = Advisor.ByYear.Current) =>
+    Advisor.getByAdvisee(this.hostId, year);
 
   public static getAll(): Student[] {
     const thisYear = CoursePlan.getCurrentSchoolYear();

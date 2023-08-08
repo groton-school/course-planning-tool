@@ -63,15 +63,31 @@ export default class CoursePlan {
     hostId: Inventory.Key
   ): CoursePlan => new CoursePlan({ hostId, spreadsheetId });
 
-  public static getByHostId = (hostId: string) =>
-    CoursePlan.coursePlanInventory.get(hostId);
+  public static getByHostId(hostId: string) {
+    const plan = CoursePlan.coursePlanInventory.get(hostId);
+    if (plan.hasNewAdvisor() && !plan.hasPermissionsUpdate()) {
+      Logger.log(
+        `Need to update course plan permissions for ${plan.getFile().getName()}`
+      );
+      plan.updateAdvisorPermissions();
+    }
+    if (plan.hasNewAdvisor() && !plan.hasStudentFolderPermissionsUpdate()) {
+      Logger.log(
+        `Need to update folder permissions for ${plan
+          .getStudentFolder()
+          .getName()}`
+      );
+      plan.updateStudentFolderPermissions();
+    }
+    return plan;
+  }
 
   public static for(student: Role.Student) {
     g.HtmlService.Element.Progress.setStatus(
       CoursePlan.thread,
       `${student.getFormattedName()} (consulting inventory)`
     );
-    return CoursePlan.coursePlanInventory.get(student.hostId);
+    return CoursePlan.getByHostId(student.hostId);
   }
 
   public static getAll = () => CoursePlan.coursePlanInventory.getAll();
@@ -340,8 +356,8 @@ export default class CoursePlan {
   public getStudentFolder = () =>
     CoursePlan.studentFolderInventory.get(this.getHostId());
 
-  private getAdvisorFolder = () =>
-    CoursePlan.advisorFolderInventory.get(this.getAdvisor().email);
+  private getAdvisorFolder = (advisorEmail = this.getAdvisor().email) =>
+    CoursePlan.advisorFolderInventory.get(advisorEmail);
 
   public static getAdvisorFolderFor = (student: Role.Student) =>
     CoursePlan.advisorFolderInventory.get(student.getAdvisor().email);
@@ -595,6 +611,97 @@ export default class CoursePlan {
       this.getHostId(),
       Inventory.CoursePlan.Columns.NumOptionsPerDepartment,
       target
+    );
+  }
+
+  public hasNewAdvisor = () =>
+    CoursePlan.coursePlanInventory.getMetadata(
+      this.getHostId(),
+      Inventory.CoursePlan.Columns.NewAdvisor
+    );
+
+  public hasPermissionsUpdate = () =>
+    CoursePlan.coursePlanInventory.getMetadata(
+      this.getHostId(),
+      Inventory.CoursePlan.Columns.PermissionsUpdated
+    );
+
+  public hasStudentFolderPermissionsUpdate = () =>
+    CoursePlan.studentFolderInventory.getMetadata(
+      this.getHostId(),
+      Inventory.StudentFolder.Columns.PermissionsUpdated
+    );
+
+  private updateAdvisorPermissions() {
+    const previousAdvisor = this.getStudent().getAdvisor(
+      Role.Advisor.ByYear.Previous
+    );
+    g.DriveApp.Permission.add(
+      this.getFile().getId(),
+      this.getAdvisor().email,
+      g.DriveApp.Permission.Role.Writer
+    );
+    Logger.log(
+      `Added ${this.getAdvisor().email
+      } as editor to ${this.getFile().getName()}`
+    );
+    const protection = this.getWorkingCopy()
+      .getRange('Protect_Advisor')
+      .protect();
+    protection.addEditor(this.getAdvisor().email);
+    Logger.log(
+      `Added ${this.getAdvisor().email
+      } to Protect_Advisor editors in ${this.getFile().getName()}`
+    );
+    protection.removeEditor(previousAdvisor.email);
+    Logger.log(
+      `Removed ${previousAdvisor.email
+      } from Protect_Advisor in ${this.getFile().getName()}`
+    );
+    this.getFile().removeEditor(previousAdvisor.email);
+    CoursePlan.coursePlanInventory.setMetadata(
+      this.getHostId(),
+      Inventory.CoursePlan.Columns.PermissionsUpdated,
+      true
+    );
+  }
+
+  private updateStudentFolderPermissions() {
+    const previousAdvisor = this.getStudent().getAdvisor(
+      Role.Advisor.ByYear.Previous
+    );
+    const studentFolder = this.getStudentFolder();
+    g.DriveApp.Permission.add(
+      studentFolder.getId(),
+      this.getAdvisor().email,
+      g.DriveApp.Permission.Role.Reader
+    );
+    Logger.log(
+      `Added ${this.getAdvisor().email} as viewer to ${studentFolder.getName()}`
+    );
+    const shortcuts = this.getAdvisorFolder(
+      previousAdvisor.email
+    ).getFilesByType(MimeType.SHORTCUT);
+    while (shortcuts.hasNext()) {
+      const shortcut = shortcuts.next();
+      if (shortcut.getTargetId() === studentFolder.getId()) {
+        shortcut.moveTo(this.getAdvisorFolder());
+        Logger.log(
+          `Moved ${shortcut.getName()} from ${this.getAdvisorFolder(
+            previousAdvisor.email
+          ).getName()} to ${this.getAdvisorFolder().getName()}`
+        );
+      }
+    }
+    studentFolder.removeViewer(previousAdvisor.email);
+    Logger.log(
+      `Removed ${previousAdvisor.email
+      } as viewer from ${studentFolder.getName()}`
+    );
+    CoursePlan.studentFolderInventory.setMetadata(
+      this.getHostId(),
+      Inventory.StudentFolder.Columns.PermissionsUpdated,
+      true
     );
   }
 }
