@@ -24,7 +24,7 @@ export default class CoursePlan {
         gradYear
       })
   );
-  private static studentFolderInventory = new Inventory.StudentFolder(
+  public static studentFolderInventory = new Inventory.StudentFolder(
     'Student Folder Inventory',
     (hostId) =>
       CoursePlan.applyFormat(
@@ -40,7 +40,7 @@ export default class CoursePlan {
         Role.Advisor.getByEmail(email.toString())
       )
   );
-  private static coursePlanInventory = new Inventory.CoursePlan(
+  public static coursePlanInventory = new Inventory.CoursePlan(
     'Course Plan Inventory'
   );
 
@@ -115,12 +115,12 @@ export default class CoursePlan {
     ]);
     CoursePlan.coursePlanInventory.setMetadata(
       this.getHostId(),
-      Inventory.CoursePlan.COL_NUM_OPTIONS_PER_DEPT,
+      Inventory.CoursePlan.Columns.NumOptionsPerDepartment,
       this.getNumOptionsPerDepartment()
     );
     CoursePlan.coursePlanInventory.setMetadata(
       this.getHostId(),
-      Inventory.CoursePlan.COL_NUM_COMMENTS,
+      Inventory.CoursePlan.Columns.NumComments,
       this.getNumComments()
     );
   }
@@ -231,7 +231,7 @@ export default class CoursePlan {
         this.numOptionsPerDepartment =
           CoursePlan.coursePlanInventory.getMetadata(
             this.getHostId(),
-            Inventory.CoursePlan.COL_NUM_OPTIONS_PER_DEPT
+            Inventory.CoursePlan.Columns.NumOptionsPerDepartment
           );
       } else {
         this.numOptionsPerDepartment =
@@ -246,7 +246,7 @@ export default class CoursePlan {
       if (CoursePlan.coursePlanInventory.has(this.getHostId())) {
         this.numComments = CoursePlan.coursePlanInventory.getMetadata(
           this.getHostId(),
-          Inventory.CoursePlan.COL_NUM_COMMENTS
+          Inventory.CoursePlan.Columns.NumComments
         );
       } else {
         this.numComments = SheetParameters.getNumComments();
@@ -593,7 +593,7 @@ export default class CoursePlan {
     }
     CoursePlan.coursePlanInventory.setMetadata(
       this.getHostId(),
-      Inventory.CoursePlan.COL_NUM_OPTIONS_PER_DEPT,
+      Inventory.CoursePlan.Columns.NumOptionsPerDepartment,
       target
     );
   }

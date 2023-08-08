@@ -1,8 +1,11 @@
 import Inventory, { Formatter, Key } from './Inventory';
 
 export default class FolderInventory extends Inventory<GoogleAppsScript.Drive.Folder> {
-  public static COL_FOLDER_ID = Inventory.COL_ID;
-  public static COL_FOLDER_URL = Inventory.COL_URL;
+  public static Columns = {
+    ...Inventory.Columns,
+    FolderId: Inventory.Columns.Id,
+    FolderUrl: Inventory.Columns.Url
+  };
 
   public constructor(sheetName: string, formatter: Formatter) {
     super(sheetName);

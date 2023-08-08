@@ -5,10 +5,11 @@ export type Entry = [Key, string, string];
 export type Formatter = (key: Key) => string;
 
 export default abstract class Inventory<T> {
-  public static COL_KEY = 1;
-  public static COL_ID = 2;
-  public static COL_URL = 3;
-
+  public static Columns = {
+    Key: 1,
+    Id: 2,
+    Url: 3
+  };
   private data?: any[][];
   private sheet: GoogleAppsScript.Spreadsheet.Sheet;
 
@@ -18,6 +19,14 @@ export default abstract class Inventory<T> {
 
   protected abstract getter(id: string, key?: Key): T;
   protected abstract creator(key: Key): T;
+
+  public getAll() {
+    const entries = g.SpreadsheetApp.Value.getSheetDisplayValues(
+      this.getSheet()
+    );
+    entries.shift(); // remove column headings
+    return entries;
+  }
 
   private getData() {
     if (!this.data) {
@@ -29,7 +38,9 @@ export default abstract class Inventory<T> {
   }
 
   public getMetadata = (key: Key, column: number) =>
-    this.getData().find((row) => row[Inventory.COL_KEY - 1] == key)[column - 1];
+    this.getData().find((row) => row[Inventory.Columns.Key - 1] == key)[
+    column - 1
+    ];
 
   public setMetadata = (key: Key, column: number, value: any) =>
     this.getData().forEach((entry, row: number) => {
@@ -73,5 +84,5 @@ export default abstract class Inventory<T> {
     this.getSheet().deleteRow(row + 1);
   }
 
-  protected getSheet = () => this.sheet;
+  public getSheet = () => this.sheet;
 }
