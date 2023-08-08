@@ -20,14 +20,6 @@ export default abstract class Inventory<T> {
   protected abstract getter(id: string, key?: Key): T;
   protected abstract creator(key: Key): T;
 
-  public getAll() {
-    const entries = g.SpreadsheetApp.Value.getSheetDisplayValues(
-      this.getSheet()
-    );
-    entries.shift(); // remove column headings
-    return entries;
-  }
-
   private getData() {
     if (!this.data) {
       this.data = g.SpreadsheetApp.Range.getEntireSheet(

@@ -84,7 +84,7 @@ global.y = () => {
     <p>Don't forget to:</p>
     <ol>
       <li>Update the Advisor List from Blackbaud</li>
-      <li>REfresh the <code>Historical Enrollment</code> sheet (<a href="https://github.com/groton-school/course-planning-tool#refresh-historical-enrollment" target="_blank">directions</a>)</li>
+      <li>Refresh the <code>Historical Enrollment</code> sheet (<a href="https://github.com/groton-school/course-planning-tool#refresh-historical-enrollment" target="_blank">directions</a>)</li>
     </ol>
     <a id="ok" class="btn btn-primary" href="#">Ok</a>
     <script>

@@ -1,3 +1,4 @@
+import g from '@battis/gas-lighter';
 import CoursePlan from '../CoursePlan';
 import * as Role from '../Role';
 import Inventory, { Key as InventoryKey } from './Inventory';
@@ -35,4 +36,12 @@ export default class CoursePlanInventory extends Inventory<CoursePlan> {
     new CoursePlan(Role.Student.getByHostId(key.toString()));
 
   public getSpreadsheet = () => this.getSheet().getParent();
+
+  public getAll() {
+    const entries = g.SpreadsheetApp.Value.getSheetDisplayValues(
+      this.getSheet()
+    );
+    entries.shift(); // remove column headings
+    return entries;
+  }
 }
