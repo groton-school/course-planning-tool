@@ -131,12 +131,12 @@ When the student's advisor is finalized, they will have to go through the `A stu
 
 ##### A student changes advisor
 
-1. Add the new advisor as an editor on the course plan
-2. On the Course Plan sheet, adjust the Protected Ranges (under Data)
-   1. Add the new advisor to Comments from Faculty Advisor
-   2. Remove the old advisor from Comments from Faculty Advisor
-3. Remove the old advisor as an editor on the spreadsheet
-4. Move the shortcut to the course plan from the old advisory group folder to the new advisory group folder
+If they change advisors at the "normal" time of year (right as the Roll-Over Academic Year workflow is started), nothing needs to happen.
+
+If they change advisors at another time of year:
+
+1. Copy their current row from the `Advisors List` sheet to replace their row (if present -- add a row if not) in `Advisors List (Previous Year`.
+2. Run an update on their course plan (e.g. Update Course Listing) to automatically reset permissions, aliases, etc. for their course plan.
 
 </td></tr></tbody></table>
 
