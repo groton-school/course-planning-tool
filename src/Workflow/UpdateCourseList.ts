@@ -1,5 +1,6 @@
 import g from '@battis/gas-lighter';
 import CoursePlan from '../CoursePlan';
+import Inventory from '../Inventory';
 import * as Picker from './Picker';
 
 export const pickPlan = () => 'e';
@@ -19,17 +20,13 @@ const updateCourseListFor = () => 'f';
 global.f = (hostId: string, thread: string) => {
   const progress = g.HtmlService.Element.Progress.bindTo(thread);
   progress.reset();
-  CoursePlan.setThread(thread);
+  CoursePlan.thread = thread;
   progress.setMax(CoursePlan.getUpdateCourseListStepCount());
-  const plan = CoursePlan.getByHostId(hostId);
+  const plan = CoursePlan.for(hostId);
   plan.updateCourseList();
   progress.setComplete({
-    html: `<div>Updated course list for ${plan
-      .getStudent()
-      .getFormattedName()}.</div>
-            <div><a id="button" class="btn btn-primary" onclick="google.script.host.close()" href="${plan
-        .getSpreadsheet()
-        .getUrl()}" target="_blank">Open Plan</a></div>`
+    html: `<div>Updated course list for ${plan.student.getFormattedName()}.</div>
+            <div><a id="button" class="btn btn-primary" onclick="google.script.host.close()" href="${plan.spreadsheet.getUrl()}" target="_blank">Open Plan</a></div>`
   });
 };
 
@@ -38,11 +35,9 @@ global.g = () => {
   const progress = g.HtmlService.Element.Progress.bindTo(Utilities.getUuid());
   progress.reset();
   progress.showModalDialog(SpreadsheetApp, 'Update Course Lists');
-  CoursePlan.setThread(progress.getThread());
-  const plans = CoursePlan.getAll();
+  CoursePlan.thread = progress.getThread();
+  const plans = Inventory.CoursePlans.getAll();
   progress.setMax(plans.length * CoursePlan.getUpdateCourseListStepCount());
-  plans.forEach(([hostId]) =>
-    CoursePlan.getByHostId(hostId).updateCourseList()
-  );
+  plans.forEach(([hostId]) => CoursePlan.for(hostId).updateCourseList());
   progress.setComplete(true);
 };

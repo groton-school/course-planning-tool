@@ -1,6 +1,6 @@
 import g from '@battis/gas-lighter';
 import CoursePlan from '../CoursePlan';
-import * as Role from '../Role';
+import Role from '../Role';
 import * as Picker from './Picker';
 
 export const pickStudent = () => 'a';
@@ -20,15 +20,11 @@ const createPlanFor = () => 'b';
 global.b = (hostId: string, thread: string) => {
   const progress = g.HtmlService.Element.Progress.bindTo(thread);
   progress.setMax(CoursePlan.getCreateStepCount());
-  CoursePlan.setThread(thread);
-  const plan = CoursePlan.getByHostId(hostId);
+  CoursePlan.thread = thread;
+  const plan = CoursePlan.for(hostId);
   progress.setComplete({
-    html: `<div>Created course plan for ${plan
-      .getStudent()
-      .getFormattedName()}.</div>
-              <div><a id="button" class="btn btn-primary" onclick="google.script.host.close()" href="${plan
-        .getSpreadsheet()
-        .getUrl()}" target="_blank">Open Plan</a></div>`
+    html: `<div>Created course plan for ${plan.student.getFormattedName()}.</div>
+              <div><a id="button" class="btn btn-primary" onclick="google.script.host.close()" href="${plan.spreadsheet.getUrl()}" target="_blank">Open Plan</a></div>`
   });
 };
 
@@ -53,7 +49,7 @@ global.d = (gradYear?: number, thread?: string) => {
   if (!gradYear) {
     progress.showModalDialog(SpreadsheetApp, 'Create Course Plans');
   }
-  CoursePlan.setThread(thread);
+  CoursePlan.thread = thread;
   const students = gradYear
     ? Role.Student.getByForm(gradYear)
     : Role.Student.getAll();

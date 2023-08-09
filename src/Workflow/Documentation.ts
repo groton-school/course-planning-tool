@@ -1,5 +1,5 @@
 import g from '@battis/gas-lighter';
-import * as SheetParameters from '../CoursePlan/SheetParameters';
+import lib from '../lib';
 
 export const downloadEmptyCoursePlanningData = () => 'n';
 global.n = () => {
@@ -120,7 +120,7 @@ global.p = (id: string, delayInSeconds = 5) => {
 export const downloadEmptyCoursePlanTemplate = () => 'o';
 global.o = () => {
   const template = SpreadsheetApp.openByUrl(
-    SheetParameters.getCoursePlanTemplate()
+    lib.config.getCoursePlanTemplate()
   );
   SpreadsheetApp.getUi().showModalDialog(
     g.HtmlService.Template.createTemplate(

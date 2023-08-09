@@ -5,7 +5,7 @@ enum ByYear {
   Previous = 'Advisor List (Previous Year)'
 }
 
-export class Advisor {
+class Advisor {
   public static ByYear = ByYear;
 
   private static data: { [k in ByYear]?: any[][] } = {};
@@ -48,3 +48,7 @@ export class Advisor {
     return new Advisor({ email, firstName, lastName });
   }
 }
+
+namespace Advisor { }
+
+export { Advisor as default };

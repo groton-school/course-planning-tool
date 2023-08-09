@@ -1,16 +1,16 @@
 import g from '@battis/gas-lighter';
 import CoursePlan from '../CoursePlan';
-import * as Role from '../Role';
-import Inventory, { Key as InventoryKey } from './Inventory';
+import Role from '../Role';
+import Inventory from './Inventory';
 
 // TODO graduate seniors out of the inventories?
 // TODO archive departed advisors
-export default class CoursePlanInventory extends Inventory<CoursePlan> {
-  public static Columns = {
-    ...Inventory.Columns,
-    HostId: Inventory.Columns.Key,
-    CoursePlanId: Inventory.Columns.Id,
-    CoursePlanUrl: Inventory.Columns.Url,
+class CoursePlans extends Inventory<CoursePlan> {
+  public Cols = {
+    ...super.Cols,
+    HostId: super.Cols.Key,
+    CoursePlanId: super.Cols.Id,
+    CoursePlanUrl: super.Cols.Url,
     StudentEmail: 4,
     StudentLastName: 5,
     StudentFirstName: 6,
@@ -28,11 +28,11 @@ export default class CoursePlanInventory extends Inventory<CoursePlan> {
     PermissionsUpdated: 18
   };
 
-  protected getter = (id: string, key?: InventoryKey): CoursePlan =>
+  protected getter = (id: string, key?: Inventory.Key): CoursePlan =>
     CoursePlan.bindTo(id, key);
 
   // added to Inventory by CoursePlan constructor directly
-  protected creator = (key: InventoryKey): CoursePlan =>
+  protected creator = (key: Inventory.Key): CoursePlan =>
     new CoursePlan(Role.Student.getByHostId(key.toString()));
 
   public getSpreadsheet = () => this.getSheet().getParent();
@@ -45,3 +45,7 @@ export default class CoursePlanInventory extends Inventory<CoursePlan> {
     return entries;
   }
 }
+
+namespace CoursePlans { }
+
+export { CoursePlans as default };

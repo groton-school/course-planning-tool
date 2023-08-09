@@ -1,5 +1,6 @@
 import g from '@battis/gas-lighter';
 import CoursePlan from '../CoursePlan';
+import Inventory from '../Inventory';
 import * as Picker from './Picker';
 
 export const pickStudentMissingFolder = () => 'k';
@@ -19,8 +20,8 @@ global.k = () =>
 const createMissingStudentFolderFor = () => 'l';
 global.l = (hostId: string, thread: string) => {
   g.HtmlService.Element.Progress.reset(thread);
-  CoursePlan.setThread(thread);
-  CoursePlan.getByHostId(hostId).createStudentFolderIfMissing();
+  CoursePlan.thread = thread;
+  CoursePlan.for(hostId).createStudentFolderIfMissing();
   g.HtmlService.Element.Progress.setComplete(thread, true);
 };
 
@@ -28,15 +29,15 @@ export const createAllMissingStudentFolders = () => 'm';
 global.m = () => {
   const progress = g.HtmlService.Element.Progress.bindTo(Utilities.getUuid());
   progress.reset();
-  CoursePlan.setThread(progress.getThread());
-  const plans = CoursePlan.getAll();
+  CoursePlan.thread = progress.getThread();
+  const plans = Inventory.CoursePlans.getAll();
   progress.setMax(plans.length * 4);
   SpreadsheetApp.getUi().showModalDialog(
     progress.getHtmlOutput(),
     'Create Missing Student Folders'
   );
   plans.forEach(([hostId]) =>
-    CoursePlan.getByHostId(hostId).createStudentFolderIfMissing()
+    CoursePlan.for(hostId).createStudentFolderIfMissing()
   );
   progress.setComplete(true);
 };
@@ -59,16 +60,12 @@ global.v = () => {
 const expandStudentDeptOptionsFor = () => 'w';
 global.w = (hostId: string, thread: string) => {
   g.HtmlService.Element.Progress.reset(thread);
-  CoursePlan.setThread(thread);
-  const plan = CoursePlan.getByHostId(hostId);
+  CoursePlan.thread = thread;
+  const plan = CoursePlan.for(hostId);
   plan.expandDeptOptionsIfFewerThanParams();
   g.HtmlService.Element.Progress.setComplete(thread, {
-    html: `<div>Expanded dept.options for ${plan
-      .getStudent()
-      .getFormattedName()}.</div>
-                <div><a id="button" class="btn btn-primary" onclick="google.script.host.close()" href="${plan
-        .getSpreadsheet()
-        .getUrl()}" target="_blank">Open Plan</a></div>`
+    html: `<div>Expanded dept.options for ${plan.student.getFormattedName()}.</div>
+                <div><a id="button" class="btn btn-primary" onclick="google.script.host.close()" href="${plan.spreadsheet.getUrl()}" target="_blank">Open Plan</a></div>`
   });
 };
 
@@ -80,15 +77,13 @@ global.x = () => {
     progress.getHtmlOutput(),
     'Expand Dept. Options'
   );
-  CoursePlan.setThread(progress.getThread());
-  const plans = CoursePlan.getAll();
+  CoursePlan.thread = progress.getThread();
+  const plans = Inventory.CoursePlans.getAll();
   progress.setMax(plans.length * 2);
   plans.forEach(([hostId]) => {
-    const plan = CoursePlan.getByHostId(hostId);
+    const plan = CoursePlan.for(hostId);
     progress.setStatus(
-      `${plan
-        .getStudent()
-        .getFormattedName()} (expanding dept. options if necessary)`
+      `${plan.student.getFormattedName()} (expanding dept. options if necessary)`
     );
     plan.expandDeptOptionsIfFewerThanParams();
     progress.incrementValue();

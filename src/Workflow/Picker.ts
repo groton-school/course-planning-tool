@@ -1,6 +1,6 @@
 import g from '@battis/gas-lighter';
-import CoursePlan from '../CoursePlan';
-import * as Role from '../Role';
+import Inventory from '../Inventory';
+import Role from '../Role';
 
 export const allStudents = () => 's';
 global.s = () =>
@@ -17,7 +17,7 @@ global.t = () =>
 
 export const allPlans = () => 'u';
 global.u = () =>
-  CoursePlan.getAll().map(
+  Inventory.CoursePlans.getAll().map(
     ([
       hostId,
       ,

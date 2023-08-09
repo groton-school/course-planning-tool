@@ -1,6 +1,5 @@
 import g from '@battis/gas-lighter';
-import CoursePlan from '../CoursePlan';
-import * as Inventory from '../Inventory';
+import Inventory from '../Inventory';
 
 const ROLL_OVER_ACADEMIC_YEAR = 'ROLL_OVER_ACADEMIC_YEAR';
 
@@ -48,24 +47,22 @@ global.y = () => {
   progress.incrementValue();
 
   progress.setStatus('Resetting course plan permissions flags…');
-  const plans = CoursePlan.coursePlanInventory
-    .getSheet()
+  const plans = Inventory.CoursePlans.getSheet()
     .getRange(
       2,
-      Inventory.CoursePlan.Columns.PermissionsUpdated,
-      CoursePlan.coursePlanInventory.getSheet().getMaxRows() - 1,
+      Inventory.CoursePlans.Cols.PermissionsUpdated,
+      Inventory.CoursePlans.getSheet().getMaxRows() - 1,
       1
     )
     .uncheck();
   progress.incrementValue();
 
   progress.setStatus('Resetting Student Folder Inventory…');
-  CoursePlan.studentFolderInventory
-    .getSheet()
+  Inventory.StudentFolders.getSheet()
     .getRange(
       2,
-      Inventory.StudentFolder.Columns.PermissionsUpdated,
-      CoursePlan.studentFolderInventory.getSheet().getMaxRows() - 1,
+      Inventory.StudentFolders.Cols.PermissionsUpdated,
+      Inventory.StudentFolders.getSheet().getMaxRows() - 1,
       1
     )
     .uncheck();

@@ -1,15 +1,12 @@
 import g from '@battis/gas-lighter';
 
-export type Key = number | string;
-export type Entry = [Key, string, string];
-export type Formatter = (key: Key) => string;
-
-export default abstract class Inventory<T> {
-  public static Columns = {
+abstract class Inventory<T> {
+  public Cols = {
     Key: 1,
     Id: 2,
     Url: 3
   };
+
   private data?: any[][];
   private sheet: GoogleAppsScript.Spreadsheet.Sheet;
 
@@ -17,8 +14,8 @@ export default abstract class Inventory<T> {
     this.sheet = SpreadsheetApp.getActive().getSheetByName(sheetName);
   }
 
-  protected abstract getter(id: string, key?: Key): T;
-  protected abstract creator(key: Key): T;
+  protected abstract getter(id: string, key?: Inventory.Key): T;
+  protected abstract creator(key: Inventory.Key): T;
 
   private getData() {
     if (!this.data) {
@@ -29,12 +26,10 @@ export default abstract class Inventory<T> {
     return this.data;
   }
 
-  public getMetadata = (key: Key, column: number) =>
-    this.getData().find((row) => row[Inventory.Columns.Key - 1] == key)[
-    column - 1
-    ];
+  public getMetadata = (key: Inventory.Key, column: number) =>
+    this.getData().find((row) => row[this.Cols.Key - 1] == key)[column - 1];
 
-  public setMetadata = (key: Key, column: number, value: any) =>
+  public setMetadata = (key: Inventory.Key, column: number, value: any) =>
     this.getData().forEach((entry, row: number) => {
       if (entry[0] == key) {
         entry[column - 1] = value;
@@ -44,10 +39,10 @@ export default abstract class Inventory<T> {
       }
     });
 
-  public has = (key: Key): boolean =>
+  public has = (key: Inventory.Key): boolean =>
     this.getData().findIndex(([k]) => k == key) >= 0;
 
-  public get(key: Key): T {
+  public get(key: Inventory.Key): T {
     const id = this.getData().reduce((id: string, [k, i]) => {
       if (k == key) {
         return i;
@@ -65,12 +60,12 @@ export default abstract class Inventory<T> {
     }
   }
 
-  public add(entry: Entry) {
+  public add(entry: Inventory.Entry) {
     this.sheet.appendRow(entry);
     this.data.push(entry);
   }
 
-  public remove(key: Key) {
+  public remove(key: Inventory.Key) {
     const row = this.getData().findIndex(([k]) => k == key);
     this.data = this.data.splice(row, 1);
     this.getSheet().deleteRow(row + 1);
@@ -78,3 +73,11 @@ export default abstract class Inventory<T> {
 
   public getSheet = () => this.sheet;
 }
+
+namespace Inventory {
+  export type Key = number | string;
+  export type Entry = [Key, string, string];
+  export type Formatter = (key: Key) => string;
+}
+
+export { Inventory as default };

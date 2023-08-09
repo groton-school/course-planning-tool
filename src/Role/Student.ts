@@ -1,8 +1,8 @@
 import g from '@battis/gas-lighter';
 import CoursePlan from '../CoursePlan';
-import { Advisor } from './Advisor';
+import Advisor from './Advisor';
 
-export class Student {
+class Student {
   private static data?: any[][];
 
   public hostId: string;
@@ -84,3 +84,7 @@ export class Student {
       );
   };
 }
+
+namespace Student { }
+
+export { Student as default };
