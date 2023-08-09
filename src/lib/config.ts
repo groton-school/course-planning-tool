@@ -22,42 +22,45 @@ export function getParam(namedRange: string) {
 
 export const getNumOptionsPerDepartment = getParam.bind(
   null,
-  'Param_NumOptionsPerDepartment'
+  CoursePlanningData.namedRange.ParamNumOptionsPerDepartment
 );
 
-export const getNumComments = getParam.bind(null, 'Param_NumComments');
+export const getNumComments = getParam.bind(
+  null,
+  CoursePlanningData.namedRange.ParamNumComments
+);
 
 export const getFormFolderNameFormat = getParam.bind(
   null,
-  'Param_FormFolderNameFormat'
+  CoursePlanningData.namedRange.ParamFormFolderNameFormat
 );
 
 export const getStudentFolderNameFormat = getParam.bind(
   null,
-  'Param_StudentFolderNameFormat'
+  CoursePlanningData.namedRange.ParamStudentFolderNameFormat
 );
 
 export const getAdvisorFolderNameFormat = getParam.bind(
   null,
-  'Param_AdvisorFolderNameFormat'
+  CoursePlanningData.namedRange.ParamAdvisorFolderNameFormat
 );
 
 export const getCoursePlanNameFormat = getParam.bind(
   null,
-  'Param_CoursePlanNameFormat'
+  CoursePlanningData.namedRange.ParamCoursePlanNameFormat
 );
 
 export const getStudiesCommittee = getParam.bind(
   null,
-  'Param_StudiesCommittee'
+  CoursePlanningData.namedRange.ParamStudiesCommittee
 );
 
 export const getCollegeCounseling = getParam.bind(
   null,
-  'Param_CollegeCounselingOffice'
+  CoursePlanningData.namedRange.ParamCollegeCounseling
 );
 
 export const getCoursePlanTemplate = getParam.bind(
   null,
-  'Param_CoursePlanTemplate'
+  CoursePlanningData.namedRange.ParamCoursePlanTemplate
 );

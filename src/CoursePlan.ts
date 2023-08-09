@@ -259,13 +259,17 @@ export default class CoursePlan {
 
     this.setStatus('calculating enrollment history'); // #create, #update-history
     const ieh = this.getIndividualEnrollmentHistory();
-    ieh.getRange('IEH_HostID_Selector').setValue(this.hostId);
+    ieh
+      .getRange(lib.CoursePlanningData.namedRange.IEHHostIdSelector)
+      .setValue(this.hostId);
     const values = ieh
-      .getRange('IEH_EnrollmentHistory')
+      .getRange(lib.CoursePlanningData.namedRange.IEHEnrollmentHistory)
       .offset(
         0,
         0,
-        ieh.getRange('IEH_Departments').getNumRows(),
+        ieh
+          .getRange(lib.CoursePlanningData.namedRange.IEHDepartments)
+          .getNumRows(),
         5 - (this.student.gradYear - lib.currentSchoolYear())
       )
       .getDisplayValues();
@@ -273,7 +277,7 @@ export default class CoursePlan {
 
     const validations = [];
     const start = ieh
-      .getRange('IEH_NumericalYears')
+      .getRange(lib.CoursePlanningData.namedRange.IEHNumericalYears)
       .getDisplayValues()[0]
       .findIndex((y) => parseInt(y) > lib.currentSchoolYear());
     if (create) {
@@ -350,9 +354,9 @@ export default class CoursePlan {
     ]);
     g.SpreadsheetApp.Value.set(
       this.workingCopy,
-      'Template_Years',
+      lib.CoursePlanTemplate.namedRange.TemplateYears,
       this.getIndividualEnrollmentHistory()
-        .getRange('IEH_Years')
+        .getRange(lib.CoursePlanningData.namedRange.IEHYears)
         .getDisplayValues()
     );
   }
@@ -456,9 +460,9 @@ export default class CoursePlan {
     const history = this.getAnchorOffset(0, 0, historyHeight, historyWidth);
     for (const range of [
       history.getA1Notation(),
-      'Protect_LeftMargin',
-      'Protect_TopMargin',
-      'Protect_BetweenComments'
+      lib.CoursePlanTemplate.namedRange.ProtectLeftMargin,
+      lib.CoursePlanTemplate.namedRange.ProtectTopMargin,
+      lib.CoursePlanTemplate.namedRange.ProtectBetweenComments
     ]) {
       const protection = this.workingCopy
         .getRange(range)
@@ -473,12 +477,12 @@ export default class CoursePlan {
     const commentors = [
       {
         name: 'Comments from Faculty Advisor',
-        range: 'Protect_Advisor',
+        range: lib.CoursePlanTemplate.namedRange.ProtectAdvisor,
         editor: this.advisor.email
       },
       {
         name: 'Comments from College Counseling Office',
-        range: 'Protect_CollegeCounselingOffice',
+        range: lib.CoursePlanTemplate.namedRange.ProtectCollegeCounseling,
         editor: lib.config.getCollegeCounseling()
       }
     ];
@@ -532,7 +536,7 @@ export default class CoursePlan {
 
     this.setStatus('trashing shortcuts to plan'); // #delete
     const shortcuts = Inventory.StudentFolders.for(this).getFilesByType(
-      'application/vnd.google-apps.shortcut'
+      MimeType.SHORTCUT
     );
     while (shortcuts.hasNext()) {
       const shortcut = shortcuts.next();
@@ -597,14 +601,16 @@ export default class CoursePlan {
     );
     const fileName = this.file.getName();
     Logger.log(`Added ${this.advisor.email} as editor to ${fileName}`);
-    const protection = this.workingCopy.getRange('Protect_Advisor').protect();
+    const protection = this.workingCopy
+      .getRange(lib.CoursePlanTemplate.namedRange.ProtectAdvisor)
+      .protect();
     protection.addEditor(this.advisor.email);
     Logger.log(
-      `Added ${this.advisor.email} to Protect_Advisor editors in ${fileName}`
+      `Added ${this.advisor.email} to ${lib.CoursePlanTemplate.namedRange.ProtectAdvisor} editors in ${fileName}`
     );
     protection.removeEditor(previousAdvisor.email);
     Logger.log(
-      `Removed ${previousAdvisor.email} from Protect_Advisor in ${fileName}`
+      `Removed ${previousAdvisor.email} from ${lib.CoursePlanTemplate.namedRange.ProtectAdvisor} in ${fileName}`
     );
     this.file.removeEditor(previousAdvisor.email);
     Inventory.CoursePlans.setMetadata(

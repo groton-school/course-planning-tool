@@ -42,7 +42,7 @@ global.n = () => {
   progress.incrementValue();
   cleanCopy
     .getSheetByName(lib.CoursePlanningData.sheet.Parameters)
-    .getRange('B7:B9')
+    .getRange(lib.CoursePlanningData.namedRange.CleanParams)
     .setValues([[''], [''], ['']]);
 
   for (const inventory of Object.keys(inventories)) {
@@ -53,7 +53,7 @@ global.n = () => {
     inventorySheet.deleteRows(3, inventorySheet.getMaxRows() - 2);
     if (hasRoot) {
       inventorySheet
-        .getRange('A2:C2')
+        .getRange(lib.CoursePlanningData.namedRange.CleanInventoryRoot)
         .setValues([
           [
             'ROOT',
@@ -62,7 +62,9 @@ global.n = () => {
           ]
         ]);
     } else {
-      inventorySheet.getRange('A2:C2').setValues([['', '', '']]);
+      inventorySheet
+        .getRange(lib.CoursePlanningData.namedRange.CleanInventoryRoot)
+        .setValues([['', '', '']]);
     }
   }
 
@@ -85,7 +87,9 @@ global.n = () => {
     lib.CoursePlanningData.sheet.AvailableCourses
   );
   available.deleteRows(4, available.getMaxRows() - 3);
-  available.getRange('A3').setValue('');
+  available
+    .getRange(lib.CoursePlanningData.namedRange.CleanAvailableCourses)
+    .setValue('');
 
   progress.setStatus(
     `Clearing student from ${lib.CoursePlanningData.sheet.IndividualEnrollmentHistory}…`
@@ -94,7 +98,9 @@ global.n = () => {
   const ieh = cleanCopy.getSheetByName(
     lib.CoursePlanningData.sheet.IndividualEnrollmentHistory
   );
-  ieh.getRange('A1:A2').setValues([[''], ['']]);
+  ieh
+    .getRange(lib.CoursePlanningData.namedRange.CleanIEH)
+    .setValues([[''], ['']]);
 
   const cleanUp = g.HtmlService.Element.Progress.bindTo(Utilities.getUuid());
   cleanUp.setStatus('Cleaning up…');
