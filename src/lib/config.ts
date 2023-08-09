@@ -1,8 +1,12 @@
+import CoursePlanningData from './CoursePlanningData';
+
 let params: GoogleAppsScript.Spreadsheet.Sheet = null;
 
 export function getParam(namedRange: string) {
   if (!params) {
-    params = SpreadsheetApp.getActive().getSheetByName('Parameters');
+    params = SpreadsheetApp.getActive().getSheetByName(
+      CoursePlanningData.sheet.Parameters
+    );
   }
   const range = params.getRange(namedRange);
   if (range.getNumRows() > 1) {

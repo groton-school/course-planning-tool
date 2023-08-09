@@ -1,5 +1,6 @@
 import lib from '../lib';
 import Role from '../Role';
+import AdvisorFolders from './AdvisorFolders';
 import CoursePlans from './CoursePlans';
 import Folders from './Folders';
 import MInventory from './Inventory';
@@ -14,7 +15,7 @@ class Inventory {
   public static get FormFoldersOfCoursePlans() {
     if (!this._formFoldersOfCoursePlans) {
       this._formFoldersOfCoursePlans = new Folders(
-        'Plans Form Folder Inventory',
+        lib.CoursePlanningData.sheet.PlansFormFolderInventory,
         (gradYear) =>
           lib.format.apply(lib.config.getFormFolderNameFormat(), {
             gradYear
@@ -25,7 +26,7 @@ class Inventory {
   }
 
   public static FormFoldersOfStudentFolders = new Folders(
-    'Folders Form Folder Inventory',
+    lib.CoursePlanningData.sheet.FoldersFormFolderInventory,
     (gradYear) =>
       lib.format.apply(lib.config.getFormFolderNameFormat(), {
         gradYear
@@ -33,7 +34,7 @@ class Inventory {
   );
 
   public static StudentFolders = new StudentFolders(
-    'Student Folder Inventory',
+    lib.CoursePlanningData.sheet.StudentFolderInventory,
     (hostId) =>
       lib.format.apply(
         lib.config.getStudentFolderNameFormat(),
@@ -41,20 +42,24 @@ class Inventory {
       )
   );
 
-  private static _advisorFolders: Folders;
+  private static _advisorFolders: AdvisorFolders;
   public static get AdvisorFolders() {
     if (!this._advisorFolders) {
-      this._advisorFolders = new Folders('Advisor Folder Inventory', (email) =>
-        lib.format.apply(
-          lib.config.getAdvisorFolderNameFormat(),
-          Role.Advisor.getByEmail(email.toString())
-        )
+      this._advisorFolders = new AdvisorFolders(
+        lib.CoursePlanningData.sheet.AdvisorFolderInventory,
+        (email) =>
+          lib.format.apply(
+            lib.config.getAdvisorFolderNameFormat(),
+            Role.Advisor.getByEmail(email.toString())
+          )
       );
     }
     return this._advisorFolders;
   }
 
-  public static CoursePlans = new CoursePlans('Course Plan Inventory');
+  public static CoursePlans = new CoursePlans(
+    lib.CoursePlanningData.sheet.CoursePlanInventory
+  );
 }
 
 namespace Inventory {

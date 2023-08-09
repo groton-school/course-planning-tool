@@ -1,5 +1,6 @@
 import g from '@battis/gas-lighter';
 import Inventory from '../Inventory';
+import lib from '../lib';
 
 const ROLL_OVER_ACADEMIC_YEAR = 'ROLL_OVER_ACADEMIC_YEAR';
 
@@ -28,9 +29,15 @@ global.y = () => {
 
   progress.setMax(5);
 
-  progress.setStatus('Preparing previous advisor list…');
-  const previous = spreadsheet.getSheetByName('Advisor List (Previous Year)');
-  const advisorList = spreadsheet.getSheetByName('Advisor List');
+  progress.setStatus(
+    `Preparing ${lib.CoursePlanningData.sheet.AdvisorListPreviousYear}…`
+  );
+  const previous = spreadsheet.getSheetByName(
+    lib.CoursePlanningData.sheet.AdvisorListPreviousYear
+  );
+  const advisorList = spreadsheet.getSheetByName(
+    lib.CoursePlanningData.sheet.AdvisorList
+  );
   const prevRows = previous.getMaxRows();
   const advRows = advisorList.getMaxRows();
   if (prevRows < advRows) {
@@ -41,7 +48,7 @@ global.y = () => {
   progress.incrementValue();
 
   progress.setStatus(
-    'Archiving current advisor list to previous advisor list…'
+    `Archiving ${lib.CoursePlanningData.sheet.AdvisorList} to ${lib.CoursePlanningData.sheet.AdvisorListPreviousYear}…`
   );
   previous.getRange('A:H').setValues(advisorList.getRange('A:H').getValues());
   progress.incrementValue();
@@ -57,7 +64,9 @@ global.y = () => {
     .uncheck();
   progress.incrementValue();
 
-  progress.setStatus('Resetting Student Folder Inventory…');
+  progress.setStatus(
+    `Resetting ${lib.CoursePlanningData.sheet.StudentFolderInventory}…`
+  );
   Inventory.StudentFolders.getSheet()
     .getRange(
       2,
@@ -81,7 +90,7 @@ global.y = () => {
     <p>Don't forget to:</p>
     <ol>
       <li>Update the Advisor List from Blackbaud</li>
-      <li>Refresh the <code>Historical Enrollment</code> sheet (<a href="https://github.com/groton-school/course-planning-tool#refresh-historical-enrollment" target="_blank">directions</a>)</li>
+      <li>Refresh the <code>${lib.CoursePlanningData.sheet.HistoricalEnrollment}</code> sheet (<a href="https://github.com/groton-school/course-planning-tool#refresh-historical-enrollment" target="_blank">directions</a>)</li>
     </ol>
     <a id="ok" class="btn btn-primary" href="#">Ok</a>
     <script>

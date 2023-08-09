@@ -13,7 +13,6 @@ export default class CoursePlan {
   public static thread = 'course-plan';
 
   private static coursesByDepartment: any[][];
-  private static currentSchoolyear?: number = null;
 
   private _student: Role.Student;
   public get student() {
@@ -65,10 +64,46 @@ export default class CoursePlan {
   }
   private set workingCopy(sheet: GoogleAppsScript.Spreadsheet.Sheet) {
     this._workingCopy = sheet;
-    this.anchor = null;
+    this._anchor = null;
   }
 
-  private anchor?: GoogleAppsScript.Spreadsheet.Range;
+  private _anchor?: GoogleAppsScript.Spreadsheet.Range;
+  private getAnchorOffset(): GoogleAppsScript.Spreadsheet.Range;
+  private getAnchorOffset(
+    rowOffset: number,
+    columnOffset: number
+  ): GoogleAppsScript.Spreadsheet.Range;
+  private getAnchorOffset(
+    rowOffset: number,
+    columnOffset: number,
+    numRows: number,
+    numColumns: number
+  ): GoogleAppsScript.Spreadsheet.Range;
+  private getAnchorOffset(
+    rowOffset?: number,
+    columnOffset?: number,
+    numRows?: number,
+    numColumns?: number
+  ): GoogleAppsScript.Spreadsheet.Range {
+    if (!this._anchor && this.workingCopy) {
+      this._anchor = this.workingCopy.getRange('Template_Anchor');
+    }
+    if (rowOffset !== undefined && columnOffset !== undefined) {
+      if (numRows !== undefined && numColumns !== undefined) {
+        return this._anchor.offset(
+          rowOffset,
+          columnOffset,
+          numRows,
+          numColumns
+        );
+      } else {
+        return this._anchor.offset(rowOffset, columnOffset);
+      }
+    } else {
+      return this._anchor;
+    }
+  }
+
   private _planSheet?: GoogleAppsScript.Spreadsheet.Sheet;
   private get planSheet() {
     if (!this._planSheet) {
@@ -81,7 +116,7 @@ export default class CoursePlan {
   private get validationSheet() {
     if (!this._validationSheet) {
       this._validationSheet = this.spreadsheet.getSheetByName(
-        'Courses by Department'
+        lib.CoursePlanningData.sheet.CoursesByDepartment
       );
     }
     return this._validationSheet;
@@ -180,39 +215,10 @@ export default class CoursePlan {
     this.spreadsheet = SpreadsheetApp.openById(spreadsheetId);
   }
 
-  private getAnchorOffset(): GoogleAppsScript.Spreadsheet.Range;
-  private getAnchorOffset(
-    rowOffset: number,
-    columnOffset: number
-  ): GoogleAppsScript.Spreadsheet.Range;
-  private getAnchorOffset(
-    rowOffset: number,
-    columnOffset: number,
-    numRows: number,
-    numColumns: number
-  ): GoogleAppsScript.Spreadsheet.Range;
-  private getAnchorOffset(
-    rowOffset?: number,
-    columnOffset?: number,
-    numRows?: number,
-    numColumns?: number
-  ): GoogleAppsScript.Spreadsheet.Range {
-    if (!this.anchor && this.workingCopy) {
-      this.anchor = this.workingCopy.getRange('Template_Anchor');
-    }
-    if (rowOffset !== undefined && columnOffset !== undefined) {
-      if (numRows !== undefined && numColumns !== undefined) {
-        return this.anchor.offset(rowOffset, columnOffset, numRows, numColumns);
-      } else {
-        return this.anchor.offset(rowOffset, columnOffset);
-      }
-    } else {
-      return this.anchor;
-    }
-  }
-
   private getIndividualEnrollmentHistory = () =>
-    SpreadsheetApp.getActive().getSheetByName('Individual Enrollment History');
+    SpreadsheetApp.getActive().getSheetByName(
+      lib.CoursePlanningData.sheet.IndividualEnrollmentHistory
+    );
 
   private getNumDepartments = () => this.validationSheet.getMaxColumns();
 
@@ -260,7 +266,7 @@ export default class CoursePlan {
         0,
         0,
         ieh.getRange('IEH_Departments').getNumRows(),
-        5 - (this.student.gradYear - CoursePlan.getCurrentSchoolYear())
+        5 - (this.student.gradYear - lib.currentSchoolYear())
       )
       .getDisplayValues();
     this.workingCopy = this.planSheet;
@@ -269,7 +275,7 @@ export default class CoursePlan {
     const start = ieh
       .getRange('IEH_NumericalYears')
       .getDisplayValues()[0]
-      .findIndex((y) => parseInt(y) > CoursePlan.getCurrentSchoolYear());
+      .findIndex((y) => parseInt(y) > lib.currentSchoolYear());
     if (create) {
       for (let row = 0; row < this.getNumDepartments(); row++) {
         const rowValidation = [];
@@ -393,7 +399,6 @@ export default class CoursePlan {
   }
 
   private setPermissions() {
-    const COL_ADVISOR_FOLDER_PERMISSION = 6;
     this.setStatus('setting permissions'); // #create
     this.file.moveTo(this.getFormFolderForPlan());
     g.DriveApp.Permission.add(this.file.getId(), this.student.email);
@@ -402,7 +407,7 @@ export default class CoursePlan {
     if (
       !Inventory.AdvisorFolders.getMetadata(
         this.advisor.email,
-        COL_ADVISOR_FOLDER_PERMISSION
+        Inventory.AdvisorFolders.Cols.PermissionsSet
       )
     ) {
       g.DriveApp.Permission.add(
@@ -412,19 +417,10 @@ export default class CoursePlan {
       );
       Inventory.AdvisorFolders.setMetadata(
         this.advisor.email,
-        COL_ADVISOR_FOLDER_PERMISSION,
+        Inventory.AdvisorFolders.Cols.PermissionsSet,
         true
       );
     }
-  }
-
-  public static getCurrentSchoolYear() {
-    if (CoursePlan.currentSchoolyear === null) {
-      const now = new Date();
-      CoursePlan.currentSchoolyear =
-        now.getMonth() > 6 ? now.getFullYear() + 1 : now.getFullYear();
-    }
-    return CoursePlan.currentSchoolyear;
   }
 
   // TODO adjust row height to accommodate actual content lines
@@ -501,7 +497,7 @@ export default class CoursePlan {
     if (!this.coursesByDepartment) {
       this.coursesByDepartment = g.SpreadsheetApp.Value.getSheetDisplayValues(
         Inventory.CoursePlans.getSpreadsheet().getSheetByName(
-          'Courses by Department'
+          lib.CoursePlanningData.sheet.CoursesByDepartment
         )
       );
     }
@@ -512,7 +508,7 @@ export default class CoursePlan {
     this.setStatus('updating course list'); // #create, #update-courses
     const source = CoursePlan.getCoursesByDepartment();
     const destination = this.spreadsheet.getSheetByName(
-      'Courses by Department'
+      lib.CoursePlanningData.sheet.CoursesByDepartment
     );
     const destHeight = destination.getMaxRows();
     if (destHeight < source.length) {

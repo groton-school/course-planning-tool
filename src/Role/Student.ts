@@ -1,5 +1,5 @@
 import g from '@battis/gas-lighter';
-import CoursePlan from '../CoursePlan';
+import lib from '../lib';
 import Advisor from './Advisor';
 
 class Student {
@@ -27,7 +27,9 @@ class Student {
   protected static getData() {
     if (!Student.data) {
       Student.data = g.SpreadsheetApp.Range.getEntireSheet(
-        SpreadsheetApp.getActive().getSheetByName('Advisor List')
+        SpreadsheetApp.getActive().getSheetByName(
+          lib.CoursePlanningData.sheet.AdvisorList
+        )
       ).getValues();
       Student.data.shift(); // strip column labels
     }
@@ -55,7 +57,7 @@ class Student {
     Advisor.getByAdvisee(this.hostId, year);
 
   public static getAll(): Student[] {
-    const thisYear = CoursePlan.getCurrentSchoolYear();
+    const thisYear = lib.currentSchoolYear();
     return Student.getData()
       .map((row) => new Student(row))
       .filter((student) => student.gradYear != thisYear);

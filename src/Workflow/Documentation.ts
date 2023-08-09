@@ -11,17 +11,17 @@ global.n = () => {
   );
 
   const inventories = {
-    'Course Plan Inventory': false,
-    'Student Folder Inventory': false,
-    'Advisor Folder Inventory': true,
-    'Plans Form Folder Inventory': true,
-    'Folders Form Folder Inventory': true
+    [lib.CoursePlanningData.sheet.CoursePlanInventory]: false,
+    [lib.CoursePlanningData.sheet.StudentFolderInventory]: false,
+    [lib.CoursePlanningData.sheet.AdvisorFolderInventory]: true,
+    [lib.CoursePlanningData.sheet.PlansFormFolderInventory]: true,
+    [lib.CoursePlanningData.sheet.FoldersFormFolderInventory]: true
   };
   const imports = {
-    'Advisor List': 8,
-    'Advisor List (Previous Year)': 8,
-    'Course List': 5,
-    'Historical Enrollment': 14
+    [lib.CoursePlanningData.sheet.AdvisorList]: 8,
+    [lib.CoursePlanningData.sheet.AdvisorListPreviousYear]: 8,
+    [lib.CoursePlanningData.sheet.CourseList]: 5,
+    [lib.CoursePlanningData.sheet.HistoricalEnrollment]: 14
   };
   progress.setMax(
     3 + Object.keys(inventories).length + Object.keys(imports).length
@@ -36,10 +36,12 @@ global.n = () => {
   const cleanCopy = SpreadsheetApp.openById(cleanCopyFile.getId());
   cleanCopyFile.setName(original.getName());
 
-  progress.setStatus('Expunging parameter values…');
+  progress.setStatus(
+    `Expunging ${lib.CoursePlanningData.sheet.Parameters} values…`
+  );
   progress.incrementValue();
   cleanCopy
-    .getSheetByName('Parameters')
+    .getSheetByName(lib.CoursePlanningData.sheet.Parameters)
     .getRange('B7:B9')
     .setValues([[''], [''], ['']]);
 
@@ -75,15 +77,23 @@ global.n = () => {
       .setValues([Array(importWidth).fill('')]);
   }
 
-  progress.setStatus('Clearing Available Courses…');
+  progress.setStatus(
+    `Clearing ${lib.CoursePlanningData.sheet.AvailableCourses}…`
+  );
   progress.incrementValue();
-  const available = cleanCopy.getSheetByName('Available Courses');
+  const available = cleanCopy.getSheetByName(
+    lib.CoursePlanningData.sheet.AvailableCourses
+  );
   available.deleteRows(4, available.getMaxRows() - 3);
   available.getRange('A3').setValue('');
 
-  progress.setStatus('Clearing student from Individual Enrollment History…');
+  progress.setStatus(
+    `Clearing student from ${lib.CoursePlanningData.sheet.IndividualEnrollmentHistory}…`
+  );
   progress.incrementValue();
-  const ieh = cleanCopy.getSheetByName('Individual Enrollment History');
+  const ieh = cleanCopy.getSheetByName(
+    lib.CoursePlanningData.sheet.IndividualEnrollmentHistory
+  );
   ieh.getRange('A1:A2').setValues([[''], ['']]);
 
   const cleanUp = g.HtmlService.Element.Progress.bindTo(Utilities.getUuid());
@@ -119,9 +129,7 @@ global.p = (id: string, delayInSeconds = 5) => {
 
 export const downloadEmptyCoursePlanTemplate = () => 'o';
 global.o = () => {
-  const template = SpreadsheetApp.openByUrl(
-    lib.config.getCoursePlanTemplate()
-  );
+  const template = SpreadsheetApp.openByUrl(lib.config.getCoursePlanTemplate());
   SpreadsheetApp.getUi().showModalDialog(
     g.HtmlService.Template.createTemplate(
       `
