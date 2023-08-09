@@ -55,18 +55,6 @@ export default class CoursePlan {
     return this._file;
   }
 
-  private _workingCopy?: GoogleAppsScript.Spreadsheet.Sheet;
-  private get workingCopy() {
-    if (!this._workingCopy) {
-      this._workingCopy = this.planSheet;
-    }
-    return this.workingCopy;
-  }
-  private set workingCopy(sheet: GoogleAppsScript.Spreadsheet.Sheet) {
-    this._workingCopy = sheet;
-    this._anchor = null;
-  }
-
   private _anchor?: GoogleAppsScript.Spreadsheet.Range;
   private getAnchorOffset(): GoogleAppsScript.Spreadsheet.Range;
   private getAnchorOffset(
@@ -85,8 +73,8 @@ export default class CoursePlan {
     numRows?: number,
     numColumns?: number
   ): GoogleAppsScript.Spreadsheet.Range {
-    if (!this._anchor && this.workingCopy) {
-      this._anchor = this.workingCopy.getRange('Template_Anchor');
+    if (!this._anchor) {
+      this._anchor = this.planSheet.getRange('Template_Anchor');
     }
     if (rowOffset !== undefined && columnOffset !== undefined) {
       if (numRows !== undefined && numColumns !== undefined) {
@@ -245,8 +233,6 @@ export default class CoursePlan {
   }
 
   private populateEnrollmentHistory(create = true) {
-    this.workingCopy = this.planSheet;
-
     this.setStatus('calculating enrollment history'); // #create, #update-history
     const ieh = this.getIndividualEnrollmentHistory();
     ieh
@@ -263,7 +249,6 @@ export default class CoursePlan {
         5 - (this.student.gradYear - lib.currentSchoolYear())
       )
       .getDisplayValues();
-    this.workingCopy = this.planSheet;
 
     const validations = [];
     const start = ieh
@@ -339,7 +324,7 @@ export default class CoursePlan {
   private populateHeaders() {
     this.setStatus('filling in the labels'); // #create
     g.SpreadsheetApp.Value.set(
-      this.workingCopy,
+      this.planSheet,
       lib.CoursePlanTemplate.namedRange.TemplateNames,
       [
         [this.student.getFormattedName()],
@@ -347,7 +332,7 @@ export default class CoursePlan {
       ]
     );
     g.SpreadsheetApp.Value.set(
-      this.workingCopy,
+      this.planSheet,
       lib.CoursePlanTemplate.namedRange.TemplateYears,
       this.getIndividualEnrollmentHistory()
         .getRange(lib.CoursePlanningData.namedRange.IEHYears)
@@ -420,7 +405,7 @@ export default class CoursePlan {
       row < this.getNumDepartments() * numOptions;
       row += numOptions
     ) {
-      this.workingCopy.insertRowsAfter(
+      this.planSheet.insertRowsAfter(
         this.getAnchorOffset().getRow() + row,
         numOptions - 1
       );
@@ -434,9 +419,9 @@ export default class CoursePlan {
   }
 
   private additionalComments(row: number) {
-    this.workingCopy.insertRowsAfter(row, this.getNumComments() - 2);
+    this.planSheet.insertRowsAfter(row, this.getNumComments() - 2);
     for (let i = 0; i < this.getNumComments() - 2; i++) {
-      this.workingCopy.getRange(row + i + 1, 3, 1, 3).mergeAcross();
+      this.planSheet.getRange(row + i + 1, 3, 1, 3).mergeAcross();
     }
   }
 
@@ -449,7 +434,7 @@ export default class CoursePlan {
       lib.CoursePlanTemplate.namedRange.ProtectTopMargin,
       lib.CoursePlanTemplate.namedRange.ProtectBetweenComments
     ]) {
-      const protection = this.workingCopy
+      const protection = this.planSheet
         .getRange(range)
         .protect()
         .setDescription('No Edits');
@@ -472,7 +457,7 @@ export default class CoursePlan {
       }
     ];
     for (const { name, range, editor } of commentors) {
-      const protection = this.workingCopy
+      const protection = this.planSheet
         .getRange(range)
         .protect()
         .setDescription(name);
@@ -535,7 +520,6 @@ export default class CoursePlan {
   }
 
   public expandDeptOptionsIfFewerThanParams() {
-    this.workingCopy = this.planSheet;
     const current = this.getNumOptionsPerDepartment();
     const target = lib.config.getNumOptionsPerDepartment();
     if (current < target) {
@@ -572,7 +556,7 @@ export default class CoursePlan {
     );
     const fileName = this.file.getName();
     Logger.log(`Added ${this.advisor.email} as editor to ${fileName}`);
-    const protection = this.workingCopy
+    const protection = this.planSheet
       .getRange(lib.CoursePlanTemplate.namedRange.ProtectAdvisor)
       .protect();
     protection.addEditor(this.advisor.email);
