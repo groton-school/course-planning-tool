@@ -6,28 +6,6 @@ import Inventory from './Inventory';
 // TODO graduate seniors out of the inventories?
 // TODO archive departed advisors
 class CoursePlans extends Inventory<CoursePlan> {
-  /* public Cols = {
-    ...super.Cols,
-    HostId: 1,
-    CoursePlanId: 2,
-    CoursePlanUrl: 3,
-    StudentEmail: 4,
-    StudentLastName: 5,
-    StudentFirstName: 6,
-    StudentGradYear: 7,
-    StudentFolderId: 8,
-    AdvisorEmail: 9,
-    AdvisorFirstName: 10,
-    AdvisorLastName: 11,
-    AdvisorFolderId: 12,
-    FormFolderId: 13,
-    NumOptionsPerDepartment: 14,
-    NumComments: 15,
-    Inactive: 16,
-    NewAdvisor: 17,
-    PermissionsUpdated: 18
-  }; */
-
   protected getter = (id: string, key?: Inventory.Key): CoursePlan =>
     CoursePlan.bindTo(id, key);
 
@@ -59,6 +37,9 @@ class CoursePlans extends Inventory<CoursePlan> {
     this.getMetadata(hostId, 18);
   public setPermissionsUpdated = (hostId: Inventory.Key, value: boolean) =>
     this.setMetadata(hostId, 18, value);
+  public getVersion = (hostId: Inventory.Key) => this.getMetadata(hostId, 19);
+  public setVersion = (hostId: Inventory.Key, value: string) =>
+    this.setMetadata(hostId, 19, value);
 }
 
 namespace CoursePlans { }

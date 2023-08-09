@@ -31,6 +31,7 @@ export default {
     ParamStudiesCommittee: 'Param_StudiesCommittee',
     ParamCollegeCounseling: 'Param_CollegeCounselingOffice',
     ParamCoursePlanTemplate: 'Param_CoursePlanTemplate',
+    ParamRollOverAcademicYear: 'Param_RollOverAcademicYear',
 
     IEHHostIdSelector: 'IEH_HostID_Selector',
     IEHEnrollmentHistory: 'IEH_EnrollmentHistory',

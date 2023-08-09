@@ -191,6 +191,7 @@ export default class CoursePlan {
       this.getNumOptionsPerDepartment()
     );
     Inventory.CoursePlans.setNumComments(this.hostId, this.getNumComments());
+    Inventory.CoursePlans.setVersion(this.hostId, APP_VERSION);
   }
 
   private bindToExistingSpreadsheet({ hostId, spreadsheetId }) {

@@ -2,18 +2,11 @@ import g from '@battis/gas-lighter';
 import Inventory from '../Inventory';
 import lib from '../lib';
 
-const ROLL_OVER_ACADEMIC_YEAR = 'ROLL_OVER_ACADEMIC_YEAR';
-
 export const rolloverAcademicYear = () => 'y';
 global.y = () => {
   const spreadsheet = SpreadsheetApp.getActive();
   const now = new Date();
-  const meta = spreadsheet
-    .createDeveloperMetadataFinder()
-    .withKey(ROLL_OVER_ACADEMIC_YEAR)
-    .find()
-    .shift();
-  const lastRollOver = new Date(meta?.getValue() || 0);
+  const lastRollOver = lib.config.getRollOverAcademicYear();
   if (now.getTime() - lastRollOver.getTime() < 11 * 30 * 24 * 60 * 60 * 1000) {
     throw new Error(
       'last academic year roll over was within the past 11 months'
@@ -54,7 +47,7 @@ global.y = () => {
   progress.incrementValue();
 
   progress.setStatus('Resetting course plan permissions flags…');
-  const plans = Inventory.CoursePlans.getSheet()
+  Inventory.CoursePlans.getSheet()
     .getRange(lib.CoursePlanningData.namedRange.RollOverCoursePlanPermissoons)
     .uncheck();
   progress.incrementValue();
@@ -70,10 +63,7 @@ global.y = () => {
   progress.incrementValue();
 
   progress.setStatus('Noting academic year roll-over');
-  spreadsheet.addDeveloperMetadata(
-    ROLL_OVER_ACADEMIC_YEAR,
-    new Date().toUTCString()
-  );
+  lib.config.setRollOverAcademicYear(new Date());
   progress.incrementValue();
 
   SpreadsheetApp.setActiveSheet(advisorList);
