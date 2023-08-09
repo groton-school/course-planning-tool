@@ -1,12 +1,6 @@
 import g from '@battis/gas-lighter';
 
 abstract class Inventory<T> {
-  public Cols = {
-    Key: 1,
-    Id: 2,
-    Url: 3
-  };
-
   private data?: any[][];
   private sheet: GoogleAppsScript.Spreadsheet.Sheet;
 
@@ -27,7 +21,7 @@ abstract class Inventory<T> {
   }
 
   public getMetadata = (key: Inventory.Key, column: number) =>
-    this.getData().find((row) => row[this.Cols.Key - 1] == key)[column - 1];
+    this.getData().find((row) => row[0] == key)[column - 1];
 
   public setMetadata = (key: Inventory.Key, column: number, value: any) =>
     this.getData().forEach((entry, row: number) => {
@@ -72,12 +66,21 @@ abstract class Inventory<T> {
   }
 
   public getSheet = () => this.sheet;
+
+  public getKey = (key: Inventory.Key) => this.getMetadata(key, 1);
+  public getId = (key: Inventory.Key) => this.getMetadata(key, 2);
+  public getUrl = (key: Inventory.Key) => this.getMetadata(key, 3);
 }
 
 namespace Inventory {
   export type Key = number | string;
   export type Entry = [Key, string, string];
   export type Formatter = (key: Key) => string;
+  /*  export enum Cols {
+    Key = 1,
+    Id = 2,
+    Url = 3
+  } */
 }
 
 export { Inventory as default };

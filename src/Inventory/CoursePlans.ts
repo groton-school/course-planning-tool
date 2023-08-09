@@ -6,11 +6,11 @@ import Inventory from './Inventory';
 // TODO graduate seniors out of the inventories?
 // TODO archive departed advisors
 class CoursePlans extends Inventory<CoursePlan> {
-  public Cols = {
+  /* public Cols = {
     ...super.Cols,
-    HostId: super.Cols.Key,
-    CoursePlanId: super.Cols.Id,
-    CoursePlanUrl: super.Cols.Url,
+    HostId: 1,
+    CoursePlanId: 2,
+    CoursePlanUrl: 3,
     StudentEmail: 4,
     StudentLastName: 5,
     StudentFirstName: 6,
@@ -26,7 +26,7 @@ class CoursePlans extends Inventory<CoursePlan> {
     Inactive: 16,
     NewAdvisor: 17,
     PermissionsUpdated: 18
-  };
+  }; */
 
   protected getter = (id: string, key?: Inventory.Key): CoursePlan =>
     CoursePlan.bindTo(id, key);
@@ -44,6 +44,21 @@ class CoursePlans extends Inventory<CoursePlan> {
     entries.shift(); // remove column headings
     return entries;
   }
+
+  public getNumOptionsPerDepartment = (hostId: Inventory.Key) =>
+    this.getMetadata(hostId, 14);
+  public setNumOptionsPerDepartment = (hostId: Inventory.Key, value: number) =>
+    this.setMetadata(hostId, 14, value);
+  public getNumComments = (hostId: Inventory.Key) =>
+    this.getMetadata(hostId, 15);
+  public setNumComments = (hostId: Inventory.Key, value: number) =>
+    this.setMetadata(hostId, 15, value);
+  public getNewAdvisor = (hostId: Inventory.Key) =>
+    this.getMetadata(hostId, 17);
+  public getPermissionsUpdated = (hostId: Inventory.Key) =>
+    this.getMetadata(hostId, 18);
+  public setPermissionsUpdated = (hostId: Inventory.Key, value: boolean) =>
+    this.setMetadata(hostId, 18, value);
 }
 
 namespace CoursePlans { }

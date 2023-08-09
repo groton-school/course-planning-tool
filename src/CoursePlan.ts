@@ -198,16 +198,11 @@ export default class CoursePlan {
       this.spreadsheet.getId(),
       this.spreadsheet.getUrl()
     ]);
-    Inventory.CoursePlans.setMetadata(
+    Inventory.CoursePlans.setNumOptionsPerDepartment(
       this.hostId,
-      Inventory.CoursePlans.Cols.NumOptionsPerDepartment,
       this.getNumOptionsPerDepartment()
     );
-    Inventory.CoursePlans.setMetadata(
-      this.hostId,
-      Inventory.CoursePlans.Cols.NumComments,
-      this.getNumComments()
-    );
+    Inventory.CoursePlans.setNumComments(this.hostId, this.getNumComments());
   }
 
   private bindToExistingSpreadsheet({ hostId, spreadsheetId }) {
@@ -225,10 +220,8 @@ export default class CoursePlan {
   private getNumOptionsPerDepartment(): number {
     if (this.numOptionsPerDepartment === null) {
       if (Inventory.CoursePlans.has(this.hostId)) {
-        this.numOptionsPerDepartment = Inventory.CoursePlans.getMetadata(
-          this.hostId,
-          Inventory.CoursePlans.Cols.NumOptionsPerDepartment
-        );
+        this.numOptionsPerDepartment =
+          Inventory.CoursePlans.getNumOptionsPerDepartment(this.hostId);
       } else {
         this.numOptionsPerDepartment = lib.config.getNumOptionsPerDepartment();
       }
@@ -239,10 +232,7 @@ export default class CoursePlan {
   private getNumComments(): number {
     if (this.numComments === null) {
       if (Inventory.CoursePlans.has(this.hostId)) {
-        this.numComments = Inventory.CoursePlans.getMetadata(
-          this.hostId,
-          Inventory.CoursePlans.Cols.NumComments
-        );
+        this.numComments = Inventory.CoursePlans.getNumComments(this.hostId);
       } else {
         this.numComments = lib.config.getNumComments();
       }
@@ -348,10 +338,14 @@ export default class CoursePlan {
 
   private populateHeaders() {
     this.setStatus('filling in the labels'); // #create
-    g.SpreadsheetApp.Value.set(this.workingCopy, 'Template_Names', [
-      [this.student.getFormattedName()],
-      [`Advisor: ${this.advisor.getFormattedName()}`]
-    ]);
+    g.SpreadsheetApp.Value.set(
+      this.workingCopy,
+      lib.CoursePlanTemplate.namedRange.TemplateNames,
+      [
+        [this.student.getFormattedName()],
+        [`Advisor: ${this.advisor.getFormattedName()}`]
+      ]
+    );
     g.SpreadsheetApp.Value.set(
       this.workingCopy,
       lib.CoursePlanTemplate.namedRange.TemplateYears,
@@ -408,22 +402,13 @@ export default class CoursePlan {
     g.DriveApp.Permission.add(this.file.getId(), this.student.email);
     g.DriveApp.Permission.add(this.file.getId(), this.advisor.email);
 
-    if (
-      !Inventory.AdvisorFolders.getMetadata(
-        this.advisor.email,
-        Inventory.AdvisorFolders.Cols.PermissionsSet
-      )
-    ) {
+    if (!Inventory.AdvisorFolders.getPermissionsSet(this.advisor.email)) {
       g.DriveApp.Permission.add(
         this.getAdvisorFolder().getId(),
         this.advisor.email,
         g.DriveApp.Permission.Role.Reader
       );
-      Inventory.AdvisorFolders.setMetadata(
-        this.advisor.email,
-        Inventory.AdvisorFolders.Cols.PermissionsSet,
-        true
-      );
+      Inventory.AdvisorFolders.setPermissionsSet(this.advisor.email, true);
     }
   }
 
@@ -565,30 +550,16 @@ export default class CoursePlan {
         this.planSheet.insertRowsAfter(row, target - current);
       }
     }
-    Inventory.CoursePlans.setMetadata(
-      this.hostId,
-      Inventory.CoursePlans.Cols.NumOptionsPerDepartment,
-      target
-    );
+    Inventory.CoursePlans.setNumOptionsPerDepartment(this.hostId, target);
   }
 
-  public hasNewAdvisor = () =>
-    Inventory.CoursePlans.getMetadata(
-      this.hostId,
-      Inventory.CoursePlans.Cols.NewAdvisor
-    );
+  public hasNewAdvisor = () => Inventory.CoursePlans.getNewAdvisor(this.hostId);
 
   public hasPermissionsUpdate = () =>
-    Inventory.CoursePlans.getMetadata(
-      this.hostId,
-      Inventory.CoursePlans.Cols.PermissionsUpdated
-    );
+    Inventory.CoursePlans.getPermissionsUpdated(this.hostId);
 
   public hasStudentFolderPermissionsUpdate = () =>
-    Inventory.StudentFolders.getMetadata(
-      this.hostId,
-      Inventory.StudentFolders.Cols.PermissionsUpdated
-    );
+    Inventory.StudentFolders.getPermissionsUpdated(this.hostId);
 
   private updateAdvisorPermissions() {
     const previousAdvisor = this.student.getAdvisor(
@@ -613,11 +584,19 @@ export default class CoursePlan {
       `Removed ${previousAdvisor.email} from ${lib.CoursePlanTemplate.namedRange.ProtectAdvisor} in ${fileName}`
     );
     this.file.removeEditor(previousAdvisor.email);
-    Inventory.CoursePlans.setMetadata(
-      this.hostId,
-      Inventory.CoursePlans.Cols.PermissionsUpdated,
-      true
+    Logger.log(`Removed ${previousAdvisor.email} as editor from ${fileName}`);
+
+    g.SpreadsheetApp.Value.set(
+      this.planSheet,
+      lib.CoursePlanTemplate.namedRange.TemplateNames,
+      [
+        [this.student.getFormattedName()],
+        [`Advisor: ${this.advisor.getFormattedName()}`]
+      ]
     );
+    Logger.log(`Updated advisor name in ${fileName}`);
+
+    Inventory.CoursePlans.setPermissionsUpdated(this.hostId, true);
   }
 
   private updateStudentFolderPermissions() {
@@ -652,10 +631,6 @@ export default class CoursePlan {
       `Removed ${previousAdvisor.email
       } as viewer from ${studentFolder.getName()}`
     );
-    Inventory.StudentFolders.setMetadata(
-      this.hostId,
-      Inventory.StudentFolders.Cols.PermissionsUpdated,
-      true
-    );
+    Inventory.StudentFolders.setPermissionsUpdated(this.hostId, true);
   }
 }

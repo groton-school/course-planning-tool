@@ -55,12 +55,7 @@ global.y = () => {
 
   progress.setStatus('Resetting course plan permissions flags…');
   const plans = Inventory.CoursePlans.getSheet()
-    .getRange(
-      2,
-      Inventory.CoursePlans.Cols.PermissionsUpdated,
-      Inventory.CoursePlans.getSheet().getMaxRows() - 1,
-      1
-    )
+    .getRange(lib.CoursePlanningData.namedRange.RollOverCoursePlanPermissoons)
     .uncheck();
   progress.incrementValue();
 
@@ -69,10 +64,7 @@ global.y = () => {
   );
   Inventory.StudentFolders.getSheet()
     .getRange(
-      2,
-      Inventory.StudentFolders.Cols.PermissionsUpdated,
-      Inventory.StudentFolders.getSheet().getMaxRows() - 1,
-      1
+      lib.CoursePlanningData.namedRange.RollOverStudentFolderPermissions
     )
     .uncheck();
   progress.incrementValue();

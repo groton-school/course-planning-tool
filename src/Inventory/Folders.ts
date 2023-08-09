@@ -1,12 +1,6 @@
 import Inventory from './Inventory';
 
 class Folders extends Inventory<GoogleAppsScript.Drive.Folder> {
-  public Cols = {
-    ...super.Cols,
-    FolderId: super.Cols.Id,
-    FolderUrl: super.Cols.Url
-  };
-
   public constructor(sheetName: string, formatter: Inventory.Formatter) {
     super(sheetName);
     this.formatter = formatter;
@@ -26,8 +20,20 @@ class Folders extends Inventory<GoogleAppsScript.Drive.Folder> {
     this.add([key, folder.getId(), folder.getUrl()]);
     return folder;
   }
+
+  public getFolderId = (key: Inventory.Key) => this.getMetadata(key, 2);
+  public getFolderUrl = (key: Inventory.Key) => this.getMetadata(key, 3);
 }
 
-namespace Folders { }
+namespace Folders {
+  /*  export enum Cols {
+    Key = 1,
+    Id = 2,
+    Url = 3,
+    FolderId = 2,
+    FolderUrl = 3
+  } */
+  export type Key = Inventory.Key;
+}
 
 export { Folders as default };

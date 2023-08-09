@@ -38,6 +38,9 @@ export default {
     IEHNumericalYears: 'IEH_NumericalYears',
     IEHYears: 'IEH_Years',
 
+    RollOverStudentFolderPermissions: 'RollOver_StudentFolderPermissions',
+    RollOverCoursePlanPermissoons: 'RollOver_CoursePlanPermissions',
+
     CleanParams: 'Clean_Params',
     CleanInventoryRoot: 'A2:C2',
     CleanAvailableCourses: 'Clean_AvailableCourses',
