@@ -67,20 +67,33 @@ abstract class Inventory<T> {
 
   public getSheet = () => this.sheet;
 
-  public getKey = (key: Inventory.Key) => this.getMetadata(key, 1);
-  public getId = (key: Inventory.Key) => this.getMetadata(key, 2);
-  public getUrl = (key: Inventory.Key) => this.getMetadata(key, 3);
+  public abstract metadataFor(target: Inventory.Key): Inventory.Metadata<T>;
 }
 
 namespace Inventory {
+  __dirname;
   export type Key = number | string;
   export type Entry = [Key, string, string];
   export type Formatter = (key: Key) => string;
-  /*  export enum Cols {
-    Key = 1,
-    Id = 2,
-    Url = 3
-  } */
+
+  export class Metadata<T> {
+    public constructor(
+      protected inventory: Inventory<T>,
+      protected k: Inventory.Key
+    ) { }
+
+    public get key() {
+      return this.inventory.getMetadata(this.k, 1);
+    }
+
+    public get id() {
+      return this.inventory.getMetadata(this.k, 2);
+    }
+
+    public get url() {
+      return this.inventory.getMetadata(this.k, 3);
+    }
+  }
 }
 
 export { Inventory as default };

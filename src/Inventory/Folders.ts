@@ -1,6 +1,7 @@
+import Folder from './Folder';
 import Inventory from './Inventory';
 
-class Folders extends Inventory<GoogleAppsScript.Drive.Folder> {
+class Folders extends Inventory<Folder> {
   public constructor(sheetName: string, formatter: Inventory.Formatter) {
     super(sheetName);
     this.formatter = formatter;
@@ -10,29 +11,30 @@ class Folders extends Inventory<GoogleAppsScript.Drive.Folder> {
 
   protected formatter = (key: Inventory.Key) => key.toString();
 
-  protected getter = (
-    id: string,
-    key?: Inventory.Key
-  ): GoogleAppsScript.Drive.Folder => DriveApp.getFolderById(id);
+  protected getter = (id: string, key?: Inventory.Key): Folder =>
+    new Folder(this, DriveApp.getFolderById(id), key);
 
-  protected creator(key: Inventory.Key): GoogleAppsScript.Drive.Folder {
-    const folder = this.getRoot().createFolder(this.formatter(key));
+  protected creator(key: Inventory.Key): Folder {
+    const folder = this.getRoot().folder.createFolder(this.formatter(key));
     this.add([key, folder.getId(), folder.getUrl()]);
-    return folder;
+    return new Folder(this, folder, key);
   }
 
-  public getFolderId = (key: Inventory.Key) => this.getMetadata(key, 2);
-  public getFolderUrl = (key: Inventory.Key) => this.getMetadata(key, 3);
+  public metadataFor(target: Inventory.Key): Metadata {
+    return new Metadata(this, target);
+  }
+}
+
+export class Metadata extends Inventory.Metadata<Folder> {
+  public get folderId() {
+    return this.id;
+  }
+  public get folderUrl() {
+    return this.url;
+  }
 }
 
 namespace Folders {
-  /*  export enum Cols {
-    Key = 1,
-    Id = 2,
-    Url = 3,
-    FolderId = 2,
-    FolderUrl = 3
-  } */
   export type Key = Inventory.Key;
 }
 

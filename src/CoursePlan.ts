@@ -1,5 +1,6 @@
 import g from '@battis/gas-lighter';
 import Inventory from './Inventory';
+import { Metadata as SFMetadata } from './Inventory/StudentFolders';
 import lib from './lib';
 import Role from './Role';
 
@@ -36,6 +37,15 @@ export default class CoursePlan {
   private set advisor(advisor: Role.Advisor) {
     this._advisor = advisor;
   }
+
+  public static getFormFolderForStudentFolderFor = (student: Role.Student) =>
+    Inventory.FormFoldersOfStudentFolders.get(student.gradYear);
+
+  private getAdvisorFolder = (advisorEmail = this.advisor.email) =>
+    Inventory.AdvisorFolders.get(advisorEmail);
+
+  public static getAdvisorFolderFor = (student: Role.Student) =>
+    Inventory.AdvisorFolders.get(student.getAdvisor().email);
 
   private _spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet;
   public get spreadsheet() {
@@ -110,31 +120,37 @@ export default class CoursePlan {
     return this._validationSheet;
   }
 
+  private get numDepartments() {
+    return this.validationSheet.getMaxColumns();
+  }
+
+  private get individualEnrollmentHistory() {
+    return SpreadsheetApp.getActive().getSheetByName(
+      lib.CoursePlanningData.sheet.IndividualEnrollmentHistory
+    );
+  }
+
+  public meta = Inventory.CoursePlans.metadataFor(this.hostId);
+
   private numOptionsPerDepartment?: number = null;
   private numComments?: number = null;
 
-  public static bindTo = (
-    spreadsheetId: string,
-    hostId: Inventory.Key
-  ): CoursePlan => new CoursePlan({ hostId, spreadsheetId });
+  public static bindTo(spreadsheetId: string, hostId: Inventory.Key) {
+    return new CoursePlan({ hostId, spreadsheetId });
+  }
 
   public static for(hostId: string): CoursePlan;
   public static for(student: Role.Student): CoursePlan;
   public static for(target: string | Role.Student): CoursePlan {
     if (typeof target === 'string') {
       const plan = Inventory.CoursePlans.get(target);
-      if (plan.hasNewAdvisor() && !plan.hasPermissionsUpdate()) {
-        Logger.log(
-          `Need to update course plan permissions for ${plan.file.getName()}`
-        );
+      if (plan.meta.newAdvisor && !plan.meta.permissionsUpdated) {
         plan.updateAdvisorPermissions();
       }
-      if (plan.hasNewAdvisor() && !plan.hasStudentFolderPermissionsUpdate()) {
-        Logger.log(
-          `Need to update folder permissions for ${Inventory.StudentFolders.for(
-            plan
-          ).getName()}`
-        );
+      if (
+        plan.meta.newAdvisor &&
+        !Inventory.StudentFolders.metadataFor(plan.hostId).permissionsUpdated
+      ) {
         plan.updateStudentFolderPermissions();
       }
       return plan;
@@ -186,12 +202,9 @@ export default class CoursePlan {
       this.spreadsheet.getId(),
       this.spreadsheet.getUrl()
     ]);
-    Inventory.CoursePlans.setNumOptionsPerDepartment(
-      this.hostId,
-      this.getNumOptionsPerDepartment()
-    );
-    Inventory.CoursePlans.setNumComments(this.hostId, this.getNumComments());
-    Inventory.CoursePlans.setVersion(this.hostId, APP_VERSION);
+    this.meta.numOptionsPerDepartment = this.getNumOptionsPerDepartment();
+    this.meta.numComments = this.getNumComments();
+    this.meta.version = APP_VERSION;
   }
 
   private bindToExistingSpreadsheet({ hostId, spreadsheetId }) {
@@ -199,18 +212,10 @@ export default class CoursePlan {
     this.spreadsheet = SpreadsheetApp.openById(spreadsheetId);
   }
 
-  private getIndividualEnrollmentHistory = () =>
-    SpreadsheetApp.getActive().getSheetByName(
-      lib.CoursePlanningData.sheet.IndividualEnrollmentHistory
-    );
-
-  private getNumDepartments = () => this.validationSheet.getMaxColumns();
-
   private getNumOptionsPerDepartment(): number {
     if (this.numOptionsPerDepartment === null) {
       if (Inventory.CoursePlans.has(this.hostId)) {
-        this.numOptionsPerDepartment =
-          Inventory.CoursePlans.getNumOptionsPerDepartment(this.hostId);
+        this.numOptionsPerDepartment = this.meta.numOptionsPerDepartment;
       } else {
         this.numOptionsPerDepartment = lib.config.getNumOptionsPerDepartment();
       }
@@ -221,7 +226,7 @@ export default class CoursePlan {
   private getNumComments(): number {
     if (this.numComments === null) {
       if (Inventory.CoursePlans.has(this.hostId)) {
-        this.numComments = Inventory.CoursePlans.getNumComments(this.hostId);
+        this.numComments = this.meta.numComments;
       } else {
         this.numComments = lib.config.getNumComments();
       }
@@ -235,7 +240,7 @@ export default class CoursePlan {
 
   private populateEnrollmentHistory(create = true) {
     this.setStatus('calculating enrollment history'); // #create, #update-history
-    const ieh = this.getIndividualEnrollmentHistory();
+    const ieh = this.individualEnrollmentHistory;
     ieh
       .getRange(lib.CoursePlanningData.namedRange.IEHHostIdSelector)
       .setValue(this.hostId);
@@ -257,7 +262,7 @@ export default class CoursePlan {
       .getDisplayValues()[0]
       .findIndex((y) => parseInt(y) > lib.currentSchoolYear());
     if (create) {
-      for (let row = 0; row < this.getNumDepartments(); row++) {
+      for (let row = 0; row < this.numDepartments; row++) {
         const rowValidation = [];
         for (let year = start; year < 5; year++) {
           rowValidation.push(
@@ -300,18 +305,6 @@ export default class CoursePlan {
     }
   }
 
-  private getFormFolderForPlan = () =>
-    Inventory.FormFoldersOfCoursePlans.get(this.student.gradYear);
-
-  public static getFormFolderForStudentFolderFor = (student: Role.Student) =>
-    Inventory.FormFoldersOfStudentFolders.get(student.gradYear);
-
-  private getAdvisorFolder = (advisorEmail = this.advisor.email) =>
-    Inventory.AdvisorFolders.get(advisorEmail);
-
-  public static getAdvisorFolderFor = (student: Role.Student) =>
-    Inventory.AdvisorFolders.get(student.getAdvisor().email);
-
   private createFromTemplate() {
     this.setStatus('creating course plan from template'); // #create
     const template = SpreadsheetApp.openByUrl(
@@ -335,7 +328,7 @@ export default class CoursePlan {
     g.SpreadsheetApp.Value.set(
       this.planSheet,
       lib.CoursePlanTemplate.namedRange.TemplateYears,
-      this.getIndividualEnrollmentHistory()
+      this.individualEnrollmentHistory
         .getRange(lib.CoursePlanningData.namedRange.IEHYears)
         .getDisplayValues()
     );
@@ -345,19 +338,19 @@ export default class CoursePlan {
     this.setStatus('creating student folder'); // #create
     const creating = !Inventory.StudentFolders.has(this.hostId);
     const studentFolder = Inventory.StudentFolders.for(this);
-    studentFolder.createShortcut(this.file.getId());
+    studentFolder.folder.createShortcut(this.file.getId());
     if (creating) {
-      this.getAdvisorFolder().createShortcut(
-        Inventory.StudentFolders.for(this).getId()
+      this.getAdvisorFolder().folder.createShortcut(
+        Inventory.StudentFolders.for(this).id
       );
     }
     g.DriveApp.Permission.add(
-      studentFolder.getId(),
+      studentFolder.id,
       this.student.email,
       g.DriveApp.Permission.Role.Reader
     );
     g.DriveApp.Permission.add(
-      studentFolder.getId(),
+      studentFolder.id,
       this.advisor.email,
       g.DriveApp.Permission.Role.Reader
     );
@@ -370,31 +363,35 @@ export default class CoursePlan {
       this.setStatus(
         'replacing plan shortcut with folder shortcut in advisor folder'
       );
-      const shortcuts = this.getAdvisorFolder().getFilesByName(
+      const shortcuts = this.getAdvisorFolder().folder.getFilesByName(
         lib.format.apply(lib.config.getCoursePlanNameFormat(), this.student)
       );
       while (shortcuts.hasNext()) {
         shortcuts.next().setTrashed(true);
       }
-      this.getAdvisorFolder().createShortcut(
-        Inventory.StudentFolders.for(this).getId()
+      this.getAdvisorFolder().folder.createShortcut(
+        Inventory.StudentFolders.for(this).id
       );
     }
   }
 
   private setPermissions() {
     this.setStatus('setting permissions'); // #create
-    this.file.moveTo(this.getFormFolderForPlan());
+    this.file.moveTo(
+      Inventory.FormFoldersOfCoursePlans.get(this.student.gradYear).folder
+    );
     g.DriveApp.Permission.add(this.file.getId(), this.student.email);
     g.DriveApp.Permission.add(this.file.getId(), this.advisor.email);
 
-    if (!Inventory.AdvisorFolders.getPermissionsSet(this.advisor.email)) {
+    const meta = Inventory.AdvisorFolders.metadataFor(this.advisor.email);
+
+    if (!meta.permissionsSet) {
       g.DriveApp.Permission.add(
-        this.getAdvisorFolder().getId(),
+        this.getAdvisorFolder().id,
         this.advisor.email,
         g.DriveApp.Permission.Role.Reader
       );
-      Inventory.AdvisorFolders.setPermissionsSet(this.advisor.email, true);
+      meta.permissionsSet = true;
     }
   }
 
@@ -403,7 +400,7 @@ export default class CoursePlan {
     const numOptions = lib.config.getNumOptionsPerDepartment();
     for (
       let row = 0;
-      row < this.getNumDepartments() * numOptions;
+      row < this.numDepartments * numOptions;
       row += numOptions
     ) {
       this.planSheet.insertRowsAfter(
@@ -506,7 +503,7 @@ export default class CoursePlan {
     Inventory.CoursePlans.remove(this.hostId);
 
     this.setStatus('trashing shortcuts to plan'); // #delete
-    const shortcuts = Inventory.StudentFolders.for(this).getFilesByType(
+    const shortcuts = Inventory.StudentFolders.for(this).folder.getFilesByType(
       MimeType.SHORTCUT
     );
     while (shortcuts.hasNext()) {
@@ -526,25 +523,15 @@ export default class CoursePlan {
     if (current < target) {
       for (
         let row =
-          this.getAnchorOffset().getRow() +
-          this.getNumDepartments() * current -
-          1;
+          this.getAnchorOffset().getRow() + this.numDepartments * current - 1;
         row > this.getAnchorOffset().getRow();
         row -= current
       ) {
         this.planSheet.insertRowsAfter(row, target - current);
       }
     }
-    Inventory.CoursePlans.setNumOptionsPerDepartment(this.hostId, target);
+    this.meta.numOptionsPerDepartment = target;
   }
-
-  public hasNewAdvisor = () => Inventory.CoursePlans.getNewAdvisor(this.hostId);
-
-  public hasPermissionsUpdate = () =>
-    Inventory.CoursePlans.getPermissionsUpdated(this.hostId);
-
-  public hasStudentFolderPermissionsUpdate = () =>
-    Inventory.StudentFolders.getPermissionsUpdated(this.hostId);
 
   private updateAdvisorPermissions() {
     const previousAdvisor = this.student.getAdvisor(
@@ -556,20 +543,12 @@ export default class CoursePlan {
       g.DriveApp.Permission.Role.Writer
     );
     const fileName = this.file.getName();
-    Logger.log(`Added ${this.advisor.email} as editor to ${fileName}`);
     const protection = this.planSheet
       .getRange(lib.CoursePlanTemplate.namedRange.ProtectAdvisor)
       .protect();
     protection.addEditor(this.advisor.email);
-    Logger.log(
-      `Added ${this.advisor.email} to ${lib.CoursePlanTemplate.namedRange.ProtectAdvisor} editors in ${fileName}`
-    );
     protection.removeEditor(previousAdvisor.email);
-    Logger.log(
-      `Removed ${previousAdvisor.email} from ${lib.CoursePlanTemplate.namedRange.ProtectAdvisor} in ${fileName}`
-    );
     this.file.removeEditor(previousAdvisor.email);
-    Logger.log(`Removed ${previousAdvisor.email} as editor from ${fileName}`);
 
     g.SpreadsheetApp.Value.set(
       this.planSheet,
@@ -579,9 +558,8 @@ export default class CoursePlan {
         [`Advisor: ${this.advisor.getFormattedName()}`]
       ]
     );
-    Logger.log(`Updated advisor name in ${fileName}`);
 
-    Inventory.CoursePlans.setPermissionsUpdated(this.hostId, true);
+    this.meta.permissionsUpdated = true;
   }
 
   private updateStudentFolderPermissions() {
@@ -590,32 +568,20 @@ export default class CoursePlan {
     );
     const studentFolder = Inventory.StudentFolders.for(this);
     g.DriveApp.Permission.add(
-      studentFolder.getId(),
+      studentFolder.id,
       this.advisor.email,
       g.DriveApp.Permission.Role.Reader
     );
-    Logger.log(
-      `Added ${this.advisor.email} as viewer to ${studentFolder.getName()}`
-    );
     const shortcuts = this.getAdvisorFolder(
       previousAdvisor.email
-    ).getFilesByType(MimeType.SHORTCUT);
+    ).folder.getFilesByType(MimeType.SHORTCUT);
     while (shortcuts.hasNext()) {
       const shortcut = shortcuts.next();
-      if (shortcut.getTargetId() === studentFolder.getId()) {
-        shortcut.moveTo(this.getAdvisorFolder());
-        Logger.log(
-          `Moved ${shortcut.getName()} from ${this.getAdvisorFolder(
-            previousAdvisor.email
-          ).getName()} to ${this.getAdvisorFolder().getName()}`
-        );
+      if (shortcut.getTargetId() === studentFolder.id) {
+        shortcut.moveTo(this.getAdvisorFolder().folder);
       }
     }
-    studentFolder.removeViewer(previousAdvisor.email);
-    Logger.log(
-      `Removed ${previousAdvisor.email
-      } as viewer from ${studentFolder.getName()}`
-    );
-    Inventory.StudentFolders.setPermissionsUpdated(this.hostId, true);
+    studentFolder.folder.removeViewer(previousAdvisor.email);
+    (studentFolder.meta as SFMetadata).permissionsUpdated = true;
   }
 }

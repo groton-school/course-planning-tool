@@ -23,23 +23,47 @@ class CoursePlans extends Inventory<CoursePlan> {
     return entries;
   }
 
-  public getNumOptionsPerDepartment = (hostId: Inventory.Key) =>
-    this.getMetadata(hostId, 14);
-  public setNumOptionsPerDepartment = (hostId: Inventory.Key, value: number) =>
-    this.setMetadata(hostId, 14, value);
-  public getNumComments = (hostId: Inventory.Key) =>
-    this.getMetadata(hostId, 15);
-  public setNumComments = (hostId: Inventory.Key, value: number) =>
-    this.setMetadata(hostId, 15, value);
-  public getNewAdvisor = (hostId: Inventory.Key) =>
-    this.getMetadata(hostId, 17);
-  public getPermissionsUpdated = (hostId: Inventory.Key) =>
-    this.getMetadata(hostId, 18);
-  public setPermissionsUpdated = (hostId: Inventory.Key, value: boolean) =>
-    this.setMetadata(hostId, 18, value);
-  public getVersion = (hostId: Inventory.Key) => this.getMetadata(hostId, 19);
-  public setVersion = (hostId: Inventory.Key, value: string) =>
-    this.setMetadata(hostId, 19, value);
+  public metadataFor(hostId: Inventory.Key) {
+    return new Metadata(this, hostId);
+  }
+}
+
+class Metadata extends Inventory.Metadata<CoursePlan> {
+  public get numOptionsPerDepartment() {
+    return this.inventory.getMetadata(this.k, 14);
+  }
+
+  public set numOptionsPerDepartment(numOptionsPerDepartment: number) {
+    this.inventory.setMetadata(this.k, 14, numOptionsPerDepartment);
+  }
+
+  public get numComments() {
+    return this.inventory.getMetadata(this.k, 15);
+  }
+
+  public set numComments(numComments: number) {
+    this.inventory.setMetadata(this.k, 15, numComments);
+  }
+
+  public get newAdvisor() {
+    return this.inventory.getMetadata(this.k, 17);
+  }
+
+  public get permissionsUpdated() {
+    return this.inventory.getMetadata(this.k, 18);
+  }
+
+  public set permissionsUpdated(permissionsUpdated: boolean) {
+    this.inventory.setMetadata(this.k, 18, permissionsUpdated);
+  }
+
+  public get version() {
+    return this.inventory.getMetadata(this.k, 19);
+  }
+
+  public set version(version: string) {
+    this.inventory.setMetadata(this.k, 19, version);
+  }
 }
 
 namespace CoursePlans { }
