@@ -1,5 +1,5 @@
 import MConfig from './config';
-import CoursePlanningData from './CoursePlanningData';
+import MCoursePlanningData from './CoursePlanningData';
 import CoursePlanTemplate from './CoursePlanTemplate';
 import currentSchoolYear from './currentSchoolYear';
 import * as MFormat from './format';
@@ -9,7 +9,6 @@ class lib {
     // static-only
   }
 
-  public static CoursePlanningData = CoursePlanningData;
   public static CoursePlanTemplate = CoursePlanTemplate;
 
   public static currentSchoolYear = currentSchoolYear;
@@ -18,6 +17,7 @@ class lib {
 namespace lib {
   export import config = MConfig;
   export import format = MFormat;
+  export import CoursePlanningData = MCoursePlanningData;
 }
 
 export { lib as default };

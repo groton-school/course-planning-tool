@@ -1,15 +1,17 @@
 import g from '@battis/gas-lighter';
+import lib from '../../lib';
+import Item from './Item';
 
-abstract class Inventory<T> {
+abstract class Inventory<ItemType extends Item = Item> {
   private data?: any[][];
   private sheet: GoogleAppsScript.Spreadsheet.Sheet;
 
-  constructor(sheetName: string) {
+  constructor(sheetName: lib.CoursePlanningData.SheetName) {
     this.sheet = SpreadsheetApp.getActive().getSheetByName(sheetName);
   }
 
-  protected abstract getter(id: string, key?: Inventory.Key): T;
-  protected abstract creator(key: Inventory.Key): T;
+  protected abstract getter(id: string, key?: Inventory.Key): ItemType;
+  protected abstract creator(key: Inventory.Key): ItemType;
 
   private getData() {
     if (!this.data) {
@@ -36,14 +38,10 @@ abstract class Inventory<T> {
   public has = (key: Inventory.Key): boolean =>
     this.getData().findIndex(([k]) => k == key) >= 0;
 
-  public get(key: Inventory.Key): T {
-    const id = this.getData().reduce((id: string, [k, i]) => {
-      if (k == key) {
-        return i;
-      }
-
-      return id;
-    }, null);
+  public get(key: Inventory.Key) {
+    const id = this.getData()
+      .find(([k]) => k == key)
+      .shift()?.id;
     if (!id) {
       return this.creator(key);
     }
@@ -66,8 +64,6 @@ abstract class Inventory<T> {
   }
 
   public getSheet = () => this.sheet;
-
-  public abstract metadataFor(target: Inventory.Key): Inventory.Metadata<T>;
 }
 
 namespace Inventory {
@@ -75,25 +71,6 @@ namespace Inventory {
   export type Key = number | string;
   export type Entry = [Key, string, string];
   export type Formatter = (key: Key) => string;
-
-  export class Metadata<T> {
-    public constructor(
-      protected inventory: Inventory<T>,
-      protected k: Inventory.Key
-    ) { }
-
-    public get key() {
-      return this.inventory.getMetadata(this.k, 1);
-    }
-
-    public get id() {
-      return this.inventory.getMetadata(this.k, 2);
-    }
-
-    public get url() {
-      return this.inventory.getMetadata(this.k, 3);
-    }
-  }
 }
 
 export { Inventory as default };

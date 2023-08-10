@@ -1,6 +1,5 @@
 import g from '@battis/gas-lighter';
 import Inventory from './Inventory';
-import { Metadata as SFMetadata } from './Inventory/StudentFolders';
 import lib from './lib';
 import Role from './Role';
 
@@ -143,14 +142,12 @@ export default class CoursePlan {
   public static for(student: Role.Student): CoursePlan;
   public static for(target: string | Role.Student): CoursePlan {
     if (typeof target === 'string') {
-      const plan = Inventory.CoursePlans.get(target);
+      const { plan } = Inventory.CoursePlans.get(target);
+      const studentFolder = Inventory.StudentFolders.get(plan.hostId);
       if (plan.meta.newAdvisor && !plan.meta.permissionsUpdated) {
         plan.updateAdvisorPermissions();
       }
-      if (
-        plan.meta.newAdvisor &&
-        !Inventory.StudentFolders.metadataFor(plan.hostId).permissionsUpdated
-      ) {
+      if (plan.meta.newAdvisor && !studentFolder.meta.permissionsUpdated) {
         plan.updateStudentFolderPermissions();
       }
       return plan;
@@ -337,20 +334,20 @@ export default class CoursePlan {
   private createStudentFolder() {
     this.setStatus('creating student folder'); // #create
     const creating = !Inventory.StudentFolders.has(this.hostId);
-    const studentFolder = Inventory.StudentFolders.for(this);
-    studentFolder.folder.createShortcut(this.file.getId());
+    const { studentFolder } = Inventory.StudentFolders.for(this);
+    studentFolder.createShortcut(this.file.getId());
     if (creating) {
-      this.getAdvisorFolder().folder.createShortcut(
-        Inventory.StudentFolders.for(this).id
+      this.getAdvisorFolder().advisorFolder.createShortcut(
+        studentFolder.getId()
       );
     }
     g.DriveApp.Permission.add(
-      studentFolder.id,
+      studentFolder.getId(),
       this.student.email,
       g.DriveApp.Permission.Role.Reader
     );
     g.DriveApp.Permission.add(
-      studentFolder.id,
+      studentFolder.getId(),
       this.advisor.email,
       g.DriveApp.Permission.Role.Reader
     );
@@ -370,7 +367,7 @@ export default class CoursePlan {
         shortcuts.next().setTrashed(true);
       }
       this.getAdvisorFolder().folder.createShortcut(
-        Inventory.StudentFolders.for(this).id
+        Inventory.StudentFolders.for(this).studentFolder.getId()
       );
     }
   }
@@ -383,15 +380,15 @@ export default class CoursePlan {
     g.DriveApp.Permission.add(this.file.getId(), this.student.email);
     g.DriveApp.Permission.add(this.file.getId(), this.advisor.email);
 
-    const meta = Inventory.AdvisorFolders.metadataFor(this.advisor.email);
+    const advisorFolder = Inventory.AdvisorFolders.get(this.advisor.email);
 
-    if (!meta.permissionsSet) {
+    if (!advisorFolder.meta.permissionsSet) {
       g.DriveApp.Permission.add(
-        this.getAdvisorFolder().id,
+        advisorFolder.folder.getId(),
         this.advisor.email,
         g.DriveApp.Permission.Role.Reader
       );
-      meta.permissionsSet = true;
+      advisorFolder.meta.permissionsSet = true;
     }
   }
 
@@ -568,7 +565,7 @@ export default class CoursePlan {
     );
     const studentFolder = Inventory.StudentFolders.for(this);
     g.DriveApp.Permission.add(
-      studentFolder.id,
+      studentFolder.studentFolder.getId(),
       this.advisor.email,
       g.DriveApp.Permission.Role.Reader
     );
@@ -577,11 +574,11 @@ export default class CoursePlan {
     ).folder.getFilesByType(MimeType.SHORTCUT);
     while (shortcuts.hasNext()) {
       const shortcut = shortcuts.next();
-      if (shortcut.getTargetId() === studentFolder.id) {
+      if (shortcut.getTargetId() === studentFolder.studentFolder.getId()) {
         shortcut.moveTo(this.getAdvisorFolder().folder);
       }
     }
     studentFolder.folder.removeViewer(previousAdvisor.email);
-    (studentFolder.meta as SFMetadata).permissionsUpdated = true;
+    studentFolder.meta.permissionsUpdated = true;
   }
 }

@@ -1,15 +1,13 @@
 import lib from '../lib';
 import Role from '../Role';
 import AdvisorFolders from './AdvisorFolders';
+import MBase from './Base';
 import CoursePlans from './CoursePlans';
 import Folders from './Folders';
-import MInventory from './Inventory';
 import StudentFolders from './StudentFolders';
 
 class Inventory {
-  private constructor() {
-    // static only
-  }
+  private constructor() { }
 
   private static _formFoldersOfCoursePlans: Folders;
   public static get FormFoldersOfCoursePlans() {
@@ -63,9 +61,8 @@ class Inventory {
 }
 
 namespace Inventory {
-  export type Key = MInventory.Key;
-  export type Entry = MInventory.Entry;
-  export type Formatter = MInventory.Formatter;
+  export type Key = Base.Inventory.Key;
+  export import Base = MBase;
 }
 
 export { Inventory as default };
