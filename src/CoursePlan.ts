@@ -4,13 +4,14 @@ import lib from './lib';
 import Role from './Role';
 
 export default class CoursePlan {
-  // these can be calculated by searching for #X where X is getXStepCount
-  public static getCreateStepCount = () => 12;
-  public static getUpdateEnrollmentHistoryStepCount = () => 4;
-  public static getUpdateCourseListStepCount = () => 2;
-  public static getDeleteStepCount = () => 4;
+  public static stepCount = {
+    create: parseInt(CREATE_STEPS),
+    updateEnrollmentHistory: parseInt(UPDATE_HISTORY_STEPS),
+    updateCourseList: parseInt(UPDATE_COURSES_STEPS),
+    delete: parseInt(DELETE_STEPS)
+  };
 
-  public static thread = 'course-plan';
+  public static thread = Utilities.getUuid();
 
   private static coursesByDepartment: any[][];
 
@@ -42,9 +43,6 @@ export default class CoursePlan {
 
   private getAdvisorFolder = (advisorEmail = this.advisor.email) =>
     Inventory.AdvisorFolders.get(advisorEmail);
-
-  public static getAdvisorFolderFor = (student: Role.Student) =>
-    Inventory.AdvisorFolders.get(student.getAdvisor().email);
 
   private _spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet;
   public get spreadsheet() {
@@ -539,7 +537,6 @@ export default class CoursePlan {
       this.advisor.email,
       g.DriveApp.Permission.Role.Writer
     );
-    const fileName = this.file.getName();
     const protection = this.planSheet
       .getRange(lib.CoursePlanTemplate.namedRange.ProtectAdvisor)
       .protect();

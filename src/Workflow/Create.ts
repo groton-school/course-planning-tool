@@ -19,7 +19,7 @@ global.a = () =>
 const createPlanFor = () => 'b';
 global.b = (hostId: string, thread: string) => {
   const progress = g.HtmlService.Element.Progress.bindTo(thread);
-  progress.setMax(CoursePlan.getCreateStepCount());
+  progress.setMax(CoursePlan.stepCount.create);
   CoursePlan.thread = thread;
   const plan = CoursePlan.for(hostId);
   progress.setComplete({
@@ -53,7 +53,7 @@ global.d = (gradYear?: number, thread?: string) => {
   const students = gradYear
     ? Role.Student.getByForm(gradYear)
     : Role.Student.getAll();
-  progress.setMax(students.length * CoursePlan.getCreateStepCount());
+  progress.setMax(students.length * CoursePlan.stepCount.create);
   students.forEach((student: Role.Student, i) => {
     progress.setValue(i + 1);
     CoursePlan.for(student);

@@ -21,7 +21,7 @@ global.f = (hostId: string, thread: string) => {
   const progress = g.HtmlService.Element.Progress.bindTo(thread);
   progress.reset();
   CoursePlan.thread = thread;
-  progress.setMax(CoursePlan.getUpdateCourseListStepCount());
+  progress.setMax(CoursePlan.stepCount.updateCourseList);
   const plan = CoursePlan.for(hostId);
   plan.updateCourseList();
   progress.setComplete({
@@ -37,7 +37,7 @@ global.g = () => {
   progress.showModalDialog(SpreadsheetApp, 'Update Course Lists');
   CoursePlan.thread = progress.getThread();
   const plans = Inventory.CoursePlans.getAll();
-  progress.setMax(plans.length * CoursePlan.getUpdateCourseListStepCount());
+  progress.setMax(plans.length * CoursePlan.stepCount.updateCourseList);
   plans.forEach(([hostId]) => CoursePlan.for(hostId).updateCourseList());
   progress.setComplete(true);
 };

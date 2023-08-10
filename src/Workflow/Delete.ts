@@ -22,10 +22,7 @@ const deletePlanFor = () => 'r';
 global.r = (hostId: string, thread: string) => {
   g.HtmlService.Element.Progress.reset(thread);
   const student = Role.Student.getByHostId(hostId);
-  g.HtmlService.Element.Progress.setMax(
-    thread,
-    CoursePlan.getDeleteStepCount()
-  );
+  g.HtmlService.Element.Progress.setMax(thread, CoursePlan.stepCount.delete);
   CoursePlan.for(student).delete();
   g.HtmlService.Element.Progress.setComplete(thread, true);
 };
