@@ -1,3 +1,4 @@
+import lib from '../../lib';
 import Base from '../Base';
 import Folders from '../Folders';
 import Inventory from './Inventory';
@@ -8,16 +9,29 @@ class Metadata extends Folders.Metadata {
   }
 
   public get inactive() {
-    return this.inventory.getMetadata(this.k, 7);
+    return this.inventory.getMetadata(
+      this.k,
+      lib.CoursePlanningData.column.StudentFolders.Inactive
+    );
   }
   public get newAdvisor() {
-    return this.inventory.getMetadata(this.k, 8);
+    return this.inventory.getMetadata(
+      this.k,
+      lib.CoursePlanningData.column.StudentFolders.NewAdvisor
+    );
   }
   public get permissionsUpdated() {
-    return this.inventory.getMetadata(this.k, 9);
+    return this.inventory.getMetadata(
+      this.k,
+      lib.CoursePlanningData.column.StudentFolders.PermissionsUpdated
+    );
   }
   public set permissionsUpdated(permissionsUpdated: boolean) {
-    this.inventory.setMetadata(this.k, 9, permissionsUpdated);
+    this.inventory.setMetadata(
+      this.k,
+      lib.CoursePlanningData.column.StudentFolders.PermissionsUpdated,
+      permissionsUpdated
+    );
   }
 }
 

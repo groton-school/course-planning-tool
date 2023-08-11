@@ -23,14 +23,14 @@ abstract class Inventory<ItemType extends Item = Item> {
   }
 
   public getMetadata = (key: Inventory.Key, column: number) =>
-    this.getData().find((row) => row[0] == key)[column - 1];
+    this.getData().find((row) => row[0] == key)[column];
 
   public setMetadata = (key: Inventory.Key, column: number, value: any) =>
     this.getData().forEach((entry, row: number) => {
       if (entry[0] == key) {
-        entry[column - 1] = value;
+        entry[column] = value;
         this.getSheet()
-          .getRange(row + 1, column)
+          .getRange(row + 1, column + 1)
           .setValue(value);
       }
     });

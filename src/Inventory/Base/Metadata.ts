@@ -1,3 +1,4 @@
+import lib from '../../lib';
 import Inventory from './Inventory';
 
 class Metadata {
@@ -7,15 +8,24 @@ class Metadata {
   ) { }
 
   public get key() {
-    return this.inventory.getMetadata(this.k, 1);
+    return this.inventory.getMetadata(
+      this.k,
+      lib.CoursePlanningData.column.Inventory.Key
+    );
   }
 
   public get id() {
-    return this.inventory.getMetadata(this.k, 2);
+    return this.inventory.getMetadata(
+      this.k,
+      lib.CoursePlanningData.column.Inventory.Id
+    );
   }
 
   public get url() {
-    return this.inventory.getMetadata(this.k, 3);
+    return this.inventory.getMetadata(
+      this.k,
+      lib.CoursePlanningData.column.Inventory.Url
+    );
   }
 }
 
