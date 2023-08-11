@@ -8,11 +8,17 @@ import CoursePlanEntry from './CoursePlanEntry';
 // TODO archive departed advisors
 class Inventory extends Base.Inventory<CoursePlanEntry> {
   protected getter(spreadsheetId: string, hostId?: Base.Inventory.Key) {
-    return new CoursePlanEntry(
+    const entry = new CoursePlanEntry(
       this,
       CoursePlan.bindTo({ spreadsheetId, hostId }),
       hostId
     );
+    if (entry.meta.newAdvisor && !entry.meta.permissionsUpdated) {
+      entry.plan.assignToCurrentAdvisor();
+    } else if (entry.meta.inactive && !entry.meta.permissionsUpdated) {
+      entry.plan.makeInactive();
+    }
+    return entry;
   }
   // added to Inventory by CoursePlan constructor directly
   protected creator(key: Base.Inventory.Key) {
@@ -29,6 +35,10 @@ class Inventory extends Base.Inventory<CoursePlanEntry> {
     entries.shift(); // remove column headings
     return entries;
   }
+
+  public refresh = (hostId: Base.Inventory.Key) => {
+    this.get(hostId);
+  };
 }
 
 namespace Inventory { }

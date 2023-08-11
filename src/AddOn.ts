@@ -21,7 +21,7 @@ export function onOpen() {
       Workflow.UpdateEnrollmentHistory.pickPlan()
     )
     .addItem(
-      "Update a single course plan's course list …",
+      "Update a single course plan's course list…",
       Workflow.UpdateCourseList.pickPlan()
     )
     .addSeparator()

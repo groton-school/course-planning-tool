@@ -170,9 +170,6 @@ export default class CoursePlan {
     } else {
       this.bindToExistingSpreadsheet(arg);
     }
-    if (this.meta.newAdvisor && !this.meta.permissionsUpdated) {
-      this.updateAdvisorPermissions();
-    }
   }
 
   private createFromStudent(student: Role.Student) {
@@ -474,32 +471,46 @@ export default class CoursePlan {
     this.meta.numOptionsPerDepartment = target;
   }
 
-  private updateAdvisorPermissions() {
-    const previousAdvisor = this.student.getAdvisor(
-      Role.Advisor.ByYear.Previous
-    );
-    g.DriveApp.Permission.add(
-      this.file.getId(),
-      this.advisor.email,
-      g.DriveApp.Permission.Role.Writer
-    );
-    const protection = this.planSheet
-      .getRange(lib.CoursePlanTemplate.namedRange.ProtectAdvisor)
-      .protect();
-    protection.addEditor(this.advisor.email);
-    protection.removeEditor(previousAdvisor.email);
-    this.file.removeEditor(previousAdvisor.email);
+  public assignToCurrentAdvisor() {
+    if (this.meta.newAdvisor && !this.meta.permissionsUpdated) {
+      const previousAdvisor = this.student.getAdvisor(
+        Role.Advisor.ByYear.Previous
+      );
+      g.DriveApp.Permission.add(
+        this.file.getId(),
+        this.advisor.email,
+        g.DriveApp.Permission.Role.Writer
+      );
+      const protection = this.planSheet
+        .getRange(lib.CoursePlanTemplate.namedRange.ProtectAdvisor)
+        .protect();
+      protection.addEditor(this.advisor.email);
+      protection.removeEditor(previousAdvisor.email);
+      this.file.removeEditor(previousAdvisor.email);
 
-    g.SpreadsheetApp.Value.set(
-      this.planSheet,
-      lib.CoursePlanTemplate.namedRange.TemplateNames,
-      [
-        [this.student.getFormattedName()],
-        [`Advisor: ${this.advisor.getFormattedName()}`]
-      ]
-    );
+      g.SpreadsheetApp.Value.set(
+        this.planSheet,
+        lib.CoursePlanTemplate.namedRange.TemplateNames,
+        [
+          [this.student.getFormattedName()],
+          [`Advisor: ${this.advisor.getFormattedName()}`]
+        ]
+      );
+      this.meta.permissionsUpdated = true;
+      Inventory.StudentFolders.refresh(this.hostId);
+    }
+  }
 
-    this.meta.permissionsUpdated = true;
+  public makeInactive() {
+    if (this.meta.inactive && !this.meta.permissionsUpdated) {
+      const previousAdvisor = this.student.getAdvisor(
+        Role.Advisor.ByYear.Previous
+      );
+      this.file.removeEditor(previousAdvisor.email);
+
+      this.meta.permissionsUpdated = true;
+      Inventory.StudentFolders.refresh(this.hostId);
+    }
   }
 }
 

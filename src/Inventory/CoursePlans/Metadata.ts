@@ -32,6 +32,13 @@ class Metadata extends Base.Metadata {
     );
   }
 
+  public get inactive() {
+    return this.inventory.getMetadata(
+      this.k,
+      lib.CoursePlanningData.column.CoursePlans.Inactive
+    );
+  }
+
   public get newAdvisor() {
     return this.inventory.getMetadata(
       this.k,

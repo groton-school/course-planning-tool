@@ -46,8 +46,9 @@ class Inventory extends Folders<StudentFolder> {
     hostId: Base.Inventory.Key,
     thread = Utilities.getUuid()
   ) {
-    const { plan } = Inventories.CoursePlans.get(hostId);
-    if (semverLt(plan.meta.version, '0.2.1')) {
+    const planEntry = Inventories.CoursePlans.get(hostId);
+    const { plan } = planEntry;
+    if (semverLt(planEntry.meta.version, '0.2.1')) {
       if (!this.has(hostId)) {
         g.HtmlService.Element.Progress.setStatus(
           thread,
@@ -68,12 +69,14 @@ class Inventory extends Folders<StudentFolder> {
   protected getter(id: string, key?: Base.Inventory.Key) {
     const item = new StudentFolder(this, DriveApp.getFolderById(id), key);
     if (item.meta.newAdvisor && !item.meta.permissionsUpdated) {
-      this.updateStudentFolderPermissions(item);
+      this.assignToCurrentAdvisor(item);
+    } else if (item.meta.inactive && !item.meta.permissionsUpdated) {
+      this.makeInactive(item);
     }
     return item;
   }
 
-  private updateStudentFolderPermissions(item: StudentFolder) {
+  private assignToCurrentAdvisor(item: StudentFolder) {
     const previousAdvisor = item.student.getAdvisor(
       Role.Advisor.ByYear.Previous
     );
@@ -91,12 +94,35 @@ class Inventory extends Folders<StudentFolder> {
       }
     }
     studentFolder.removeViewer(previousAdvisor.email);
+
     item.meta.permissionsUpdated = true;
+    Inventories.CoursePlans.refresh(item.student.hostId);
+  }
+
+  private makeInactive(item: StudentFolder) {
+    const previousAdvisor = item.student.getAdvisor(
+      Role.Advisor.ByYear.Previous
+    );
+    const shortcuts = previousAdvisor.folder.getFilesByType(MimeType.SHORTCUT);
+    while (shortcuts.hasNext()) {
+      const shortcut = shortcuts.next();
+      if (shortcut.getTargetId() === item.studentFolder.getId()) {
+        shortcut.moveTo(item.student.advisor.folder);
+      }
+    }
+    item.studentFolder.removeViewer(previousAdvisor.email);
+
+    item.meta.permissionsUpdated = true;
+    Inventories.CoursePlans.refresh(item.student.hostId);
   }
 
   public for(plan: CoursePlan) {
     return this.get(plan.hostId);
   }
+
+  public refresh = (hostId: Base.Inventory.Key) => {
+    this.get(hostId);
+  };
 }
 
 namespace Inventory { }
