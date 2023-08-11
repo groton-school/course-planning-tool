@@ -1,6 +1,6 @@
 {
   "name": "@groton/course-planning-tool",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": {
     "name": "Seth Battis",
     "url": "https://github.com/groton-school"
@@ -22,7 +22,9 @@
     "deploy:push": "clasp push"
   },
   "dependencies": {
-    "@battis/gas-lighter": "^0.3.0"
+    "@battis/gas-lighter": "^0.3.0",
+    "@types/semver": "^7.5.0",
+    "semver": "^7.5.4"
   },
   "devDependencies": {
     "@battis/eslint-config": "latest",

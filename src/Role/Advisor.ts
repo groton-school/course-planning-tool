@@ -1,4 +1,5 @@
 import g from '@battis/gas-lighter';
+import Inventory from '../Inventory';
 
 enum ByYear {
   Current = 'Advisor List',
@@ -13,6 +14,14 @@ class Advisor {
   public readonly email: string;
   public readonly firstName: string;
   public readonly lastName: string;
+
+  private _folder?: GoogleAppsScript.Drive.Folder;
+  public get folder() {
+    if (!this._folder) {
+      this._folder = Inventory.AdvisorFolders.get(this.email).folder;
+    }
+    return this.folder;
+  }
 
   public constructor(data: object) {
     if (Array.isArray(data)) {

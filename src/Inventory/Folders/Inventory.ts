@@ -19,8 +19,9 @@ class Inventory<
 
   protected formatter = (key: Base.Inventory.Key) => key.toString();
 
-  protected getter = (id: string, key?: Base.Inventory.Key) =>
-    new Folder(this, DriveApp.getFolderById(id), key);
+  protected getter(id: string, key?: Base.Inventory.Key) {
+    return new Folder(this, DriveApp.getFolderById(id), key);
+  }
 
   protected creator(key: Base.Inventory.Key) {
     const folder = this.root.folder.createFolder(this.formatter(key));

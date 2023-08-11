@@ -41,11 +41,15 @@ export default class CoursePlan {
     this._advisor = advisor;
   }
 
-  public static getFormFolderForStudentFolderFor = (student: Role.Student) =>
-    Inventory.FormFoldersOfStudentFolders.get(student.gradYear);
-
-  private getAdvisorFolder = (advisorEmail = this.advisor.email) =>
-    Inventory.AdvisorFolders.get(advisorEmail);
+  private _formFolder?: GoogleAppsScript.Drive.Folder;
+  public get formFolder() {
+    if (!this._formFolder) {
+      this._formFolder = Inventory.FormFoldersOfCoursePlans.get(
+        this.student.gradYear
+      ).folder;
+    }
+    return this._formFolder;
+  }
 
   private _spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet;
   public get spreadsheet() {
@@ -142,13 +146,6 @@ export default class CoursePlan {
   public static for(target: string | Role.Student): CoursePlan {
     if (typeof target === 'string') {
       const { plan } = Inventory.CoursePlans.get(target);
-      const studentFolder = Inventory.StudentFolders.get(plan.hostId);
-      if (plan.meta.newAdvisor && !plan.meta.permissionsUpdated) {
-        plan.updateAdvisorPermissions();
-      }
-      if (plan.meta.newAdvisor && !studentFolder.meta.permissionsUpdated) {
-        plan.updateStudentFolderPermissions();
-      }
       return plan;
     } else {
       g.HtmlService.Element.Progress.setStatus(
@@ -173,6 +170,9 @@ export default class CoursePlan {
     } else {
       this.bindToExistingSpreadsheet(arg);
     }
+    if (this.meta.newAdvisor && !this.meta.permissionsUpdated) {
+      this.updateAdvisorPermissions();
+    }
   }
 
   private createFromStudent(student: Role.Student) {
@@ -181,8 +181,8 @@ export default class CoursePlan {
     this.createFromTemplate();
     this.populateEnrollmentHistory();
     this.populateHeaders();
-    this.createStudentFolder();
     this.setPermissions();
+    Inventory.StudentFolders.putInPlace(this, CoursePlan.thread); // #create
     this.prepareCommentBlanks();
     this.updateCourseList();
     this.setStatus('updating inventory'); // #create
@@ -329,65 +329,11 @@ export default class CoursePlan {
     );
   }
 
-  private createStudentFolder() {
-    this.setStatus('creating student folder'); // #create
-    const creating = !Inventory.StudentFolders.has(this.hostId);
-    const { studentFolder } = Inventory.StudentFolders.for(this);
-    studentFolder.createShortcut(this.file.getId());
-    if (creating) {
-      this.getAdvisorFolder().advisorFolder.createShortcut(
-        studentFolder.getId()
-      );
-    }
-    g.DriveApp.Permission.add(
-      studentFolder.getId(),
-      this.student.email,
-      g.DriveApp.Permission.Role.Reader
-    );
-    g.DriveApp.Permission.add(
-      studentFolder.getId(),
-      this.advisor.email,
-      g.DriveApp.Permission.Role.Reader
-    );
-  }
-
-  public createStudentFolderIfMissing() {
-    if (!Inventory.StudentFolders.has(this.hostId)) {
-      this.createStudentFolder();
-
-      this.setStatus(
-        'replacing plan shortcut with folder shortcut in advisor folder'
-      );
-      const shortcuts = this.getAdvisorFolder().folder.getFilesByName(
-        lib.format.apply(lib.config.getCoursePlanNameFormat(), this.student)
-      );
-      while (shortcuts.hasNext()) {
-        shortcuts.next().setTrashed(true);
-      }
-      this.getAdvisorFolder().folder.createShortcut(
-        Inventory.StudentFolders.for(this).studentFolder.getId()
-      );
-    }
-  }
-
   private setPermissions() {
     this.setStatus('setting permissions'); // #create
-    this.file.moveTo(
-      Inventory.FormFoldersOfCoursePlans.get(this.student.gradYear).folder
-    );
+    this.file.moveTo(this.formFolder);
     g.DriveApp.Permission.add(this.file.getId(), this.student.email);
     g.DriveApp.Permission.add(this.file.getId(), this.advisor.email);
-
-    const advisorFolder = Inventory.AdvisorFolders.get(this.advisor.email);
-
-    if (!advisorFolder.meta.permissionsSet) {
-      g.DriveApp.Permission.add(
-        advisorFolder.folder.getId(),
-        this.advisor.email,
-        g.DriveApp.Permission.Role.Reader
-      );
-      advisorFolder.meta.permissionsSet = true;
-    }
   }
 
   // TODO adjust row height to accommodate actual content lines
@@ -554,29 +500,6 @@ export default class CoursePlan {
     );
 
     this.meta.permissionsUpdated = true;
-  }
-
-  private updateStudentFolderPermissions() {
-    const previousAdvisor = this.student.getAdvisor(
-      Role.Advisor.ByYear.Previous
-    );
-    const studentFolder = Inventory.StudentFolders.for(this);
-    g.DriveApp.Permission.add(
-      studentFolder.studentFolder.getId(),
-      this.advisor.email,
-      g.DriveApp.Permission.Role.Reader
-    );
-    const shortcuts = this.getAdvisorFolder(
-      previousAdvisor.email
-    ).folder.getFilesByType(MimeType.SHORTCUT);
-    while (shortcuts.hasNext()) {
-      const shortcut = shortcuts.next();
-      if (shortcut.getTargetId() === studentFolder.studentFolder.getId()) {
-        shortcut.moveTo(this.getAdvisorFolder().folder);
-      }
-    }
-    studentFolder.folder.removeViewer(previousAdvisor.email);
-    studentFolder.meta.permissionsUpdated = true;
   }
 }
 

@@ -25,6 +25,14 @@ export function onOpen() {
       Workflow.UpdateCourseList.pickPlan()
     )
     .addSeparator()
+    /*
+     * TODO figure out versioning for including restructure options
+     *   Pragmatically, we don't need these options, since all plans are now at
+     *   v0.2.1 (which introduced student folders). It would be slick to be
+     *   able to conditionally hide this option when not needed (and to have a
+     *   structure for doing this for other restructuring that is version-
+     *   based.
+     */
     .addItem(
       'Create a single missing student folder…',
       Workflow.Restructure.pickStudentMissingFolder()

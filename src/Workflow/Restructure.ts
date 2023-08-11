@@ -20,8 +20,7 @@ global.k = () =>
 const createMissingStudentFolderFor = () => 'l';
 global.l = (hostId: string, thread: string) => {
   g.HtmlService.Element.Progress.reset(thread);
-  CoursePlan.thread = thread;
-  CoursePlan.for(hostId).createStudentFolderIfMissing();
+  Inventory.StudentFolders.createStudentFolderIfMissing(hostId, thread);
   g.HtmlService.Element.Progress.setComplete(thread, true);
 };
 
@@ -29,7 +28,6 @@ export const createAllMissingStudentFolders = () => 'm';
 global.m = () => {
   const progress = g.HtmlService.Element.Progress.bindTo(Utilities.getUuid());
   progress.reset();
-  CoursePlan.thread = progress.getThread();
   const plans = Inventory.CoursePlans.getAll();
   progress.setMax(plans.length * 4);
   SpreadsheetApp.getUi().showModalDialog(
@@ -37,7 +35,10 @@ global.m = () => {
     'Create Missing Student Folders'
   );
   plans.forEach(([hostId]) =>
-    CoursePlan.for(hostId).createStudentFolderIfMissing()
+    Inventory.StudentFolders.createStudentFolderIfMissing(
+      hostId,
+      progress.getThread()
+    )
   );
   progress.setComplete(true);
 };

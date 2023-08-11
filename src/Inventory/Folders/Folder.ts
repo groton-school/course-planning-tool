@@ -11,7 +11,7 @@ class Folder extends Base.Item {
     super(inventory, folder, key);
   }
 
-  public get folder() {
+  public get folder(): GoogleAppsScript.Drive.Folder {
     return this._content;
   }
 

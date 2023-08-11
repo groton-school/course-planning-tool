@@ -44,6 +44,14 @@ class Student {
     );
   }
 
+  private _advisor?: Advisor;
+  public get advisor() {
+    if (!this._advisor) {
+      this._advisor = this.getAdvisor();
+    }
+    return this._advisor;
+  }
+
   public getAdvisor = (year = Advisor.ByYear.Current) =>
     Advisor.getByAdvisee(this.hostId, year);
 
