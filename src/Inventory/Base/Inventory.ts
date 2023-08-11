@@ -3,7 +3,16 @@ import lib from '../../lib';
 import Item from './Item';
 
 abstract class Inventory<ItemType extends Item = Item> {
-  private data?: any[][];
+  private _data?: any[][];
+  private get data() {
+    if (!this._data) {
+      this._data = g.SpreadsheetApp.Range.getEntireSheet(
+        this.getSheet()
+      ).getValues();
+    }
+    return this._data;
+  }
+
   private sheet: GoogleAppsScript.Spreadsheet.Sheet;
 
   constructor(sheetName: lib.CoursePlanningData.SheetName) {
@@ -13,20 +22,11 @@ abstract class Inventory<ItemType extends Item = Item> {
   protected abstract getter(id: string, key?: Inventory.Key): ItemType;
   protected abstract creator(key: Inventory.Key): ItemType;
 
-  private getData() {
-    if (!this.data) {
-      this.data = g.SpreadsheetApp.Range.getEntireSheet(
-        this.getSheet()
-      ).getValues();
-    }
-    return this.data;
-  }
-
   public getMetadata = (key: Inventory.Key, column: number) =>
-    this.getData().find((row) => row[0] == key)[column];
+    (this.data.find((row) => row[0] == key) || [])[column];
 
   public setMetadata = (key: Inventory.Key, column: number, value: any) =>
-    this.getData().forEach((entry, row: number) => {
+    this.data.forEach((entry, row: number) => {
       if (entry[0] == key) {
         entry[column] = value;
         this.getSheet()
@@ -36,12 +36,10 @@ abstract class Inventory<ItemType extends Item = Item> {
     });
 
   public has = (key: Inventory.Key): boolean =>
-    this.getData().findIndex(([k]) => k == key) >= 0;
+    this.data.findIndex(([k]) => k == key) >= 0;
 
   public get(key: Inventory.Key) {
-    const id = this.getData()
-      .find(([k]) => k == key)
-      .shift()?.id;
+    const [, id] = this.data.find(([k]) => k == key) || [];
     if (!id) {
       return this.creator(key);
     }
@@ -58,8 +56,8 @@ abstract class Inventory<ItemType extends Item = Item> {
   }
 
   public remove(key: Inventory.Key) {
-    const row = this.getData().findIndex(([k]) => k == key);
-    this.data = this.data.splice(row, 1);
+    const row = this.data.findIndex(([k]) => k == key);
+    this._data = this.data.splice(row, 1);
     this.getSheet().deleteRow(row + 1);
   }
 

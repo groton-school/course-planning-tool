@@ -10,9 +10,9 @@ class Advisor {
 
   private static data: { [k in ByYear]?: any[][] } = {};
 
-  public email: string;
-  public firstName: string;
-  public lastName: string;
+  public readonly email: string;
+  public readonly firstName: string;
+  public readonly lastName: string;
 
   public constructor(data: object) {
     if (Array.isArray(data)) {

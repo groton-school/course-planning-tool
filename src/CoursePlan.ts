@@ -1,5 +1,6 @@
 import g from '@battis/gas-lighter';
 import Inventory from './Inventory';
+import Metadata from './Inventory/CoursePlans/Metadata';
 import lib from './lib';
 import Role from './Role';
 
@@ -14,6 +15,8 @@ export default class CoursePlan {
   public static thread = Utilities.getUuid();
 
   private static coursesByDepartment: any[][];
+
+  private meta: Metadata;
 
   private _student: Role.Student;
   public get student() {
@@ -127,13 +130,11 @@ export default class CoursePlan {
     );
   }
 
-  public meta = Inventory.CoursePlans.metadataFor(this.hostId);
-
   private numOptionsPerDepartment?: number = null;
   private numComments?: number = null;
 
-  public static bindTo(spreadsheetId: string, hostId: Inventory.Key) {
-    return new CoursePlan({ hostId, spreadsheetId });
+  public static bindTo(args: CoursePlan.BindToImplementation): CoursePlan {
+    return new CoursePlan(args);
   }
 
   public static for(hostId: string): CoursePlan;
@@ -166,15 +167,7 @@ export default class CoursePlan {
     g.HtmlService.Element.Progress.incrementValue(CoursePlan.thread);
   }
 
-  public constructor({
-    hostId,
-    spreadsheetId
-  }: {
-    hostId: Inventory.Key;
-    spreadsheetId: string;
-  });
-  public constructor(student: Role.Student);
-  public constructor(arg: Role.Student | { hostId; spreadsheetId }) {
+  public constructor(arg: Role.Student | CoursePlan.BindToImplementation) {
     if (arg instanceof Role.Student) {
       this.createFromStudent(arg);
     } else {
@@ -184,6 +177,7 @@ export default class CoursePlan {
 
   private createFromStudent(student: Role.Student) {
     this.student = student;
+    this.meta = new Metadata(Inventory.CoursePlans, this.hostId);
     this.createFromTemplate();
     this.populateEnrollmentHistory();
     this.populateHeaders();
@@ -202,9 +196,15 @@ export default class CoursePlan {
     this.meta.version = APP_VERSION;
   }
 
-  private bindToExistingSpreadsheet({ hostId, spreadsheetId }) {
-    this.student = Role.Student.getByHostId(hostId);
-    this.spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+  private bindToExistingSpreadsheet({
+    hostId,
+    spreadsheetId,
+    student,
+    spreadsheet
+  }: CoursePlan.BindToImplementation) {
+    this.student = student || Role.Student.getByHostId(hostId.toString());
+    this.meta = new Metadata(Inventory.CoursePlans, this.hostId);
+    this.spreadsheet = spreadsheet || SpreadsheetApp.openById(spreadsheetId);
   }
 
   private getNumOptionsPerDepartment(): number {
@@ -578,4 +578,18 @@ export default class CoursePlan {
     studentFolder.folder.removeViewer(previousAdvisor.email);
     studentFolder.meta.permissionsUpdated = true;
   }
+}
+
+namespace CoursePlan {
+  export type BindToImplementation = (
+    | { student: Role.Student; hostId?: never }
+    | { student?: never; hostId: Inventory.Key }
+  ) &
+    (
+      | {
+        spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet;
+        spreadsheetId?: never;
+      }
+      | { spreadsheet?: never; spreadsheetId: string }
+    );
 }

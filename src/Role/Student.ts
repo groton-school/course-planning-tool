@@ -5,12 +5,12 @@ import Advisor from './Advisor';
 class Student {
   private static data?: any[][];
 
-  public hostId: string;
-  public email: string;
-  public firstName: string;
-  public lastName: string;
-  public gradYear: number;
-  public abbrevGradYear: number;
+  public readonly hostId: string;
+  public readonly email: string;
+  public readonly firstName: string;
+  public readonly lastName: string;
+  public readonly gradYear: number;
+  public readonly abbrevGradYear: number;
 
   public constructor(data: object) {
     if (Array.isArray(data)) {
@@ -36,22 +36,13 @@ class Student {
     return Student.data;
   }
 
-  public static getByHostId = (id: string) =>
-    Student.getData().reduce(
-      (student: Student, [hostId, email, firstName, lastName, gradYear]) => {
-        if (hostId == id) {
-          return new Student({
-            hostId,
-            firstName,
-            lastName,
-            email,
-            gradYear
-          });
-        }
-        return student;
-      },
-      null
+  public static getByHostId(id: string) {
+    const [hostId, email, firstName, lastName, gradYear] =
+      Student.getData().find(([hostId]) => hostId == id) || [];
+    return (
+      hostId && new Student({ hostId, firstName, lastName, email, gradYear })
     );
+  }
 
   public getAdvisor = (year = Advisor.ByYear.Current) =>
     Advisor.getByAdvisee(this.hostId, year);
