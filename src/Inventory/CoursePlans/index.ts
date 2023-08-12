@@ -1,5 +1,5 @@
 import lib from '../../lib';
-import MCoursePlanEntry from './CoursePlanEntry';
+import MCoursePlan from './CoursePlan';
 import Inventory from './Inventory';
 import MMetadata from './Metadata';
 
@@ -16,7 +16,7 @@ class CoursePlans extends Inventory {
 }
 
 namespace CoursePlans {
-  export import CoursePlanEntry = MCoursePlanEntry;
+  export import CoursePlan = MCoursePlan;
   export import Metadata = MMetadata;
 }
 

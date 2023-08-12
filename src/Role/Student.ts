@@ -1,4 +1,7 @@
 import g from '@battis/gas-lighter';
+import Inventory from '../Inventory';
+import CoursePlan from '../Inventory/CoursePlans/CoursePlan';
+import StudentFolder from '../Inventory/StudentFolders/StudentFolder';
 import lib from '../lib';
 import Advisor from './Advisor';
 
@@ -42,6 +45,22 @@ class Student {
     return (
       hostId && new Student({ hostId, firstName, lastName, email, gradYear })
     );
+  }
+
+  private _plan?: CoursePlan;
+  public get plan() {
+    if (!this._plan) {
+      this._plan = Inventory.CoursePlans.get(this.hostId);
+    }
+    return this._plan;
+  }
+
+  private _folder?: StudentFolder;
+  public get folder() {
+    if (!this._folder) {
+      this._folder = Inventory.StudentFolders.get(this.hostId);
+    }
+    return this._folder;
   }
 
   private _advisor?: Advisor;

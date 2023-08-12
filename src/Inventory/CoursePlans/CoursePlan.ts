@@ -1,10 +1,14 @@
 import g from '@battis/gas-lighter';
+import CoursePlans from '.';
+import lib from '../../lib';
+import Role from '../../Role';
+import Base from '../Base';
+import FormFoldersOfCoursePlans from '../FormFoldersOfCoursePlans';
+import StudentFolders from '../StudentFolders';
+import Metadata from './/Metadata';
 import Inventory from './Inventory';
-import Metadata from './Inventory/CoursePlans/Metadata';
-import lib from './lib';
-import Role from './Role';
 
-export default class CoursePlan {
+class CoursePlan extends Base.Item {
   public static stepCount = {
     create: parseInt(CREATE_STEPS),
     updateEnrollmentHistory: parseInt(UPDATE_HISTORY_STEPS),
@@ -16,7 +20,7 @@ export default class CoursePlan {
 
   private static coursesByDepartment: any[][];
 
-  private meta: Metadata;
+  public meta = new Metadata(this.inventory as Inventory, this.key);
 
   private _student: Role.Student;
   public get student() {
@@ -44,7 +48,7 @@ export default class CoursePlan {
   private _formFolder?: GoogleAppsScript.Drive.Folder;
   public get formFolder() {
     if (!this._formFolder) {
-      this._formFolder = Inventory.FormFoldersOfCoursePlans.get(
+      this._formFolder = FormFoldersOfCoursePlans.getInstance().get(
         this.student.gradYear
       ).folder;
     }
@@ -61,12 +65,11 @@ export default class CoursePlan {
     this._spreadsheet = spreadsheet;
   }
 
-  private _file: GoogleAppsScript.Drive.File;
-  public get file() {
-    if (!this._file && this.spreadsheet) {
-      this._file = DriveApp.getFileById(this.spreadsheet.getId());
-    }
-    return this._file;
+  public get file(): GoogleAppsScript.Drive.File {
+    return this.content;
+  }
+  private set file(file) {
+    this._content = file;
   }
 
   private _anchor?: GoogleAppsScript.Spreadsheet.Range;
@@ -137,16 +140,26 @@ export default class CoursePlan {
   private numOptionsPerDepartment?: number = null;
   private numComments?: number = null;
 
-  public static bindTo(args: CoursePlan.BindToImplementation): CoursePlan {
-    return new CoursePlan(args);
+  public static bindTo({
+    hostId,
+    spreadsheetId,
+    student,
+    spreadsheet
+  }: CoursePlan.BindToImplementation): CoursePlan {
+    hostId = hostId || student.hostId;
+    spreadsheetId = spreadsheetId || spreadsheet.getId();
+    return new CoursePlan(
+      CoursePlans.getInstance(),
+      DriveApp.getFileById(spreadsheetId),
+      hostId
+    );
   }
 
   public static for(hostId: string): CoursePlan;
   public static for(student: Role.Student): CoursePlan;
   public static for(target: string | Role.Student): CoursePlan {
     if (typeof target === 'string') {
-      const { plan } = Inventory.CoursePlans.get(target);
-      return plan;
+      return CoursePlans.getInstance().get(target);
     } else {
       g.HtmlService.Element.Progress.setStatus(
         CoursePlan.thread,
@@ -164,26 +177,28 @@ export default class CoursePlan {
     g.HtmlService.Element.Progress.incrementValue(CoursePlan.thread);
   }
 
-  public constructor(arg: Role.Student | CoursePlan.BindToImplementation) {
-    if (arg instanceof Role.Student) {
-      this.createFromStudent(arg);
-    } else {
-      this.bindToExistingSpreadsheet(arg);
+  public constructor(
+    inventory: Inventory,
+    obj: GoogleAppsScript.Drive.File | Role.Student,
+    hostId: Base.Inventory.Key
+  ) {
+    super(inventory, obj instanceof Role.Student ? null : obj, hostId);
+    if (obj instanceof Role.Student) {
+      this.createFromStudent(obj);
     }
   }
 
   private createFromStudent(student: Role.Student) {
     this.student = student;
-    this.meta = new Metadata(Inventory.CoursePlans, this.hostId);
     this.createFromTemplate();
     this.populateEnrollmentHistory();
     this.populateHeaders();
     this.setPermissions();
-    Inventory.StudentFolders.putInPlace(this, CoursePlan.thread); // #create
+    StudentFolders.getInstance().putInPlace(this, CoursePlan.thread); // #create
     this.prepareCommentBlanks();
     this.updateCourseList();
     this.setStatus('updating inventory'); // #create
-    Inventory.CoursePlans.add([
+    this.inventory.add([
       this.hostId,
       this.spreadsheet.getId(),
       this.spreadsheet.getUrl()
@@ -210,14 +225,13 @@ export default class CoursePlan {
       );
     }
     this.student = student || Role.Student.getByHostId(hostId.toString());
-    this.meta = new Metadata(Inventory.CoursePlans, this.hostId);
     this.spreadsheet = spreadsheet || SpreadsheetApp.openById(spreadsheetId);
   }
 
   // TODO could this be pulled by looking at merged cells?
   private getNumOptionsPerDepartment(): number {
     if (this.numOptionsPerDepartment === null) {
-      if (Inventory.CoursePlans.has(this.hostId)) {
+      if (this.inventory.has(this.hostId)) {
         this.numOptionsPerDepartment = this.meta.numOptionsPerDepartment;
       } else {
         this.numOptionsPerDepartment = lib.config.getNumOptionsPerDepartment();
@@ -229,7 +243,7 @@ export default class CoursePlan {
   // TODO could this be pulled from the data protection model?
   private getNumComments(): number {
     if (this.numComments === null) {
-      if (Inventory.CoursePlans.has(this.hostId)) {
+      if (this.inventory.has(this.hostId)) {
         this.numComments = this.meta.numComments;
       } else {
         this.numComments = lib.config.getNumComments();
@@ -317,6 +331,7 @@ export default class CoursePlan {
     this.spreadsheet = template.copy(
       lib.format.apply(lib.config.getCoursePlanNameFormat(), this.student)
     );
+    this.file = DriveApp.getFileById(this.spreadsheet.getId());
   }
 
   private populateHeaders() {
@@ -418,7 +433,7 @@ export default class CoursePlan {
   private static getCoursesByDepartment(): string[][] {
     if (!this.coursesByDepartment) {
       this.coursesByDepartment = g.SpreadsheetApp.Value.getSheetDisplayValues(
-        Inventory.CoursePlans.getSpreadsheet().getSheetByName(
+        SpreadsheetApp.getActive().getSheetByName(
           lib.CoursePlanningData.sheet.CoursesByDepartment
         )
       );
@@ -450,12 +465,12 @@ export default class CoursePlan {
   public delete() {
     const file = this.file;
     this.setStatus('removing from inventory'); // #delete
-    Inventory.CoursePlans.remove(this.hostId);
+    this.inventory.remove(this.hostId);
 
     this.setStatus('trashing shortcuts to plan'); // #delete
-    const shortcuts = Inventory.StudentFolders.for(this).folder.getFilesByType(
-      MimeType.SHORTCUT
-    );
+    const shortcuts = StudentFolders.getInstance()
+      .for(this)
+      .folder.getFilesByType(MimeType.SHORTCUT);
     while (shortcuts.hasNext()) {
       const shortcut = shortcuts.next();
       if (shortcut.getTargetId() == file.getId()) {
@@ -483,7 +498,7 @@ export default class CoursePlan {
     this.meta.numOptionsPerDepartment = target;
   }
 
-  public assignToCurrentAdvisor() {
+  public assignToCurrentAdvisor(primary = true) {
     if (this.meta.newAdvisor && !this.meta.permissionsUpdated) {
       const previousAdvisor = this.student.getAdvisor(
         Role.Advisor.ByYear.Previous
@@ -509,11 +524,13 @@ export default class CoursePlan {
         ]
       );
       this.meta.permissionsUpdated = true;
-      Inventory.StudentFolders.refresh(this.hostId);
+      if (primary) {
+        this.student.folder.assignToCurrentAdvisor(false);
+      }
     }
   }
 
-  public makeInactive() {
+  public makeInactive(primary = true) {
     if (this.meta.inactive && !this.meta.permissionsUpdated) {
       const previousAdvisor = this.student.getAdvisor(
         Role.Advisor.ByYear.Previous
@@ -521,7 +538,9 @@ export default class CoursePlan {
       this.file.removeEditor(previousAdvisor.email);
 
       this.meta.permissionsUpdated = true;
-      Inventory.StudentFolders.refresh(this.hostId);
+      if (primary) {
+        this.student.folder.makeInactive(false);
+      }
     }
   }
 }
@@ -529,7 +548,7 @@ export default class CoursePlan {
 namespace CoursePlan {
   export type BindToImplementation = (
     | { student: Role.Student; hostId?: never }
-    | { student?: never; hostId: Inventory.Key }
+    | { student?: never; hostId: Base.Inventory.Key }
   ) &
     (
       | {
@@ -539,3 +558,5 @@ namespace CoursePlan {
       | { spreadsheet?: never; spreadsheetId: string }
     );
 }
+
+export { CoursePlan as default };

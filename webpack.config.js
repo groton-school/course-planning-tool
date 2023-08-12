@@ -1,7 +1,9 @@
 const fs = require('fs');
 const webpack = require('webpack');
 
-const coursePlanModule = fs.readFileSync('src/CoursePlan.ts').toString();
+const coursePlanModule = fs
+  .readFileSync('src/Inventory/CoursePlans/CoursePlan.ts')
+  .toString();
 
 module.exports = require('@battis/gas-lighter/webpack.config')({
   root: __dirname,

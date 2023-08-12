@@ -1,34 +1,33 @@
 import g from '@battis/gas-lighter';
 import semverLt from 'semver/functions/lt';
-import CoursePlan from '../../CoursePlan';
 import lib from '../../lib';
 import Role from '../../Role';
 import Base from '../Base';
-import CoursePlanEntry from './CoursePlanEntry';
+import CoursePlan from './CoursePlan';
 
 // TODO graduate seniors out of the inventories?
 // TODO archive departed advisors
-class Inventory extends Base.Inventory<CoursePlanEntry> {
+class Inventory extends Base.Inventory<CoursePlan> {
   protected getter(spreadsheetId: string, hostId: Base.Inventory.Key) {
-    const entry = new CoursePlanEntry(
+    const plan = new CoursePlan(
       this,
-      CoursePlan.bindTo({ spreadsheetId, hostId }),
+      DriveApp.getFileById(spreadsheetId),
       hostId
     );
-    if (!entry.meta.permissionsUpdated) {
-      if (entry.meta.newAdvisor) {
-        entry.plan.assignToCurrentAdvisor();
+    if (!plan.meta.permissionsUpdated) {
+      if (plan.meta.newAdvisor) {
+        plan.assignToCurrentAdvisor();
       }
-      if (entry.meta.inactive) {
-        entry.plan.makeInactive();
+      if (plan.meta.inactive) {
+        plan.makeInactive();
       }
     }
-    return entry;
+    return plan;
   }
   // added to Inventory by CoursePlan constructor directly
   protected creator(key: Base.Inventory.Key) {
     const student = Role.Student.getByHostId(key.toString());
-    return new CoursePlanEntry(this, new CoursePlan(student), student.hostId);
+    return new CoursePlan(this, student, student.hostId);
   }
 
   public getSpreadsheet = () => this.getSheet().getParent();
@@ -43,10 +42,6 @@ class Inventory extends Base.Inventory<CoursePlanEntry> {
     entries.shift(); // remove column headings
     return entries;
   }
-
-  public refresh = (hostId: Base.Inventory.Key) => {
-    this.get(hostId);
-  };
 
   public get minVersion() {
     return this.data.reduce(

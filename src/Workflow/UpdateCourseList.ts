@@ -1,6 +1,6 @@
 import g from '@battis/gas-lighter';
-import CoursePlan from '../CoursePlan';
 import Inventory from '../Inventory';
+import CoursePlan from '../Inventory/CoursePlans/CoursePlan';
 import * as Picker from './Picker';
 
 export const pickPlan = () => 'ucl_pp';

@@ -1,5 +1,5 @@
 import g from '@battis/gas-lighter';
-import CoursePlan from '../CoursePlan';
+import CoursePlan from '../Inventory/CoursePlans/CoursePlan';
 import Role from '../Role';
 import * as Picker from './Picker';
 

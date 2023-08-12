@@ -1,10 +1,10 @@
 import g from '@battis/gas-lighter';
 import semverLt from 'semver/functions/lt';
-import CoursePlan from '../../CoursePlan';
 import lib from '../../lib';
 import Role from '../../Role';
 import Base from '../Base';
 import CoursePlans from '../CoursePlans';
+import CoursePlan from '../CoursePlans/CoursePlan';
 import Folders from '../Folders';
 import FormFoldersOfStudentFolders from '../FormFoldersOfStudentFolders';
 import StudentFolder from './StudentFolder';
@@ -47,9 +47,8 @@ class Inventory extends Folders<StudentFolder> {
     hostId: Base.Inventory.Key,
     thread = Utilities.getUuid()
   ) {
-    const planEntry = CoursePlans.getInstance().get(hostId);
-    const { plan } = planEntry;
-    if (semverLt(planEntry.meta.version, '0.2.1')) {
+    const plan = CoursePlans.getInstance().get(hostId);
+    if (semverLt(plan.meta.version, '0.2.1')) {
       if (!this.has(hostId)) {
         g.HtmlService.Element.Progress.setStatus(
           thread,
@@ -71,53 +70,13 @@ class Inventory extends Folders<StudentFolder> {
     const item = new StudentFolder(this, DriveApp.getFolderById(id), key);
     if (!item.meta.permissionsUpdated) {
       if (item.meta.newAdvisor) {
-        this.assignToCurrentAdvisor(item);
+        item.assignToCurrentAdvisor();
       }
       if (item.meta.inactive) {
-        this.makeInactive(item);
+        item.makeInactive();
       }
     }
     return item;
-  }
-
-  private assignToCurrentAdvisor(item: StudentFolder) {
-    const previousAdvisor = item.student.getAdvisor(
-      Role.Advisor.ByYear.Previous
-    );
-    const { studentFolder } = item;
-    g.DriveApp.Permission.add(
-      studentFolder.getId(),
-      item.student.advisor.email,
-      g.DriveApp.Permission.Role.Reader
-    );
-    const shortcuts = previousAdvisor.folder.getFilesByType(MimeType.SHORTCUT);
-    while (shortcuts.hasNext()) {
-      const shortcut = shortcuts.next();
-      if (shortcut.getTargetId() === studentFolder.getId()) {
-        shortcut.moveTo(item.student.advisor.folder);
-      }
-    }
-    studentFolder.removeViewer(previousAdvisor.email);
-
-    item.meta.permissionsUpdated = true;
-    CoursePlans.getInstance().refresh(item.student.hostId);
-  }
-
-  private makeInactive(item: StudentFolder) {
-    const previousAdvisor = item.student.getAdvisor(
-      Role.Advisor.ByYear.Previous
-    );
-    const shortcuts = previousAdvisor.folder.getFilesByType(MimeType.SHORTCUT);
-    while (shortcuts.hasNext()) {
-      const shortcut = shortcuts.next();
-      if (shortcut.getTargetId() === item.studentFolder.getId()) {
-        shortcut.setTrashed(true);
-      }
-    }
-    item.studentFolder.removeViewer(previousAdvisor.email);
-
-    item.meta.permissionsUpdated = true;
-    CoursePlans.getInstance().refresh(item.student.hostId);
   }
 
   public for(plan: CoursePlan) {
