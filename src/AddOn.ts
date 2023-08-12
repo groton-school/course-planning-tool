@@ -56,6 +56,7 @@ export function onOpen() {
       Workflow.Restructure.expandAllDeptOptions()
     )
     .addItem('Delete a single course plan…', Workflow.Delete.pickPlan())
+    .addSeparator()
     .addSubMenu(
       SpreadsheetApp.getUi()
         .createMenu('Documentation')
