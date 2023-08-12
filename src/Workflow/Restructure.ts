@@ -3,8 +3,8 @@ import CoursePlan from '../CoursePlan';
 import Inventory from '../Inventory';
 import * as Picker from './Picker';
 
-export const pickStudentMissingFolder = () => 'k';
-global.k = () =>
+export const pickStudentMissingFolder = () => 'r_psmf';
+global.r_psmf = () =>
   g.HtmlService.Element.Picker.showModalDialog(
     SpreadsheetApp,
     {
@@ -17,15 +17,15 @@ global.k = () =>
     'Create Missing Folder'
   );
 
-const createMissingStudentFolderFor = () => 'l';
-global.l = (hostId: string, thread: string) => {
+const createMissingStudentFolderFor = () => 'r_cmsff';
+global.r_cmsff = (hostId: string, thread: string) => {
   g.HtmlService.Element.Progress.reset(thread);
   Inventory.StudentFolders.createStudentFolderIfMissing(hostId, thread);
   g.HtmlService.Element.Progress.setComplete(thread, true);
 };
 
-export const createAllMissingStudentFolders = () => 'm';
-global.m = () => {
+export const createAllMissingStudentFolders = () => 'r_camsf';
+global.r_camsf = () => {
   const progress = g.HtmlService.Element.Progress.bindTo(Utilities.getUuid());
   progress.reset();
   const plans = Inventory.CoursePlans.getAll();
@@ -43,8 +43,8 @@ global.m = () => {
   progress.setComplete(true);
 };
 
-export const pickStudentExpandDeptOptions = () => 'v';
-global.v = () => {
+export const pickStudentExpandDeptOptions = () => 'r_psedo';
+global.r_psedo = () => {
   g.HtmlService.Element.Picker.showModalDialog(
     SpreadsheetApp,
     {
@@ -58,8 +58,8 @@ global.v = () => {
   );
 };
 
-const expandStudentDeptOptionsFor = () => 'w';
-global.w = (hostId: string, thread: string) => {
+const expandStudentDeptOptionsFor = () => 'r_esdof';
+global.r_esdof = (hostId: string, thread: string) => {
   g.HtmlService.Element.Progress.reset(thread);
   CoursePlan.thread = thread;
   const plan = CoursePlan.for(hostId);
@@ -70,8 +70,8 @@ global.w = (hostId: string, thread: string) => {
   });
 };
 
-export const expandAllDeptOptions = () => 'x';
-global.x = () => {
+export const expandAllDeptOptions = () => 'r_eado';
+global.r_eado = () => {
   const progress = g.HtmlService.Element.Progress.bindTo(Utilities.getUuid());
   progress.reset();
   SpreadsheetApp.getUi().showModalDialog(

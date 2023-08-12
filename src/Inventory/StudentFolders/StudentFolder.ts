@@ -1,7 +1,7 @@
-import Inventories from '..';
 import Role from '../../Role';
 import Base from '../Base';
 import Folders from '../Folders';
+import FormFoldersOfStudentFolders from '../FormFoldersOfStudentFolders';
 import Inventory from './Inventory';
 import Metadata from './Metadata';
 
@@ -31,7 +31,7 @@ class StudentFolder extends Folders.Folder {
   private _formFolder?: GoogleAppsScript.Drive.Folder;
   public get formFolder() {
     if (!this._formFolder) {
-      this._formFolder = Inventories.FormFoldersOfStudentFolders.get(
+      this._formFolder = FormFoldersOfStudentFolders.getInstance().get(
         this.student.gradYear
       ).folder;
     }

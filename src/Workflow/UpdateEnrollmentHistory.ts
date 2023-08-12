@@ -3,8 +3,8 @@ import CoursePlan from '../CoursePlan';
 import Inventory from '../Inventory';
 import * as Picker from './Picker';
 
-export const pickPlan = () => 'h';
-global.h = () =>
+export const pickPlan = () => 'ueh_pp';
+global.ueh_pp = () =>
   g.HtmlService.Element.Picker.showModalDialog(
     SpreadsheetApp,
     {
@@ -17,8 +17,8 @@ global.h = () =>
     'Update Enrollment History'
   );
 
-const updateEnrollmentHistoryFor = () => 'i';
-global.i = (hostId: string, thread: string) => {
+const updateEnrollmentHistoryFor = () => 'ueh_uehf';
+global.ueh_uehf = (hostId: string, thread: string) => {
   const progress = g.HtmlService.Element.Progress.bindTo(thread);
   progress.reset();
   progress.setMax(CoursePlan.stepCount.updateEnrollmentHistory);
@@ -31,8 +31,8 @@ global.i = (hostId: string, thread: string) => {
   });
 };
 
-export const all = () => 'j';
-global.j = () => {
+export const all = () => 'ueh_a';
+global.ueh_a = () => {
   const progress = g.HtmlService.Element.Progress.bindTo(Utilities.getUuid());
   progress.reset();
   progress.showModalDialog(SpreadsheetApp, 'Update Enrollment Histories');

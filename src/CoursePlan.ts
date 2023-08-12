@@ -152,7 +152,7 @@ export default class CoursePlan {
         CoursePlan.thread,
         `${target.getFormattedName()} (consulting inventory)`
       );
-      return CoursePlan.for(target.hostId);
+      return CoursePlan.for(target);
     }
   }
 
@@ -204,6 +204,7 @@ export default class CoursePlan {
     this.spreadsheet = spreadsheet || SpreadsheetApp.openById(spreadsheetId);
   }
 
+  // TODO could this be pulled by looking at merged cells?
   private getNumOptionsPerDepartment(): number {
     if (this.numOptionsPerDepartment === null) {
       if (Inventory.CoursePlans.has(this.hostId)) {
@@ -215,6 +216,7 @@ export default class CoursePlan {
     return this.numOptionsPerDepartment;
   }
 
+  // TODO could this be pulled from the data protection model?
   private getNumComments(): number {
     if (this.numComments === null) {
       if (Inventory.CoursePlans.has(this.hostId)) {

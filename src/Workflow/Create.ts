@@ -3,8 +3,8 @@ import CoursePlan from '../CoursePlan';
 import Role from '../Role';
 import * as Picker from './Picker';
 
-export const pickStudent = () => 'a';
-global.a = () =>
+export const pickStudent = () => 'c_ps';
+global.c_ps = () =>
   g.HtmlService.Element.Picker.showModalDialog(
     SpreadsheetApp,
     {
@@ -16,8 +16,8 @@ global.a = () =>
     'Create Course Plan'
   );
 
-const createPlanFor = () => 'b';
-global.b = (hostId: string, thread: string) => {
+const createPlanFor = () => 'c_cpf';
+global.c_cpf = (hostId: string, thread: string) => {
   const progress = g.HtmlService.Element.Progress.bindTo(thread);
   progress.setMax(CoursePlan.stepCount.create);
   CoursePlan.thread = thread;
@@ -28,8 +28,8 @@ global.b = (hostId: string, thread: string) => {
   });
 };
 
-export const pickForm = () => 'c';
-global.c = () =>
+export const pickForm = () => 'c_pf';
+global.c_pf = () =>
   g.HtmlService.Element.Picker.showModalDialog(
     SpreadsheetApp,
     {
@@ -41,8 +41,8 @@ global.c = () =>
     'Create Course Plans'
   );
 
-export const all = () => 'd';
-global.d = (gradYear?: number, thread?: string) => {
+export const all = () => 'c_a';
+global.c_a = (gradYear?: number, thread?: string) => {
   thread = thread || Utilities.getUuid();
   const progress = g.HtmlService.Element.Progress.bindTo(thread);
   progress.reset();

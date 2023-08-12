@@ -19,6 +19,6 @@ module.exports = require('@battis/gas-lighter/webpack.config')({
       ),
       DELETE_STEPS: JSON.stringify(coursePlanModule.match(/#delete/).length)
     })
-  ]
-  // production: false
+  ],
+  production: false
 });

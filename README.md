@@ -147,7 +147,7 @@ If they change advisors at another time of year:
 - The data in the sheet is pulled from Blackbaud advanced lists categorized as “Course Planning”.
 - The code runs it is an Apps Script extension attached to the sheet, with [the source code managed on GitHub](https://github.com/groton-school/course-planning-tool).
 - Any outstanding issues with the code are also [tracked on GitHub](https://github.com/groton-school/course-planning-tool/issues).
-- Developing the code requires [node](https://nodejs.org/), [clasp](https://github.com/google/clasp#install), and [pnpm](https://pnpm.io/installation#using-npm) to install and manage dependencies and to compile and deploy the project.
+- Developing the code requires [node](https://nodejs.org/) and [pnpm](https://pnpm.io/installation#using-npm) to install and manage dependencies and to compile and deploy the project.
 
 ### Permissions
 

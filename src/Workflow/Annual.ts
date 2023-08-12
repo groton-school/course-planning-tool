@@ -2,8 +2,8 @@ import g from '@battis/gas-lighter';
 import Inventory from '../Inventory';
 import lib from '../lib';
 
-export const rolloverAcademicYear = () => 'y';
-global.y = () => {
+export const rolloverAcademicYear = () => 'a_ray';
+global.a_ray = () => {
   const spreadsheet = SpreadsheetApp.getActive();
   const now = new Date();
   const lastRollOver = lib.config.getRollOverAcademicYear();

@@ -3,8 +3,8 @@ import CoursePlan from '../CoursePlan';
 import Role from '../Role';
 import * as Picker from './Picker';
 
-export const pickPlan = () => 'q';
-global.q = () =>
+export const pickPlan = () => 'd_pp';
+global.d_pp = () =>
   g.HtmlService.Element.Picker.showModalDialog(
     SpreadsheetApp,
     {
@@ -18,8 +18,8 @@ global.q = () =>
     'Delete Course Plan'
   );
 
-const deletePlanFor = () => 'r';
-global.r = (hostId: string, thread: string) => {
+const deletePlanFor = () => 'd_dpf';
+global.d_dpf = (hostId: string, thread: string) => {
   g.HtmlService.Element.Progress.reset(thread);
   const student = Role.Student.getByHostId(hostId);
   g.HtmlService.Element.Progress.setMax(thread, CoursePlan.stepCount.delete);

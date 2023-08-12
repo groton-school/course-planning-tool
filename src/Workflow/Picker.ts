@@ -2,21 +2,21 @@ import g from '@battis/gas-lighter';
 import Inventory from '../Inventory';
 import Role from '../Role';
 
-export const allStudents = () => 's';
-global.s = () =>
+export const allStudents = () => 'd_dpf';
+global.p_as = () =>
   Role.Student.getAll().map((student) => ({
     name: student.getFormattedName(),
     value: student.hostId
   }));
 
-export const allForms = () => 't';
-global.t = () =>
+export const allForms = () => 'p_af';
+global.p_af = () =>
   [...new Set(Role.Student.getAll().map((student) => student.gradYear))]
     .sort()
     .map((year) => ({ name: `Class of ${year}`, value: year.toString() }));
 
-export const allPlans = () => 'u';
-global.u = () =>
+export const allPlans = () => 'p_ap';
+global.p_ap = () =>
   Inventory.CoursePlans.getAll().map(
     ([
       hostId,

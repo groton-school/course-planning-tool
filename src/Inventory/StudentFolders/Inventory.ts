@@ -1,19 +1,20 @@
 import g from '@battis/gas-lighter';
 import semverLt from 'semver/functions/lt';
-import Inventories from '..';
 import CoursePlan from '../../CoursePlan';
 import lib from '../../lib';
 import Role from '../../Role';
 import Base from '../Base';
+import CoursePlans from '../CoursePlans';
 import Folders from '../Folders';
+import FormFoldersOfStudentFolders from '../FormFoldersOfStudentFolders';
 import StudentFolder from './StudentFolder';
 
 class Inventory extends Folders<StudentFolder> {
   protected creator(hostId: Base.Inventory.Key) {
     const student = Role.Student.getByHostId(hostId.toString());
-    const folder = Inventories.FormFoldersOfStudentFolders.get(
-      student.gradYear
-    ).folder.createFolder(this.formatter(hostId));
+    const folder = FormFoldersOfStudentFolders.getInstance()
+      .get(student.gradYear)
+      .folder.createFolder(this.formatter(hostId));
     this.add([hostId, folder.getId(), folder.getUrl()]);
 
     return new StudentFolder(this, folder, hostId);
@@ -46,7 +47,7 @@ class Inventory extends Folders<StudentFolder> {
     hostId: Base.Inventory.Key,
     thread = Utilities.getUuid()
   ) {
-    const planEntry = Inventories.CoursePlans.get(hostId);
+    const planEntry = CoursePlans.getInstance().get(hostId);
     const { plan } = planEntry;
     if (semverLt(planEntry.meta.version, '0.2.1')) {
       if (!this.has(hostId)) {
@@ -68,10 +69,13 @@ class Inventory extends Folders<StudentFolder> {
 
   protected getter(id: string, key?: Base.Inventory.Key) {
     const item = new StudentFolder(this, DriveApp.getFolderById(id), key);
-    if (item.meta.newAdvisor && !item.meta.permissionsUpdated) {
-      this.assignToCurrentAdvisor(item);
-    } else if (item.meta.inactive && !item.meta.permissionsUpdated) {
-      this.makeInactive(item);
+    if (!item.meta.permissionsUpdated) {
+      if (item.meta.newAdvisor) {
+        this.assignToCurrentAdvisor(item);
+      }
+      if (item.meta.inactive) {
+        this.makeInactive(item);
+      }
     }
     return item;
   }
@@ -96,7 +100,7 @@ class Inventory extends Folders<StudentFolder> {
     studentFolder.removeViewer(previousAdvisor.email);
 
     item.meta.permissionsUpdated = true;
-    Inventories.CoursePlans.refresh(item.student.hostId);
+    CoursePlans.getInstance().refresh(item.student.hostId);
   }
 
   private makeInactive(item: StudentFolder) {
@@ -107,13 +111,13 @@ class Inventory extends Folders<StudentFolder> {
     while (shortcuts.hasNext()) {
       const shortcut = shortcuts.next();
       if (shortcut.getTargetId() === item.studentFolder.getId()) {
-        shortcut.moveTo(item.student.advisor.folder);
+        shortcut.setTrashed(true);
       }
     }
     item.studentFolder.removeViewer(previousAdvisor.email);
 
     item.meta.permissionsUpdated = true;
-    Inventories.CoursePlans.refresh(item.student.hostId);
+    CoursePlans.getInstance().refresh(item.student.hostId);
   }
 
   public for(plan: CoursePlan) {
@@ -125,6 +129,13 @@ class Inventory extends Folders<StudentFolder> {
   };
 }
 
-namespace Inventory { }
+namespace Inventory {
+  export namespace createStudentFolderIfMissing {
+    export const enabled = semverLt(
+      CoursePlans.getInstance().minVersion,
+      '0.2.1'
+    );
+  }
+}
 
 export { Inventory as default };

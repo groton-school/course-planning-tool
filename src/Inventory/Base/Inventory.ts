@@ -4,11 +4,12 @@ import Item from './Item';
 
 abstract class Inventory<ItemType extends Item = Item> {
   private _data?: any[][];
-  private get data() {
+  protected get data() {
     if (!this._data) {
       this._data = g.SpreadsheetApp.Range.getEntireSheet(
         this.getSheet()
       ).getValues();
+      this._data.shift();  // strip column labels
     }
     return this._data;
   }
@@ -59,6 +60,10 @@ abstract class Inventory<ItemType extends Item = Item> {
     const row = this.data.findIndex(([k]) => k == key);
     this._data = this.data.splice(row, 1);
     this.getSheet().deleteRow(row + 1);
+  }
+
+  public all() {
+    return this.data.map(([key, id]) => this.getter(id, key));
   }
 
   public getSheet = () => this.sheet;

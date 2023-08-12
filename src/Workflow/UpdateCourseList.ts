@@ -3,8 +3,8 @@ import CoursePlan from '../CoursePlan';
 import Inventory from '../Inventory';
 import * as Picker from './Picker';
 
-export const pickPlan = () => 'e';
-global.e = () =>
+export const pickPlan = () => 'ucl_pp';
+global.ucl_pp = () =>
   g.HtmlService.Element.Picker.showModalDialog(
     SpreadsheetApp,
     {
@@ -16,8 +16,8 @@ global.e = () =>
     'Update Course List'
   );
 
-const updateCourseListFor = () => 'f';
-global.f = (hostId: string, thread: string) => {
+const updateCourseListFor = () => 'ucl_uclf';
+global.ucl_uclf = (hostId: string, thread: string) => {
   const progress = g.HtmlService.Element.Progress.bindTo(thread);
   progress.reset();
   CoursePlan.thread = thread;
@@ -30,8 +30,8 @@ global.f = (hostId: string, thread: string) => {
   });
 };
 
-export const all = () => 'g';
-global.g = () => {
+export const all = () => 'ucl_a';
+global.ucl_a = () => {
   const progress = g.HtmlService.Element.Progress.bindTo(Utilities.getUuid());
   progress.reset();
   progress.showModalDialog(SpreadsheetApp, 'Update Course Lists');

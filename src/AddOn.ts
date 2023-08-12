@@ -1,7 +1,9 @@
+import semverLt from 'semver/functions/lt';
+import Inventory from './Inventory';
 import * as Workflow from './Workflow';
 
 export function onOpen() {
-  SpreadsheetApp.getUi()
+  let menu = SpreadsheetApp.getUi()
     .createMenu('Course Planning')
     .addItem('Create all course plans', Workflow.Create.all())
     .addItem('Create course plans by form…', Workflow.Create.pickForm())
@@ -24,23 +26,27 @@ export function onOpen() {
       "Update a single course plan's course list…",
       Workflow.UpdateCourseList.pickPlan()
     )
-    .addSeparator()
-    /*
-     * TODO figure out versioning for including restructure options
-     *   Pragmatically, we don't need these options, since all plans are now at
-     *   v0.2.1 (which introduced student folders). It would be slick to be
-     *   able to conditionally hide this option when not needed (and to have a
-     *   structure for doing this for other restructuring that is version-
-     *   based.
-     */
-    .addItem(
-      'Create a single missing student folder…',
-      Workflow.Restructure.pickStudentMissingFolder()
-    )
-    .addItem(
-      'Create all missing student folders',
-      Workflow.Restructure.createAllMissingStudentFolders()
-    )
+    .addSeparator();
+  /*
+   * TODO figure out versioning for including restructure options
+   *   Pragmatically, we don't need these options, since all plans are now at
+   *   v0.2.1 (which introduced student folders). It would be slick to be
+   *   able to conditionally hide this option when not needed (and to have a
+   *   structure for doing this for other restructuring that is version-
+   *   based.
+   */
+  if (semverLt(Inventory.CoursePlans.minVersion, '0.2.1')) {
+    menu = menu
+      .addItem(
+        'Create a single missing student folder…',
+        Workflow.Restructure.pickStudentMissingFolder()
+      )
+      .addItem(
+        'Create all missing student folders',
+        Workflow.Restructure.createAllMissingStudentFolders()
+      );
+  }
+  menu
     .addItem(
       "Expand a single course plan's dept. options…",
       Workflow.Restructure.pickStudentExpandDeptOptions()
@@ -50,14 +56,17 @@ export function onOpen() {
       Workflow.Restructure.expandAllDeptOptions()
     )
     .addItem('Delete a single course plan…', Workflow.Delete.pickPlan())
-    .addSeparator()
-    .addItem(
-      'Download clean copy of Course Planning Data',
-      Workflow.Documentation.downloadEmptyCoursePlanningData()
-    )
-    .addItem(
-      'Download clean copy of Course Plan Template',
-      Workflow.Documentation.downloadEmptyCoursePlanTemplate()
+    .addSubMenu(
+      SpreadsheetApp.getUi()
+        .createMenu('Documentation')
+        .addItem(
+          'Download clean copy of Course Planning Data',
+          Workflow.Documentation.downloadEmptyCoursePlanningData()
+        )
+        .addItem(
+          'Download clean copy of Course Plan Template',
+          Workflow.Documentation.downloadEmptyCoursePlanTemplate()
+        )
     )
     .addToUi();
 }

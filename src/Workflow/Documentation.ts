@@ -1,8 +1,8 @@
 import g from '@battis/gas-lighter';
 import lib from '../lib';
 
-export const downloadEmptyCoursePlanningData = () => 'n';
-global.n = () => {
+export const downloadEmptyCoursePlanningData = () => 'd_decpd';
+global.d_decpd = () => {
   const progress = g.HtmlService.Element.Progress.bindTo(Utilities.getUuid());
   progress.reset();
   SpreadsheetApp.getUi().showModalDialog(
@@ -127,14 +127,14 @@ global.n = () => {
   });
 };
 
-const deleteTempFile = () => 'p';
-global.p = (id: string, delayInSeconds = 5) => {
+const deleteTempFile = () => 'd_dtf';
+global.d_dtf = (id: string, delayInSeconds = 5) => {
   Utilities.sleep(delayInSeconds * 1000);
   DriveApp.getFileById(id).setTrashed(true);
 };
 
-export const downloadEmptyCoursePlanTemplate = () => 'o';
-global.o = () => {
+export const downloadEmptyCoursePlanTemplate = () => 'd_decpt';
+global.d_decpt = () => {
   const template = SpreadsheetApp.openByUrl(lib.config.getCoursePlanTemplate());
   SpreadsheetApp.getUi().showModalDialog(
     g.HtmlService.Template.createTemplate(

@@ -1,5 +1,7 @@
 import g from '@battis/gas-lighter';
+import semverLt from 'semver/functions/lt';
 import CoursePlan from '../../CoursePlan';
+import lib from '../../lib';
 import Role from '../../Role';
 import Base from '../Base';
 import CoursePlanEntry from './CoursePlanEntry';
@@ -13,10 +15,13 @@ class Inventory extends Base.Inventory<CoursePlanEntry> {
       CoursePlan.bindTo({ spreadsheetId, hostId }),
       hostId
     );
-    if (entry.meta.newAdvisor && !entry.meta.permissionsUpdated) {
-      entry.plan.assignToCurrentAdvisor();
-    } else if (entry.meta.inactive && !entry.meta.permissionsUpdated) {
-      entry.plan.makeInactive();
+    if (!entry.meta.permissionsUpdated) {
+      if (entry.meta.newAdvisor) {
+        entry.plan.assignToCurrentAdvisor();
+      }
+      if (entry.meta.inactive) {
+        entry.plan.makeInactive();
+      }
     }
     return entry;
   }
@@ -28,6 +33,9 @@ class Inventory extends Base.Inventory<CoursePlanEntry> {
 
   public getSpreadsheet = () => this.getSheet().getParent();
 
+  /**
+   * @deprecated use {@link Inventory.all()}
+   */
   public getAll() {
     const entries = g.SpreadsheetApp.Value.getSheetDisplayValues(
       this.getSheet()
@@ -39,6 +47,16 @@ class Inventory extends Base.Inventory<CoursePlanEntry> {
   public refresh = (hostId: Base.Inventory.Key) => {
     this.get(hostId);
   };
+
+  public get minVersion() {
+    return this.data.reduce(
+      (min: string, row) =>
+        semverLt(row[lib.CoursePlanningData.column.CoursePlans.Version], min)
+          ? row[lib.CoursePlanningData.column.CoursePlans.Version]
+          : min,
+      APP_VERSION
+    );
+  }
 }
 
 namespace Inventory { }

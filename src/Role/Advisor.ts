@@ -16,7 +16,7 @@ class Advisor {
   public readonly lastName: string;
 
   private _folder?: GoogleAppsScript.Drive.Folder;
-  public get folder() {
+  public get folder(): GoogleAppsScript.Drive.Folder {
     if (!this._folder) {
       this._folder = Inventory.AdvisorFolders.get(this.email).folder;
     }
