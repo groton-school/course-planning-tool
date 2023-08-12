@@ -14,6 +14,8 @@ abstract class Inventory<ItemType extends Item = Item> {
     return this._data;
   }
 
+  private cache: { [key: Inventory.Key]: ItemType } = {};
+
   private sheet: GoogleAppsScript.Spreadsheet.Sheet;
 
   constructor(sheetName: lib.CoursePlanningData.SheetName) {
@@ -40,15 +42,18 @@ abstract class Inventory<ItemType extends Item = Item> {
     this.data.findIndex(([k]) => k == key) >= 0;
 
   public get(key: Inventory.Key) {
-    const [, id] = this.data.find(([k]) => k == key) || [];
-    if (!id) {
-      return this.creator(key);
+    if (!this.cache[key]) {
+      const [, id] = this.data.find(([k]) => k == key) || [];
+      if (!id) {
+        this.cache[key] = this.creator(key);
+      }
+      try {
+        this.cache[key] = this.getter(id, key);
+      } catch (e) {
+        this.cache[key] = this.getter(id); // not everyone _wants_ the key!
+      }
     }
-    try {
-      return this.getter(id, key);
-    } catch (e) {
-      return this.getter(id); // not everyone _wants_ the key!
-    }
+    return this.cache[key];
   }
 
   public add(entry: Inventory.Entry) {
@@ -70,7 +75,6 @@ abstract class Inventory<ItemType extends Item = Item> {
 }
 
 namespace Inventory {
-  __dirname;
   export type Key = number | string;
   export type Entry = [Key, string, string];
   export type Formatter = (key: Key) => string;
