@@ -9,7 +9,7 @@ abstract class Inventory<ItemType extends Item = Item> {
       this._data = g.SpreadsheetApp.Range.getEntireSheet(
         this.getSheet()
       ).getValues();
-      this._data.shift();  // strip column labels
+      this._data.shift(); // strip column labels
     }
     return this._data;
   }
@@ -31,7 +31,7 @@ abstract class Inventory<ItemType extends Item = Item> {
       if (entry[0] == key) {
         entry[column] = value;
         this.getSheet()
-          .getRange(row + 1, column + 1)
+          .getRange(row + 2, column + 1) // 0-indexed array without headers --> 1-indexed sheet with headers
           .setValue(value);
       }
     });

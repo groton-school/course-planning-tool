@@ -9,7 +9,7 @@ import CoursePlanEntry from './CoursePlanEntry';
 // TODO graduate seniors out of the inventories?
 // TODO archive departed advisors
 class Inventory extends Base.Inventory<CoursePlanEntry> {
-  protected getter(spreadsheetId: string, hostId?: Base.Inventory.Key) {
+  protected getter(spreadsheetId: string, hostId: Base.Inventory.Key) {
     const entry = new CoursePlanEntry(
       this,
       CoursePlan.bindTo({ spreadsheetId, hostId }),

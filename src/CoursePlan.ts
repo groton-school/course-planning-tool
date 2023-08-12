@@ -152,7 +152,7 @@ export default class CoursePlan {
         CoursePlan.thread,
         `${target.getFormattedName()} (consulting inventory)`
       );
-      return CoursePlan.for(target);
+      return CoursePlan.for(target.hostId);
     }
   }
 
@@ -199,6 +199,16 @@ export default class CoursePlan {
     student,
     spreadsheet
   }: CoursePlan.BindToImplementation) {
+    if ((!student && !hostId) || (!spreadsheet && !spreadsheetId)) {
+      throw new Error(
+        `Insufficient data to bind CoursePlan ${JSON.stringify({
+          hostId,
+          spreadsheetId,
+          student,
+          spreadsheet
+        })}`
+      );
+    }
     this.student = student || Role.Student.getByHostId(hostId.toString());
     this.meta = new Metadata(Inventory.CoursePlans, this.hostId);
     this.spreadsheet = spreadsheet || SpreadsheetApp.openById(spreadsheetId);
