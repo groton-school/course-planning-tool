@@ -8,6 +8,18 @@ import CoursePlan from './CoursePlan';
 // TODO graduate seniors out of the inventories?
 // TODO archive departed advisors
 class Inventory extends Base.Inventory<CoursePlan> {
+  private static _instance?: Inventory;
+  public static getInstance(): Inventory {
+    if (!this._instance) {
+      this._instance = new Inventory();
+    }
+    return this._instance;
+  }
+
+  private constructor() {
+    super(lib.CoursePlanningData.sheet.CoursePlanInventory);
+  }
+
   protected getter(spreadsheetId: string, hostId: Base.Inventory.Key) {
     const plan = new CoursePlan(
       this,

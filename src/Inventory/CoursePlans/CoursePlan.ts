@@ -1,5 +1,4 @@
 import g from '@battis/gas-lighter';
-import CoursePlans from '.';
 import lib from '../../lib';
 import Role from '../../Role';
 import Base from '../Base';
@@ -149,7 +148,7 @@ class CoursePlan extends Base.Item {
     hostId = hostId || student.hostId;
     spreadsheetId = spreadsheetId || spreadsheet.getId();
     return new CoursePlan(
-      CoursePlans.getInstance(),
+      Inventory.getInstance(),
       DriveApp.getFileById(spreadsheetId),
       hostId
     );
@@ -159,7 +158,7 @@ class CoursePlan extends Base.Item {
   public static for(student: Role.Student): CoursePlan;
   public static for(target: string | Role.Student): CoursePlan {
     if (typeof target === 'string') {
-      return CoursePlans.getInstance().get(target);
+      return Inventory.getInstance().get(target);
     } else {
       g.HtmlService.Element.Progress.setStatus(
         CoursePlan.thread,
@@ -194,7 +193,7 @@ class CoursePlan extends Base.Item {
     this.populateEnrollmentHistory();
     this.populateHeaders();
     this.setPermissions();
-    StudentFolders.getInstance().putInPlace(this, CoursePlan.thread); // #create
+    this.putInPlace();
     this.prepareCommentBlanks();
     this.updateCourseList();
     this.setStatus('updating inventory'); // #create
@@ -206,26 +205,6 @@ class CoursePlan extends Base.Item {
     this.meta.numOptionsPerDepartment = this.getNumOptionsPerDepartment();
     this.meta.numComments = this.getNumComments();
     this.meta.version = APP_VERSION;
-  }
-
-  private bindToExistingSpreadsheet({
-    hostId,
-    spreadsheetId,
-    student,
-    spreadsheet
-  }: CoursePlan.BindToImplementation) {
-    if ((!student && !hostId) || (!spreadsheet && !spreadsheetId)) {
-      throw new Error(
-        `Insufficient data to bind CoursePlan ${JSON.stringify({
-          hostId,
-          spreadsheetId,
-          student,
-          spreadsheet
-        })}`
-      );
-    }
-    this.student = student || Role.Student.getByHostId(hostId.toString());
-    this.spreadsheet = spreadsheet || SpreadsheetApp.openById(spreadsheetId);
   }
 
   // TODO could this be pulled by looking at merged cells?
@@ -360,6 +339,28 @@ class CoursePlan extends Base.Item {
     g.DriveApp.Permission.add(this.file.getId(), this.advisor.email);
   }
 
+  public putInPlace() {
+    this.setStatus('filing in student folder'); // #create
+    const creating = !StudentFolders.Inventory.getInstance().has(this.hostId);
+    const { studentFolder } = StudentFolders.Inventory.getInstance().get(
+      this.hostId
+    );
+    studentFolder.createShortcut(this.file.getId());
+    if (creating) {
+      this.advisor.folder.createShortcut(studentFolder.getId());
+    }
+    g.DriveApp.Permission.add(
+      studentFolder.getId(),
+      this.student.email,
+      g.DriveApp.Permission.Role.Reader
+    );
+    g.DriveApp.Permission.add(
+      studentFolder.getId(),
+      this.advisor.email,
+      g.DriveApp.Permission.Role.Reader
+    );
+  }
+
   // TODO adjust row height to accommodate actual content lines
   private insertAndMergeOptionsRows(valueWidth: number) {
     const numOptions = lib.config.getNumOptionsPerDepartment();
@@ -468,8 +469,8 @@ class CoursePlan extends Base.Item {
     this.inventory.remove(this.hostId);
 
     this.setStatus('trashing shortcuts to plan'); // #delete
-    const shortcuts = StudentFolders.getInstance()
-      .for(this)
+    const shortcuts = StudentFolders.Inventory.getInstance()
+      .get(this.hostId)
       .folder.getFilesByType(MimeType.SHORTCUT);
     while (shortcuts.hasNext()) {
       const shortcut = shortcuts.next();

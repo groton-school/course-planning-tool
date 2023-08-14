@@ -1,9 +1,10 @@
-import AdvisorFolders from './AdvisorFolders';
+import MAdvisorFolders from './AdvisorFolders';
 import MBase from './Base';
-import CoursePlans from './CoursePlans';
+import MCoursePlans from './CoursePlans';
+import MFolders from './Folders';
 import FormFoldersOfCoursePlans from './FormFoldersOfCoursePlans';
 import FormFoldersOfStudentFolders from './FormFoldersOfStudentFolders';
-import StudentFolders from './StudentFolders';
+import MStudentFolders from './StudentFolders';
 
 class Inventory {
   private constructor() { }
@@ -12,14 +13,20 @@ class Inventory {
     FormFoldersOfCoursePlans.getInstance();
   public static FormFoldersOfStudentFolders =
     FormFoldersOfStudentFolders.getInstance();
-  public static StudentFolders = StudentFolders.getInstance();
-  public static AdvisorFolders = AdvisorFolders.getInstance();
-  public static CoursePlans = CoursePlans.getInstance();
+  public static StudentFolders = MStudentFolders.Inventory.getInstance();
+  public static AdvisorFolders = MAdvisorFolders.Inventory.getInstance();
+  public static CoursePlans = MCoursePlans.Inventory.getInstance();
 }
 
 namespace Inventory {
   export type Key = Base.Inventory.Key;
   export import Base = MBase;
+  export namespace Module {
+    export import CoursePlans = MCoursePlans;
+    export import AdvisorFolders = MAdvisorFolders;
+    export import StudentFolders = MStudentFolders;
+    export import Folders = MFolders;
+  }
 }
 
 export { Inventory as default };

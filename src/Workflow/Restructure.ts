@@ -1,47 +1,7 @@
 import g from '@battis/gas-lighter';
 import Inventory from '../Inventory';
-import CoursePlan from '../Inventory/CoursePlans/CoursePlan';
+import CoursePlans from '../Inventory/CoursePlans';
 import * as Picker from './Picker';
-
-export const pickStudentMissingFolder = () => 'r_psmf';
-global.r_psmf = () =>
-  g.HtmlService.Element.Picker.showModalDialog(
-    SpreadsheetApp,
-    {
-      list: Picker.allPlans(),
-      message:
-        'Please choose a student for whom to create their missing student folder',
-      actionName: 'Create Missing Folder',
-      callback: createMissingStudentFolderFor()
-    },
-    'Create Missing Folder'
-  );
-
-const createMissingStudentFolderFor = () => 'r_cmsff';
-global.r_cmsff = (hostId: string, thread: string) => {
-  g.HtmlService.Element.Progress.reset(thread);
-  Inventory.StudentFolders.createStudentFolderIfMissing(hostId, thread);
-  g.HtmlService.Element.Progress.setComplete(thread, true);
-};
-
-export const createAllMissingStudentFolders = () => 'r_camsf';
-global.r_camsf = () => {
-  const progress = g.HtmlService.Element.Progress.bindTo(Utilities.getUuid());
-  progress.reset();
-  const plans = Inventory.CoursePlans.getAll();
-  progress.setMax(plans.length * 4);
-  SpreadsheetApp.getUi().showModalDialog(
-    progress.getHtmlOutput(),
-    'Create Missing Student Folders'
-  );
-  plans.forEach(([hostId]) =>
-    Inventory.StudentFolders.createStudentFolderIfMissing(
-      hostId,
-      progress.getThread()
-    )
-  );
-  progress.setComplete(true);
-};
 
 export const pickStudentExpandDeptOptions = () => 'r_psedo';
 global.r_psedo = () => {
@@ -61,8 +21,8 @@ global.r_psedo = () => {
 const expandStudentDeptOptionsFor = () => 'r_esdof';
 global.r_esdof = (hostId: string, thread: string) => {
   g.HtmlService.Element.Progress.reset(thread);
-  CoursePlan.thread = thread;
-  const plan = CoursePlan.for(hostId);
+  CoursePlans.CoursePlan.thread = thread;
+  const plan = Inventory.CoursePlans.get(hostId);
   plan.expandDeptOptionsIfFewerThanParams();
   g.HtmlService.Element.Progress.setComplete(thread, {
     html: `<div>Expanded dept.options for ${plan.student.getFormattedName()}.</div>
@@ -78,11 +38,10 @@ global.r_eado = () => {
     progress.getHtmlOutput(),
     'Expand Dept. Options'
   );
-  CoursePlan.thread = progress.getThread();
-  const plans = Inventory.CoursePlans.getAll();
+  CoursePlans.CoursePlan.thread = progress.getThread();
+  const plans = Inventory.CoursePlans.all();
   progress.setMax(plans.length * 2);
-  plans.forEach(([hostId]) => {
-    const plan = CoursePlan.for(hostId);
+  plans.forEach((plan) => {
     progress.setStatus(
       `${plan.student.getFormattedName()} (expanding dept. options if necessary)`
     );

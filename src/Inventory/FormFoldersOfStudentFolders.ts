@@ -1,20 +1,20 @@
 import lib from '../lib';
 import Folders from './Folders';
 
-export default class FormFoldersOfStudentFolders {
-  private constructor() { }
-
-  private static _instance?: Folders;
+export default class FormFoldersOfStudentFolders extends Folders.Inventory {
+  private static _instance?: FormFoldersOfStudentFolders;
   public static getInstance() {
     if (!this._instance) {
-      this._instance = new Folders(
-        lib.CoursePlanningData.sheet.FoldersFormFolderInventory,
-        (gradYear) =>
-          lib.format.apply(lib.config.getFormFolderNameFormat(), {
-            gradYear
-          })
-      );
+      this._instance = new FormFoldersOfStudentFolders();
     }
     return this._instance;
+  }
+
+  private constructor() {
+    super(lib.CoursePlanningData.sheet.FoldersFormFolderInventory, (gradYear) =>
+      lib.format.apply(lib.config.getFormFolderNameFormat(), {
+        gradYear
+      })
+    );
   }
 }
