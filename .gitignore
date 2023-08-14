@@ -1,4 +1,5 @@
 .clasp.json
+/.env
 /.nova/*
 !/.nova/Artwork
 !/.nova/Configuration.json
