@@ -1,7 +1,7 @@
 import g from '@battis/gas-lighter';
 import CoursePlanningData from './CoursePlanningData';
 
-class config {
+class Config {
   private constructor() {
     // static-onlty
   }
@@ -73,6 +73,6 @@ class config {
     );
 }
 
-namespace config { }
+namespace Config { }
 
-export { config as default };
+export { Config as default };

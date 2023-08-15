@@ -3,10 +3,9 @@ import lib from '../lib';
 
 export const downloadEmptyCoursePlanningData = () => 'd_decpd';
 global.d_decpd = () => {
-  const progress = g.HtmlService.Element.Progress.bindTo(Utilities.getUuid());
-  progress.reset();
-  SpreadsheetApp.getUi().showModalDialog(
-    progress.getHtmlOutput(),
+  lib.Progress.reset();
+  lib.Progress.showModalDialog(
+    SpreadsheetApp,
     'Download clean copy of Course Planning Data'
   );
 
@@ -23,12 +22,11 @@ global.d_decpd = () => {
     [lib.CoursePlanningData.sheet.CourseList]: 5,
     [lib.CoursePlanningData.sheet.HistoricalEnrollment]: 14
   };
-  progress.setMax(
+  lib.Progress.setMax(
     3 + Object.keys(inventories).length + Object.keys(imports).length
   );
 
-  progress.setStatus('Making clean copy…');
-  progress.incrementValue();
+  lib.Progress.setStatus('Making clean copy…');
   const original = SpreadsheetApp.getActive();
   const cleanCopyFile = DriveApp.getFileById(original.getId()).makeCopy(
     DriveApp.getRootFolder()
@@ -36,18 +34,16 @@ global.d_decpd = () => {
   const cleanCopy = SpreadsheetApp.openById(cleanCopyFile.getId());
   cleanCopyFile.setName(original.getName());
 
-  progress.setStatus(
+  lib.Progress.setStatus(
     `Expunging ${lib.CoursePlanningData.sheet.Parameters} values…`
   );
-  progress.incrementValue();
   cleanCopy
     .getSheetByName(lib.CoursePlanningData.sheet.Parameters)
     .getRange(lib.CoursePlanningData.namedRange.CleanParams)
     .setValues([[''], [''], ['']]);
 
   for (const inventory of Object.keys(inventories)) {
-    progress.setStatus(`Clearing ${inventory}…`);
-    progress.incrementValue();
+    lib.Progress.setStatus(`Clearing ${inventory}…`);
     const hasRoot = inventories[inventory];
     const inventorySheet = cleanCopy.getSheetByName(inventory);
     inventorySheet.deleteRows(3, inventorySheet.getMaxRows() - 2);
@@ -69,8 +65,7 @@ global.d_decpd = () => {
   }
 
   for (const importName of Object.keys(imports)) {
-    progress.setStatus(`Clearing ${importName}…`);
-    progress.incrementValue();
+    lib.Progress.setStatus(`Clearing ${importName}…`);
     const importWidth = imports[importName];
     const importSheet = cleanCopy.getSheetByName(importName);
     importSheet.deleteRows(3, importSheet.getMaxRows() - 2);
@@ -79,10 +74,9 @@ global.d_decpd = () => {
       .setValues([Array(importWidth).fill('')]);
   }
 
-  progress.setStatus(
+  lib.Progress.setStatus(
     `Clearing ${lib.CoursePlanningData.sheet.AvailableCourses}…`
   );
-  progress.incrementValue();
   const available = cleanCopy.getSheetByName(
     lib.CoursePlanningData.sheet.AvailableCourses
   );
@@ -91,10 +85,9 @@ global.d_decpd = () => {
     .getRange(lib.CoursePlanningData.namedRange.CleanAvailableCourses)
     .setValue('');
 
-  progress.setStatus(
+  lib.Progress.setStatus(
     `Clearing student from ${lib.CoursePlanningData.sheet.IndividualEnrollmentHistory}…`
   );
-  progress.incrementValue();
   const ieh = cleanCopy.getSheetByName(
     lib.CoursePlanningData.sheet.IndividualEnrollmentHistory
   );
@@ -102,10 +95,10 @@ global.d_decpd = () => {
     .getRange(lib.CoursePlanningData.namedRange.CleanIEH)
     .setValues([[''], ['']]);
 
-  const cleanUp = g.HtmlService.Element.Progress.bindTo(Utilities.getUuid());
-  cleanUp.setStatus('Cleaning up…');
+  lib.Progress.reset();
+  lib.Progress.setStatus('Cleaning up…');
 
-  progress.setComplete({
+  lib.Progress.setComplete({
     html: `
             <a
                 id="download"
@@ -119,7 +112,7 @@ global.d_decpd = () => {
             </a>
             <script>
                 document.querySelector('#download').addEventListener('click', () => {
-                    replaceContent(${JSON.stringify(cleanUp.getHtml())});
+                    replaceContent(${JSON.stringify(lib.Progress.getHtml())});
                     google.script.run.withSuccessHandler(() => google.script.host.close()).${deleteTempFile()}('${cleanCopy.getId()}')
                 });
             </script>
@@ -135,7 +128,7 @@ global.d_dtf = (id: string, delayInSeconds = 5) => {
 
 export const downloadEmptyCoursePlanTemplate = () => 'd_decpt';
 global.d_decpt = () => {
-  const template = SpreadsheetApp.openByUrl(lib.config.getCoursePlanTemplate());
+  const template = SpreadsheetApp.openByUrl(lib.Config.getCoursePlanTemplate());
   SpreadsheetApp.getUi().showModalDialog(
     g.HtmlService.Template.createTemplate(
       `

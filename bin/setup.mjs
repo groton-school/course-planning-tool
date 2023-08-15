@@ -19,4 +19,10 @@ import cli from '@battis/qui-cli';
   cli.env.set({ key: 'PROJECT_NUMBER', value: project.projectNumber });
   gcloud.projects.active.set(project.projectId, project);
   gcloud.services.enable({ service: 'drive.googleapis.com' });
+  const scriptId = await cli.prompts.input({
+    message: 'Google Script ID',
+    validate: cli.validators.notEmpty
+  });
+  cli.shell.exec(`npx clasp clone ${scriptId}`);
+  cli.shell.exec('git checkout appsscript.json');
 })();

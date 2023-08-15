@@ -1,14 +1,14 @@
 import g from '@battis/gas-lighter';
+import Inventory from '../Inventory';
 import CoursePlan from '../Inventory/CoursePlans/CoursePlan';
-import Role from '../Role';
-import * as Picker from './Picker';
+import lib from '../lib';
 
 export const pickPlan = () => 'd_pp';
 global.d_pp = () =>
   g.HtmlService.Element.Picker.showModalDialog(
     SpreadsheetApp,
     {
-      list: Picker.allPlans(),
+      list: lib.Picker.allPlans(),
       message: 'Please select a student course plan to delete',
       actionName: 'Delete Course Plan',
       confirmation:
@@ -20,9 +20,9 @@ global.d_pp = () =>
 
 const deletePlanFor = () => 'd_dpf';
 global.d_dpf = (hostId: string, thread: string) => {
-  g.HtmlService.Element.Progress.reset(thread);
-  const student = Role.Student.getByHostId(hostId);
-  g.HtmlService.Element.Progress.setMax(thread, CoursePlan.stepCount.delete);
-  CoursePlan.for(student).delete();
-  g.HtmlService.Element.Progress.setComplete(thread, true);
+  lib.Progress.setThread(thread);
+  lib.Progress.reset();
+  lib.Progress.setMax(CoursePlan.stepCount.delete);
+  Inventory.CoursePlans.get(hostId).delete();
+  lib.Progress.setComplete(true);
 };

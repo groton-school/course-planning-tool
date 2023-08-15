@@ -200,15 +200,13 @@ To rebuild this project from scratch…
 - In the Course Planning Data spreadsheet, go to Extensions > Apps Script to open the embedded script for that sheet
   - Copy the ID of the script
   - [Enable Drive Service](https://developers.google.com/apps-script/guides/services/advanced#enable_advanced_services) for the script
-- In your development workspace (answer yes when asked about over-writing your `appsscript.json` file)…
+- In your development workspace…
 
   ```bash
   git clone https://github.com/groton-school/course-planning-tool.git <project directory>
   cd <project directory>
   npm install
-  npx clasp clone <script ID>
-  git checkout appsscript.json
-  npm run build
+  node bin/setup.mjs
   npm run deploy
   ```
 

@@ -13,7 +13,12 @@ export function onOpen() {
       'Update all course plan course lists',
       Workflow.UpdateCourseList.all()
     )
+    .addSeparator()
     .addItem('Roll-over Academic Year', Workflow.Annual.rolloverAcademicYear())
+    .addItem(
+      'Assign a student to current advisor…',
+      Workflow.Annual.pickStudentToAssignToCurrentAdvisor()
+    )
     .addSeparator()
     .addItem('Create a single course plan…', Workflow.Create.pickStudent())
     .addItem(

@@ -16,15 +16,15 @@ class AdvisorFolder extends Folders.Folder {
     return this._advisor;
   }
 
-  public get advisorFolder(): GoogleAppsScript.Drive.Folder {
+  public get advisorFolder() {
     return this.folder;
   }
   public constructor(
     inventory: Inventory,
-    advisorFolder: GoogleAppsScript.Drive.Folder,
+    folderId: string,
     advisorEmail: Base.Inventory.Key
   ) {
-    super(inventory, advisorFolder, advisorEmail);
+    super(inventory, folderId, advisorEmail);
     this.meta = new Metadata(this.inventory as Inventory, this.key);
     if (!this.meta.permissionsSet) {
       g.DriveApp.Permission.add(

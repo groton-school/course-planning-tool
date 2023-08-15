@@ -19,7 +19,7 @@
     "build": "webpack",
     "deploy": "run-s deploy:*",
     "deploy:build": "npm run build",
-    "deploy:push": "clasp push"
+    "deploy:push": "clasp push --force"
   },
   "dependencies": {
     "@battis/gas-lighter": "^0.3.0",

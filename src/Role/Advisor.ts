@@ -20,10 +20,10 @@ class Advisor {
     if (!this._folder) {
       this._folder = Inventory.AdvisorFolders.get(this.email).folder;
     }
-    return this.folder;
+    return this._folder;
   }
 
-  public constructor(data: object) {
+  private constructor(data: object) {
     if (Array.isArray(data)) {
       const [email, firstName, lastName] = data;
       data = { email, firstName, lastName };

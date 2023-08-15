@@ -1,8 +1,10 @@
-import MConfig from './config';
+import MConfig from './Config';
 import MCoursePlanningData from './CoursePlanningData';
 import CoursePlanTemplate from './CoursePlanTemplate';
 import currentSchoolYear from './currentSchoolYear';
-import * as MFormat from './format';
+import * as MFormat from './Format';
+import Picker from './Picker';
+import MProgress from './Progress';
 
 class lib {
   private constructor() {
@@ -12,12 +14,15 @@ class lib {
   public static CoursePlanTemplate = CoursePlanTemplate;
 
   public static currentSchoolYear = currentSchoolYear;
+
+  public static Picker = Picker;
 }
 
 namespace lib {
-  export import config = MConfig;
-  export import format = MFormat;
+  export import Config = MConfig;
+  export import Format = MFormat;
   export import CoursePlanningData = MCoursePlanningData;
+  export import Progress = MProgress;
 }
 
 export { lib as default };

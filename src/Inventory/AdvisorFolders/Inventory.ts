@@ -15,8 +15,8 @@ class Inventory extends Folders.Inventory<AdvisorFolder> {
 
   private constructor() {
     super(lib.CoursePlanningData.sheet.AdvisorFolderInventory, (email) =>
-      lib.format.apply(
-        lib.config.getAdvisorFolderNameFormat(),
+      lib.Format.apply(
+        lib.Config.getAdvisorFolderNameFormat(),
         Role.Advisor.getByEmail(email.toString())
       )
     );
@@ -25,7 +25,7 @@ class Inventory extends Folders.Inventory<AdvisorFolder> {
   protected creator(key: Base.Inventory.Key): AdvisorFolder {
     const folder = this.root.folder.createFolder(this.formatter(key));
     this.add([key, folder.getId(), folder.getUrl()]);
-    return new AdvisorFolder(this, folder, key);
+    return new AdvisorFolder(this, folder.getId(), key);
   }
 }
 

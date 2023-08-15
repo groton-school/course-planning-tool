@@ -1,28 +1,25 @@
 import g from '@battis/gas-lighter';
 import Inventory from '../Inventory';
 import lib from '../lib';
+import Role from '../Role';
 
 export const rolloverAcademicYear = () => 'a_ray';
 global.a_ray = () => {
   const spreadsheet = SpreadsheetApp.getActive();
   const now = new Date();
-  const lastRollOver = lib.config.getRollOverAcademicYear();
+  const lastRollOver = lib.Config.getRollOverAcademicYear();
   if (now.getTime() - lastRollOver.getTime() < 11 * 30 * 24 * 60 * 60 * 1000) {
     throw new Error(
       'last academic year roll over was within the past 11 months'
     );
   }
 
-  const progress = g.HtmlService.Element.Progress.bindTo(Utilities.getUuid());
-  progress.reset();
-  SpreadsheetApp.getUi().showModalDialog(
-    progress.getHtmlOutput(),
-    'Roll-over Academic Year'
-  );
+  lib.Progress.reset();
+  lib.Progress.showModalDialog(SpreadsheetApp, 'Roll-over Academic Year');
 
-  progress.setMax(5);
+  lib.Progress.setMax(5);
 
-  progress.setStatus(
+  lib.Progress.setStatus(
     `Preparing ${lib.CoursePlanningData.sheet.AdvisorListPreviousYear}…`
   );
   const previous = spreadsheet.getSheetByName(
@@ -38,21 +35,18 @@ global.a_ray = () => {
   } else if (prevRows > advRows) {
     previous.deleteRows(advRows + 1, prevRows - advRows);
   }
-  progress.incrementValue();
 
-  progress.setStatus(
+  lib.Progress.setStatus(
     `Archiving ${lib.CoursePlanningData.sheet.AdvisorList} to ${lib.CoursePlanningData.sheet.AdvisorListPreviousYear}…`
   );
   previous.getRange('A:H').setValues(advisorList.getRange('A:H').getValues());
-  progress.incrementValue();
 
-  progress.setStatus('Resetting course plan permissions flags…');
+  lib.Progress.setStatus('Resetting course plan permissions flags…');
   Inventory.CoursePlans.getSheet()
     .getRange(lib.CoursePlanningData.namedRange.RollOverCoursePlanPermissoons)
     .uncheck();
-  progress.incrementValue();
 
-  progress.setStatus(
+  lib.Progress.setStatus(
     `Resetting ${lib.CoursePlanningData.sheet.StudentFolderInventory}…`
   );
   Inventory.StudentFolders.getSheet()
@@ -60,14 +54,12 @@ global.a_ray = () => {
       lib.CoursePlanningData.namedRange.RollOverStudentFolderPermissions
     )
     .uncheck();
-  progress.incrementValue();
 
-  progress.setStatus('Noting academic year roll-over');
-  lib.config.setRollOverAcademicYear(new Date());
-  progress.incrementValue();
+  lib.Progress.setStatus('Noting academic year roll-over');
+  lib.Config.setRollOverAcademicYear(new Date());
 
   SpreadsheetApp.setActiveSheet(advisorList);
-  progress.setComplete({
+  lib.Progress.setComplete({
     html: `
     <p>Don't forget to:</p>
     <ol>
@@ -80,4 +72,32 @@ global.a_ray = () => {
     </script>
     `
   });
+};
+
+const studentsWithNewAdvisor = () => 'a_swna';
+global.a_swna = () =>
+  Role.Student.all()
+    .filter((s) => s.newAdvisor)
+    .map((s) => ({ name: s.getFormattedName(), value: s.hostId }));
+
+export const pickStudentToAssignToCurrentAdvisor = () => 'a_pstatca';
+global.a_pstatca = () =>
+  g.HtmlService.Element.Picker.showModalDialog(
+    SpreadsheetApp,
+    {
+      message: 'Please select a student to re-assign to their current advisor',
+      list: studentsWithNewAdvisor(),
+      callback: assignToCurrentAdvisor(),
+      actionName: 'Re-assign'
+    },
+    'Assign to Current Advisor'
+  );
+
+const assignToCurrentAdvisor = () => 'a_atca';
+global.a_atca = (hostId: string, thread: string) => {
+  lib.Progress.setThread(thread);
+  lib.Progress.reset();
+  const student = Role.Student.getByHostId(hostId);
+  student.plan.assignToCurrentAdvisor();
+  lib.Progress.setComplete(true);
 };

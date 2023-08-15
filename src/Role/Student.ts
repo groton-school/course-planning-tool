@@ -14,11 +14,29 @@ class Student {
   public readonly lastName: string;
   public readonly gradYear: number;
   public readonly abbrevGradYear: number;
+  public readonly newStudent: boolean;
+  public readonly newAdvisor: boolean;
 
-  public constructor(data: object) {
+  private constructor(data: object) {
     if (Array.isArray(data)) {
-      const [hostId, email, firstName, lastName, gradYear] = data;
-      data = { hostId, email, firstName, lastName, gradYear };
+      const [
+        hostId,
+        email,
+        firstName,
+        lastName,
+        gradYear,
+        newStudent,
+        newAdvisor
+      ] = data;
+      data = {
+        hostId,
+        email,
+        firstName,
+        lastName,
+        gradYear,
+        newStudent,
+        newAdvisor
+      };
     }
     Object.assign(this, data);
     this.abbrevGradYear = this.gradYear - 2000;
@@ -40,10 +58,29 @@ class Student {
   }
 
   public static getByHostId(id: string) {
-    const [hostId, email, firstName, lastName, gradYear] =
-      Student.getData().find(([hostId]) => hostId == id) || [];
+    const [
+      hostId,
+      email,
+      firstName,
+      lastName,
+      gradYear,
+      ,
+      ,
+      ,
+      newStudent,
+      newAdvisor
+    ] = Student.getData().find(([hostId]) => hostId == id) || [];
     return (
-      hostId && new Student({ hostId, firstName, lastName, email, gradYear })
+      hostId &&
+      new Student({
+        hostId,
+        firstName,
+        lastName,
+        email,
+        gradYear,
+        newStudent,
+        newAdvisor
+      })
     );
   }
 
@@ -74,7 +111,7 @@ class Student {
   public getAdvisor = (year = Advisor.ByYear.Current) =>
     Advisor.getByAdvisee(this.hostId, year);
 
-  public static getAll(): Student[] {
+  public static all(): Student[] {
     const thisYear = lib.currentSchoolYear();
     return Student.getData()
       .map((row) => new Student(row))
@@ -87,22 +124,11 @@ class Student {
       .filter((student) => student.gradYear == gradYear);
   }
 
-  public static getForms: g.HtmlService.Element.Picker.OptionsCallback = () => {
-    return Student.getData()
-      .reduce((forms, [, , , , gradYear]) => {
-        if (!forms.includes(gradYear)) {
-          forms.push(gradYear);
-          forms.sort();
-        }
-        return forms;
-      }, [])
-      .map(
-        (form): g.HtmlService.Element.Picker.Option => ({
-          name: `Class of ${form}`,
-          value: form.toString()
-        })
-      );
-  };
+  public static getForms(): number[] {
+    return [
+      ...new Set(Student.getData().map(([, , , , gradYear]) => gradYear))
+    ].sort();
+  }
 }
 
 namespace Student { }

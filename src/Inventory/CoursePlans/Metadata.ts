@@ -38,6 +38,9 @@ class Metadata extends Base.Metadata {
       lib.CoursePlanningData.column.CoursePlans.Inactive
     );
   }
+  public get active() {
+    return !this.inactive;
+  }
 
   public get newAdvisor() {
     return this.inventory.getMetadata(

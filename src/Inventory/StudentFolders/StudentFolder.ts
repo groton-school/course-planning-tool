@@ -9,10 +9,10 @@ import Metadata from './Metadata';
 class StudentFolder extends Folders.Folder {
   public constructor(
     inventory: Inventory,
-    studentFolder: GoogleAppsScript.Drive.Folder,
+    folderId: string,
     hostId: Base.Inventory.Key
   ) {
-    super(inventory, studentFolder, hostId);
+    super(inventory, folderId, hostId);
   }
 
   public meta = new Metadata(this.inventory as Inventory, this.key);
@@ -25,7 +25,7 @@ class StudentFolder extends Folders.Folder {
     return this._student;
   }
 
-  public get studentFolder(): GoogleAppsScript.Drive.Folder {
+  public get studentFolder() {
     return this.folder;
   }
 

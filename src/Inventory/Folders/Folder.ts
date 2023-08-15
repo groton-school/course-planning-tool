@@ -5,14 +5,18 @@ import Metadata from './Metadata';
 class Folder extends Base.Item {
   public constructor(
     inventory: Inventory,
-    folder: GoogleAppsScript.Drive.Folder,
+    folderId: string,
     key: Base.Inventory.Key
   ) {
-    super(inventory, folder, key);
+    super(inventory, folderId, key);
   }
 
-  public get folder(): GoogleAppsScript.Drive.Folder {
-    return this._content;
+  private _folder?: GoogleAppsScript.Drive.Folder;
+  public get folder() {
+    if (!this._folder) {
+      this._folder = DriveApp.getFolderById(this.id);
+    }
+    return this._folder;
   }
 
   public meta = new Metadata(this.inventory as Inventory, this.key);

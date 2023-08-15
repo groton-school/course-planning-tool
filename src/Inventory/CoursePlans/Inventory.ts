@@ -1,4 +1,3 @@
-import g from '@battis/gas-lighter';
 import semverLt from 'semver/functions/lt';
 import lib from '../../lib';
 import Role from '../../Role';
@@ -21,20 +20,7 @@ class Inventory extends Base.Inventory<CoursePlan> {
   }
 
   protected getter(spreadsheetId: string, hostId: Base.Inventory.Key) {
-    const plan = new CoursePlan(
-      this,
-      DriveApp.getFileById(spreadsheetId),
-      hostId
-    );
-    if (!plan.meta.permissionsUpdated) {
-      if (plan.meta.newAdvisor) {
-        plan.assignToCurrentAdvisor();
-      }
-      if (plan.meta.inactive) {
-        plan.makeInactive();
-      }
-    }
-    return plan;
+    return new CoursePlan(this, spreadsheetId, hostId);
   }
   // added to Inventory by CoursePlan constructor directly
   protected creator(key: Base.Inventory.Key) {
@@ -43,17 +29,6 @@ class Inventory extends Base.Inventory<CoursePlan> {
   }
 
   public getSpreadsheet = () => this.getSheet().getParent();
-
-  /**
-   * @deprecated use {@link Inventory.all()}
-   */
-  public getAll() {
-    const entries = g.SpreadsheetApp.Value.getSheetDisplayValues(
-      this.getSheet()
-    );
-    entries.shift(); // remove column headings
-    return entries;
-  }
 
   public get minVersion() {
     return this.data.reduce(

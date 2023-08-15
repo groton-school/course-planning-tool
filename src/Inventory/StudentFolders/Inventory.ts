@@ -15,8 +15,8 @@ class Inventory extends Folders.Inventory<StudentFolder> {
   }
   private constructor() {
     super(lib.CoursePlanningData.sheet.StudentFolderInventory, (hostId) =>
-      lib.format.apply(
-        lib.config.getStudentFolderNameFormat(),
+      lib.Format.apply(
+        lib.Config.getStudentFolderNameFormat(),
         Role.Student.getByHostId(hostId.toString())
       )
     );
@@ -29,20 +29,11 @@ class Inventory extends Folders.Inventory<StudentFolder> {
       .folder.createFolder(this.formatter(hostId));
     this.add([hostId, folder.getId(), folder.getUrl()]);
 
-    return new StudentFolder(this, folder, hostId);
+    return new StudentFolder(this, folder.getId(), hostId);
   }
 
-  protected getter(id: string, key?: Base.Inventory.Key) {
-    const item = new StudentFolder(this, DriveApp.getFolderById(id), key);
-    if (!item.meta.permissionsUpdated) {
-      if (item.meta.newAdvisor) {
-        item.assignToCurrentAdvisor();
-      }
-      if (item.meta.inactive) {
-        item.makeInactive();
-      }
-    }
-    return item;
+  protected getter(folderId: string, hostId?: Base.Inventory.Key) {
+    return new StudentFolder(this, folderId, hostId);
   }
 
   public refresh = (hostId: Base.Inventory.Key) => {

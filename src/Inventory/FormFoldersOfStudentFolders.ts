@@ -12,7 +12,7 @@ export default class FormFoldersOfStudentFolders extends Folders.Inventory {
 
   private constructor() {
     super(lib.CoursePlanningData.sheet.FoldersFormFolderInventory, (gradYear) =>
-      lib.format.apply(lib.config.getFormFolderNameFormat(), {
+      lib.Format.apply(lib.Config.getFormFolderNameFormat(), {
         gradYear
       })
     );

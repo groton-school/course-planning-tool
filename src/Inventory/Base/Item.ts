@@ -8,7 +8,7 @@ class Item {
 
   public constructor(
     protected _inventory: Inventory,
-    protected _content: any,
+    protected _id: any,
     protected _key: Inventory.Key
   ) { }
 
@@ -17,15 +17,18 @@ class Item {
   public get inventory() {
     return this._inventory;
   }
-  public get content() {
-    return this._content;
+
+  public get id() {
+    return this._id;
   }
+
   public get key() {
     return this._key;
   }
 }
+
 namespace Item {
-  export function isItem<WrappedType = any>(obj: any): obj is Item {
+  export function isItem(obj: any): obj is Item {
     return (
       obj && typeof obj === 'object' && 'kind' in obj && obj.kind === itemKind
     );

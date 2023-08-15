@@ -15,28 +15,29 @@ class CoursePlan extends Base.Item {
     delete: parseInt(DELETE_STEPS)
   };
 
-  public static thread = Utilities.getUuid();
-
   private static coursesByDepartment: any[][];
 
   public meta = new Metadata(this.inventory as Inventory, this.key);
 
-  private _student: Role.Student;
+  private _student?: Role.Student;
   public get student() {
+    if (!this._student) {
+      this._student = Role.Student.getByHostId(this.hostId);
+    }
     return this._student;
   }
   private set student(student: Role.Student) {
     this._student = student;
-    this.setStatus('identifying student'); // #create, #update-history, #update-courses, #delete
+    lib.Progress.setStatus('identifying student', this); // #create, #update-history, #update-courses, #delete
   }
   public get hostId() {
-    return this.student.hostId;
+    return this.key.toString();
   }
 
-  private _advisor: Role.Advisor;
+  private _advisor?: Role.Advisor;
   public get advisor() {
     if (!this._advisor && this.student) {
-      this._advisor = this.student.getAdvisor();
+      this._advisor = this.student.advisor;
     }
     return this._advisor;
   }
@@ -54,21 +55,38 @@ class CoursePlan extends Base.Item {
     return this._formFolder;
   }
 
-  private _spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet;
+  private _spreadsheet?: GoogleAppsScript.Spreadsheet.Spreadsheet;
   public get spreadsheet() {
+    if (!this._spreadsheet) {
+      if (this.id) {
+        this._spreadsheet = SpreadsheetApp.openById(this.id);
+      } else {
+        throw new Error(`File ID not defined for Host ID ${this.key}`);
+      }
+    }
     return this._spreadsheet;
   }
   private set spreadsheet(
     spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet
   ) {
     this._spreadsheet = spreadsheet;
+    // FIXME does this.id need to be updated?
   }
 
+  private _file?: GoogleAppsScript.Drive.File;
   public get file(): GoogleAppsScript.Drive.File {
-    return this.content;
+    if (!this._file) {
+      if (this.id) {
+        this._file = DriveApp.getFileById(this.id);
+      } else {
+        throw new Error(`Spreadsheet ID not defined for Host ID ${this.key}`);
+      }
+    }
+    return this._file;
   }
   private set file(file) {
-    this._content = file;
+    this._file = file;
+    // FIXME does this.id need to be updated?
   }
 
   private _anchor?: GoogleAppsScript.Spreadsheet.Range;
@@ -147,11 +165,7 @@ class CoursePlan extends Base.Item {
   }: CoursePlan.BindToImplementation): CoursePlan {
     hostId = hostId || student.hostId;
     spreadsheetId = spreadsheetId || spreadsheet.getId();
-    return new CoursePlan(
-      Inventory.getInstance(),
-      DriveApp.getFileById(spreadsheetId),
-      hostId
-    );
+    return new CoursePlan(Inventory.getInstance(), spreadsheetId, hostId);
   }
 
   public static for(hostId: string): CoursePlan;
@@ -160,30 +174,19 @@ class CoursePlan extends Base.Item {
     if (typeof target === 'string') {
       return Inventory.getInstance().get(target);
     } else {
-      g.HtmlService.Element.Progress.setStatus(
-        CoursePlan.thread,
-        `${target.getFormattedName()} (consulting inventory)`
-      );
+      lib.Progress.setStatus('consulting inventory', target);
       return CoursePlan.for(target.hostId);
     }
   }
 
-  private setStatus(message: string) {
-    g.HtmlService.Element.Progress.setStatus(
-      CoursePlan.thread,
-      `${this.student.getFormattedName()} (${message})`
-    );
-    g.HtmlService.Element.Progress.incrementValue(CoursePlan.thread);
-  }
-
   public constructor(
     inventory: Inventory,
-    obj: GoogleAppsScript.Drive.File | Role.Student,
+    content: string | Role.Student,
     hostId: Base.Inventory.Key
   ) {
-    super(inventory, obj instanceof Role.Student ? null : obj, hostId);
-    if (obj instanceof Role.Student) {
-      this.createFromStudent(obj);
+    super(inventory, content instanceof Role.Student ? null : content, hostId);
+    if (content instanceof Role.Student) {
+      this.createFromStudent(content);
     }
   }
 
@@ -196,7 +199,7 @@ class CoursePlan extends Base.Item {
     this.putInPlace();
     this.prepareCommentBlanks();
     this.updateCourseList();
-    this.setStatus('updating inventory'); // #create
+    lib.Progress.setStatus('updating inventory', this); // #create
     this.inventory.add([
       this.hostId,
       this.spreadsheet.getId(),
@@ -213,7 +216,7 @@ class CoursePlan extends Base.Item {
       if (this.inventory.has(this.hostId)) {
         this.numOptionsPerDepartment = this.meta.numOptionsPerDepartment;
       } else {
-        this.numOptionsPerDepartment = lib.config.getNumOptionsPerDepartment();
+        this.numOptionsPerDepartment = lib.Config.getNumOptionsPerDepartment();
       }
     }
     return this.numOptionsPerDepartment;
@@ -225,7 +228,7 @@ class CoursePlan extends Base.Item {
       if (this.inventory.has(this.hostId)) {
         this.numComments = this.meta.numComments;
       } else {
-        this.numComments = lib.config.getNumComments();
+        this.numComments = lib.Config.getNumComments();
       }
     }
     return this.numComments;
@@ -236,7 +239,7 @@ class CoursePlan extends Base.Item {
   }
 
   private populateEnrollmentHistory(create = true) {
-    this.setStatus('calculating enrollment history'); // #create, #update-history
+    lib.Progress.setStatus('calculating enrollment history', this); // #create, #update-history
     const ieh = this.individualEnrollmentHistory;
     ieh
       .getRange(lib.CoursePlanningData.namedRange.IEHHostIdSelector)
@@ -278,7 +281,7 @@ class CoursePlan extends Base.Item {
       // TODO need to incrementally expand protection when history expands
       this.protectNonCommentRanges(values[0].length, values.length);
 
-      this.setStatus('configuring data validation'); // #create
+      lib.Progress.setStatus('configuring data validation', this); // #create
       this.getAnchorOffset(
         0,
         values[0].length,
@@ -289,7 +292,7 @@ class CoursePlan extends Base.Item {
       this.insertAndMergeOptionsRows(values[0].length);
     }
 
-    this.setStatus('publishing enrollment history'); // #create, #update-history
+    lib.Progress.setStatus('publishing enrollment history', this); // #create, #update-history
     for (let row = 0; row < values.length; row++) {
       const target = this.getAnchorOffset(
         row * this.getNumOptionsPerDepartment(),
@@ -303,18 +306,18 @@ class CoursePlan extends Base.Item {
   }
 
   private createFromTemplate() {
-    this.setStatus('creating course plan from template'); // #create
+    lib.Progress.setStatus('creating course plan from template', this); // #create
     const template = SpreadsheetApp.openByUrl(
-      lib.config.getCoursePlanTemplate()
+      lib.Config.getCoursePlanTemplate()
     );
     this.spreadsheet = template.copy(
-      lib.format.apply(lib.config.getCoursePlanNameFormat(), this.student)
+      lib.Format.apply(lib.Config.getCoursePlanNameFormat(), this.student)
     );
     this.file = DriveApp.getFileById(this.spreadsheet.getId());
   }
 
   private populateHeaders() {
-    this.setStatus('filling in the labels'); // #create
+    lib.Progress.setStatus('filling in the labels', this); // #create
     g.SpreadsheetApp.Value.set(
       this.planSheet,
       lib.CoursePlanTemplate.namedRange.TemplateNames,
@@ -333,14 +336,14 @@ class CoursePlan extends Base.Item {
   }
 
   private setPermissions() {
-    this.setStatus('setting permissions'); // #create
+    lib.Progress.setStatus('setting permissions', this); // #create
     this.file.moveTo(this.formFolder);
     g.DriveApp.Permission.add(this.file.getId(), this.student.email);
     g.DriveApp.Permission.add(this.file.getId(), this.advisor.email);
   }
 
   public putInPlace() {
-    this.setStatus('filing in student folder'); // #create
+    lib.Progress.setStatus('filing in student folder', this); // #create
     const creating = !StudentFolders.Inventory.getInstance().has(this.hostId);
     const { studentFolder } = StudentFolders.Inventory.getInstance().get(
       this.hostId
@@ -363,7 +366,7 @@ class CoursePlan extends Base.Item {
 
   // TODO adjust row height to accommodate actual content lines
   private insertAndMergeOptionsRows(valueWidth: number) {
-    const numOptions = lib.config.getNumOptionsPerDepartment();
+    const numOptions = lib.Config.getNumOptionsPerDepartment();
     for (
       let row = 0;
       row < this.numDepartments * numOptions;
@@ -390,7 +393,7 @@ class CoursePlan extends Base.Item {
   }
 
   private protectNonCommentRanges(historyWidth: number, historyHeight: number) {
-    this.setStatus('protecting data'); // #create
+    lib.Progress.setStatus('protecting data', this); // #create
     const history = this.getAnchorOffset(0, 0, historyHeight, historyWidth);
     for (const range of [
       history.getA1Notation(),
@@ -407,7 +410,7 @@ class CoursePlan extends Base.Item {
   }
 
   private prepareCommentBlanks() {
-    this.setStatus('making room for comments'); // #create
+    lib.Progress.setStatus('making room for comments', this); // #create
     const commentors = [
       {
         name: 'Comments from Faculty Advisor',
@@ -417,7 +420,7 @@ class CoursePlan extends Base.Item {
       {
         name: 'Comments from College Counseling Office',
         range: lib.CoursePlanTemplate.namedRange.ProtectCollegeCounseling,
-        editor: lib.config.getCollegeCounseling()
+        editor: lib.Config.getCollegeCounseling()
       }
     ];
     for (const { name, range, editor } of commentors) {
@@ -443,7 +446,7 @@ class CoursePlan extends Base.Item {
   }
 
   public updateCourseList() {
-    this.setStatus('updating course list'); // #create, #update-courses
+    lib.Progress.setStatus('updating course list', this); // #create, #update-courses
     const source = CoursePlan.getCoursesByDepartment();
     const destination = this.spreadsheet.getSheetByName(
       lib.CoursePlanningData.sheet.CoursesByDepartment
@@ -465,10 +468,10 @@ class CoursePlan extends Base.Item {
 
   public delete() {
     const file = this.file;
-    this.setStatus('removing from inventory'); // #delete
+    lib.Progress.setStatus('removing from inventory', this); // #delete
     this.inventory.remove(this.hostId);
 
-    this.setStatus('trashing shortcuts to plan'); // #delete
+    lib.Progress.setStatus('trashing shortcuts to plan', this); // #delete
     const shortcuts = StudentFolders.Inventory.getInstance()
       .get(this.hostId)
       .folder.getFilesByType(MimeType.SHORTCUT);
@@ -479,13 +482,13 @@ class CoursePlan extends Base.Item {
       }
     }
 
-    this.setStatus('trashing plan'); // #delete
+    lib.Progress.setStatus('trashing plan', this); // #delete
     file.setTrashed(true);
   }
 
   public expandDeptOptionsIfFewerThanParams() {
     const current = this.getNumOptionsPerDepartment();
-    const target = lib.config.getNumOptionsPerDepartment();
+    const target = lib.Config.getNumOptionsPerDepartment();
     if (current < target) {
       for (
         let row =
