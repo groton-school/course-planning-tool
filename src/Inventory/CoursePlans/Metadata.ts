@@ -78,6 +78,21 @@ class Metadata extends Base.Metadata {
       version
     );
   }
+
+  public get incomplete() {
+    return this.inventory.getMetadata(
+      this.k,
+      lib.CoursePlanningData.column.CoursePlans.Incomplete
+    );
+  }
+
+  public set incomplete(incomplete: boolean) {
+    this.inventory.setMetadata(
+      this.k,
+      lib.CoursePlanningData.column.CoursePlans.Incomplete,
+      incomplete
+    );
+  }
 }
 
 namespace Metadata { }

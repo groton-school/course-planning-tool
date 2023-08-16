@@ -299,18 +299,20 @@ class CoursePlan
     this.populateEnrollmentHistory();
     this.populateHeaders();
     this.setPermissions();
-    this.putInPlace();
-    this.prepareCommentBlanks();
-    this.updateCourseList();
-    lib.Progress.setStatus('updating inventory', this); // #create
     this.inventory.add([
       this.hostId,
       this.spreadsheet.getId(),
       this.spreadsheet.getUrl()
     ]);
+    this.meta.incomplete = true;
+    this.putInPlace();
+    this.prepareCommentBlanks();
+    this.updateCourseList();
+    lib.Progress.setStatus('updating inventory', this); // #create
     this.meta.numOptionsPerDepartment = this.getNumOptionsPerDepartment();
     this.meta.numComments = this.getNumComments();
     this.meta.version = APP_VERSION;
+    this.meta.incomplete = false;
   }
 
   private createFromTemplate() {

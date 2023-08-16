@@ -76,7 +76,8 @@ class CoursePlanningData {
       Inactive: i('P'),
       NewAdvisor: i('Q'),
       PermissionsUpdated: i('R'),
-      Version: i('S')
+      Version: i('S'),
+      Incomplete: i('T')
     }
   };
 }
