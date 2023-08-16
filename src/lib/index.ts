@@ -3,7 +3,6 @@ import MCoursePlanningData from './CoursePlanningData';
 import CoursePlanTemplate from './CoursePlanTemplate';
 import currentSchoolYear from './currentSchoolYear';
 import * as MFormat from './Format';
-import Picker from './Picker';
 import MProgress from './Progress';
 
 class lib {
@@ -14,8 +13,6 @@ class lib {
   public static CoursePlanTemplate = CoursePlanTemplate;
 
   public static currentSchoolYear = currentSchoolYear;
-
-  public static Picker = Picker;
 }
 
 namespace lib {

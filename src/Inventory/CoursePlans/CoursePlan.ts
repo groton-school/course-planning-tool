@@ -1,21 +1,38 @@
 import g from '@battis/gas-lighter';
-import lib from '../../lib';
 import Role from '../../Role';
+import lib from '../../lib';
 import Base from '../Base';
 import FormFoldersOfCoursePlans from '../FormFoldersOfCoursePlans';
 import StudentFolders from '../StudentFolders';
 import Metadata from './/Metadata';
 import Inventory from './Inventory';
 
-class CoursePlan extends Base.Item {
+class CoursePlan
+  extends Base.Item
+  implements
+  g.HtmlService.Element.Picker.Pickable,
+  lib.Progress.Contextable,
+  lib.Progress.Sourceable {
   public static stepCount = {
     create: parseInt(CREATE_STEPS),
     updateEnrollmentHistory: parseInt(UPDATE_HISTORY_STEPS),
     updateCourseList: parseInt(UPDATE_COURSES_STEPS),
-    delete: parseInt(DELETE_STEPS)
+    delete: parseInt(DELETE_STEPS),
+    reassign: parseInt(REASSIGN_STEPS),
+    inactive: parseInt(INACTIVE_STEPS)
   };
 
-  private static coursesByDepartment: any[][];
+  private static _coursesByDepartment: any[][];
+  private static get coursesByDepartment(): string[][] {
+    if (!this._coursesByDepartment) {
+      this._coursesByDepartment = g.SpreadsheetApp.Value.getSheetDisplayValues(
+        SpreadsheetApp.getActive().getSheetByName(
+          lib.CoursePlanningData.sheet.CoursesByDepartment
+        )
+      );
+    }
+    return this._coursesByDepartment;
+  }
 
   public meta = new Metadata(this.inventory as Inventory, this.key);
 
@@ -155,28 +172,29 @@ class CoursePlan extends Base.Item {
   }
 
   private numOptionsPerDepartment?: number = null;
-  private numComments?: number = null;
-
-  public static bindTo({
-    hostId,
-    spreadsheetId,
-    student,
-    spreadsheet
-  }: CoursePlan.BindToImplementation): CoursePlan {
-    hostId = hostId || student.hostId;
-    spreadsheetId = spreadsheetId || spreadsheet.getId();
-    return new CoursePlan(Inventory.getInstance(), spreadsheetId, hostId);
+  // TODO could this be pulled by looking at merged cells?
+  private getNumOptionsPerDepartment(): number {
+    if (this.numOptionsPerDepartment === null) {
+      if (this.inventory.has(this.hostId)) {
+        this.numOptionsPerDepartment = this.meta.numOptionsPerDepartment;
+      } else {
+        this.numOptionsPerDepartment = lib.Config.getNumOptionsPerDepartment();
+      }
+    }
+    return this.numOptionsPerDepartment;
   }
 
-  public static for(hostId: string): CoursePlan;
-  public static for(student: Role.Student): CoursePlan;
-  public static for(target: string | Role.Student): CoursePlan {
-    if (typeof target === 'string') {
-      return Inventory.getInstance().get(target);
-    } else {
-      lib.Progress.setStatus('consulting inventory', target);
-      return CoursePlan.for(target.hostId);
+  private numComments?: number = null;
+  // TODO could this be pulled from the data protection model?
+  private getNumComments(): number {
+    if (this.numComments === null) {
+      if (this.inventory.has(this.hostId)) {
+        this.numComments = this.meta.numComments;
+      } else {
+        this.numComments = lib.Config.getNumComments();
+      }
     }
+    return this.numComments;
   }
 
   public constructor(
@@ -188,6 +206,81 @@ class CoursePlan extends Base.Item {
     if (content instanceof Role.Student) {
       this.createFromStudent(content);
     }
+  }
+
+  public assignToCurrentAdvisor(previousAdvisor?: Role.Advisor) {
+    const primary = !previousAdvisor;
+    previousAdvisor =
+      previousAdvisor || this.student.getAdvisor(Role.Advisor.ByYear.Previous);
+    if (this.meta.newAdvisor && !this.meta.permissionsUpdated) {
+      lib.Progress.setStatus(`updating course plan permissions`, this); // #reassign
+      g.DriveApp.Permission.add(
+        this.file.getId(),
+        this.advisor.email,
+        g.DriveApp.Permission.Role.Writer
+      );
+      const protections = this.planSheet.getProtections(
+        SpreadsheetApp.ProtectionType.RANGE
+      );
+      for (const protection of protections) {
+        const editors = protection.getEditors();
+        for (const editor of editors) {
+          if (editor.getEmail() === previousAdvisor.email) {
+            protection.addEditor(this.advisor.email);
+            protection.removeEditor(previousAdvisor.email);
+          }
+        }
+      }
+      try {
+        this.file.removeEditor(previousAdvisor.email);
+      } catch (e) {
+        lib.Progress.log(
+          `${previousAdvisor.email} was not a course plan editor`,
+          this
+        );
+      }
+
+      lib.Progress.setStatus('updating advisor on course plan', this); // #reassign
+      g.SpreadsheetApp.Value.set(
+        this.planSheet,
+        lib.CoursePlanTemplate.namedRange.TemplateNames,
+        [
+          [this.student.getFormattedName()],
+          [`Advisor: ${this.advisor.getFormattedName()}`]
+        ]
+      );
+
+      this.meta.permissionsUpdated = true;
+    }
+    if (primary) {
+      this.student.folder.assignToCurrentAdvisor(previousAdvisor);
+    }
+  }
+
+  public makeInactive(previousAdvisor?: Role.Advisor) {
+    const primary = !previousAdvisor;
+    previousAdvisor =
+      previousAdvisor || this.student.getAdvisor(Role.Advisor.ByYear.Previous);
+    if (this.meta.inactive && !this.meta.permissionsUpdated) {
+      lib.Progress.setStatus('removing previous advisor', this); // #inactive
+      try {
+        this.file.removeEditor(previousAdvisor.email);
+      } catch (e) {
+        lib.Progress.log(
+          `${previousAdvisor.email} as not a course plan editor`,
+          this
+        );
+      }
+
+      this.meta.permissionsUpdated = true;
+    }
+    if (primary) {
+      this.student.folder.makeInactive(previousAdvisor);
+    }
+  }
+
+  public updateEnrollmentHistory() {
+    this.populateEnrollmentHistory(false);
   }
 
   private createFromStudent(student: Role.Student) {
@@ -210,32 +303,15 @@ class CoursePlan extends Base.Item {
     this.meta.version = APP_VERSION;
   }
 
-  // TODO could this be pulled by looking at merged cells?
-  private getNumOptionsPerDepartment(): number {
-    if (this.numOptionsPerDepartment === null) {
-      if (this.inventory.has(this.hostId)) {
-        this.numOptionsPerDepartment = this.meta.numOptionsPerDepartment;
-      } else {
-        this.numOptionsPerDepartment = lib.Config.getNumOptionsPerDepartment();
-      }
-    }
-    return this.numOptionsPerDepartment;
-  }
-
-  // TODO could this be pulled from the data protection model?
-  private getNumComments(): number {
-    if (this.numComments === null) {
-      if (this.inventory.has(this.hostId)) {
-        this.numComments = this.meta.numComments;
-      } else {
-        this.numComments = lib.Config.getNumComments();
-      }
-    }
-    return this.numComments;
-  }
-
-  public updateEnrollmentHistory() {
-    this.populateEnrollmentHistory(false);
+  private createFromTemplate() {
+    lib.Progress.setStatus('creating course plan from template', this); // #create
+    const template = SpreadsheetApp.openByUrl(
+      lib.Config.getCoursePlanTemplate()
+    );
+    this.spreadsheet = template.copy(
+      lib.Format.apply(lib.Config.getCoursePlanNameFormat(), this.student)
+    );
+    this.file = DriveApp.getFileById(this.spreadsheet.getId());
   }
 
   private populateEnrollmentHistory(create = true) {
@@ -305,17 +381,6 @@ class CoursePlan extends Base.Item {
     }
   }
 
-  private createFromTemplate() {
-    lib.Progress.setStatus('creating course plan from template', this); // #create
-    const template = SpreadsheetApp.openByUrl(
-      lib.Config.getCoursePlanTemplate()
-    );
-    this.spreadsheet = template.copy(
-      lib.Format.apply(lib.Config.getCoursePlanNameFormat(), this.student)
-    );
-    this.file = DriveApp.getFileById(this.spreadsheet.getId());
-  }
-
   private populateHeaders() {
     lib.Progress.setStatus('filling in the labels', this); // #create
     g.SpreadsheetApp.Value.set(
@@ -364,6 +429,52 @@ class CoursePlan extends Base.Item {
     );
   }
 
+  private prepareCommentBlanks() {
+    lib.Progress.setStatus('making room for comments', this); // #create
+    const commentors = [
+      {
+        name: 'Comments from Faculty Advisor',
+        range: lib.CoursePlanTemplate.namedRange.ProtectAdvisor,
+        editor: this.advisor.email
+      },
+      {
+        name: 'Comments from College Counseling Office',
+        range: lib.CoursePlanTemplate.namedRange.ProtectCollegeCounseling,
+        editor: lib.Config.getCollegeCounseling()
+      }
+    ];
+    for (const { name, range, editor } of commentors) {
+      const protection = this.planSheet
+        .getRange(range)
+        .protect()
+        .setDescription(name);
+      g.SpreadsheetApp.Protection.clearEditors(protection);
+      protection.addEditor(editor);
+      this.additionalComments(protection.getRange().getRow());
+    }
+  }
+
+  public updateCourseList() {
+    lib.Progress.setStatus('updating course list', this); // #create, #update-courses
+    const source = CoursePlan.coursesByDepartment;
+    const destination = this.spreadsheet.getSheetByName(
+      lib.CoursePlanningData.sheet.CoursesByDepartment
+    );
+    const destHeight = destination.getMaxRows();
+    if (destHeight < source.length) {
+      destination.insertRowsAfter(destHeight, source.length - destHeight);
+    } else if (destHeight > source.length) {
+      destination.deleteRows(source.length, destHeight - source.length);
+    }
+    g.SpreadsheetApp.Value.set(
+      destination,
+      destination
+        .getRange(1, 1, source.length, source[0].length)
+        .getA1Notation(),
+      source
+    );
+  }
+
   // TODO adjust row height to accommodate actual content lines
   private insertAndMergeOptionsRows(valueWidth: number) {
     const numOptions = lib.Config.getNumOptionsPerDepartment();
@@ -409,61 +520,32 @@ class CoursePlan extends Base.Item {
     }
   }
 
-  private prepareCommentBlanks() {
-    lib.Progress.setStatus('making room for comments', this); // #create
-    const commentors = [
-      {
-        name: 'Comments from Faculty Advisor',
-        range: lib.CoursePlanTemplate.namedRange.ProtectAdvisor,
-        editor: this.advisor.email
-      },
-      {
-        name: 'Comments from College Counseling Office',
-        range: lib.CoursePlanTemplate.namedRange.ProtectCollegeCounseling,
-        editor: lib.Config.getCollegeCounseling()
+  public expandDeptOptionsIfFewerThanParams() {
+    const current = this.getNumOptionsPerDepartment();
+    const target = lib.Config.getNumOptionsPerDepartment();
+    if (current < target) {
+      for (
+        let row =
+          this.getAnchorOffset().getRow() + this.numDepartments * current - 1;
+        row > this.getAnchorOffset().getRow();
+        row -= current
+      ) {
+        this.planSheet.insertRowsAfter(row, target - current);
       }
-    ];
-    for (const { name, range, editor } of commentors) {
-      const protection = this.planSheet
-        .getRange(range)
-        .protect()
-        .setDescription(name);
-      g.SpreadsheetApp.Protection.clearEditors(protection);
-      protection.addEditor(editor);
-      this.additionalComments(protection.getRange().getRow());
     }
+    this.meta.numOptionsPerDepartment = target;
   }
 
-  private static getCoursesByDepartment(): string[][] {
-    if (!this.coursesByDepartment) {
-      this.coursesByDepartment = g.SpreadsheetApp.Value.getSheetDisplayValues(
-        SpreadsheetApp.getActive().getSheetByName(
-          lib.CoursePlanningData.sheet.CoursesByDepartment
-        )
-      );
-    }
-    return this.coursesByDepartment;
+  public toOption(): g.HtmlService.Element.Picker.Option {
+    return { name: this.student.getFormattedName(), value: this.hostId };
   }
 
-  public updateCourseList() {
-    lib.Progress.setStatus('updating course list', this); // #create, #update-courses
-    const source = CoursePlan.getCoursesByDepartment();
-    const destination = this.spreadsheet.getSheetByName(
-      lib.CoursePlanningData.sheet.CoursesByDepartment
-    );
-    const destHeight = destination.getMaxRows();
-    if (destHeight < source.length) {
-      destination.insertRowsAfter(destHeight, source.length - destHeight);
-    } else if (destHeight > source.length) {
-      destination.deleteRows(source.length, destHeight - source.length);
-    }
-    g.SpreadsheetApp.Value.set(
-      destination,
-      destination
-        .getRange(1, 1, source.length, source[0].length)
-        .getA1Notation(),
-      source
-    );
+  public toSourceString(): string {
+    return this.student.getFormattedName();
+  }
+
+  public toContext(): { [key: string]: any } {
+    return { type: 'course plan', id: this.id, hostId: this.hostId };
   }
 
   public delete() {
@@ -485,82 +567,8 @@ class CoursePlan extends Base.Item {
     lib.Progress.setStatus('trashing plan', this); // #delete
     file.setTrashed(true);
   }
-
-  public expandDeptOptionsIfFewerThanParams() {
-    const current = this.getNumOptionsPerDepartment();
-    const target = lib.Config.getNumOptionsPerDepartment();
-    if (current < target) {
-      for (
-        let row =
-          this.getAnchorOffset().getRow() + this.numDepartments * current - 1;
-        row > this.getAnchorOffset().getRow();
-        row -= current
-      ) {
-        this.planSheet.insertRowsAfter(row, target - current);
-      }
-    }
-    this.meta.numOptionsPerDepartment = target;
-  }
-
-  public assignToCurrentAdvisor(primary = true) {
-    if (this.meta.newAdvisor && !this.meta.permissionsUpdated) {
-      const previousAdvisor = this.student.getAdvisor(
-        Role.Advisor.ByYear.Previous
-      );
-      g.DriveApp.Permission.add(
-        this.file.getId(),
-        this.advisor.email,
-        g.DriveApp.Permission.Role.Writer
-      );
-      const protection = this.planSheet
-        .getRange(lib.CoursePlanTemplate.namedRange.ProtectAdvisor)
-        .protect();
-      protection.addEditor(this.advisor.email);
-      protection.removeEditor(previousAdvisor.email);
-      this.file.removeEditor(previousAdvisor.email);
-
-      g.SpreadsheetApp.Value.set(
-        this.planSheet,
-        lib.CoursePlanTemplate.namedRange.TemplateNames,
-        [
-          [this.student.getFormattedName()],
-          [`Advisor: ${this.advisor.getFormattedName()}`]
-        ]
-      );
-      this.meta.permissionsUpdated = true;
-      if (primary) {
-        this.student.folder.assignToCurrentAdvisor(false);
-      }
-    }
-  }
-
-  public makeInactive(primary = true) {
-    if (this.meta.inactive && !this.meta.permissionsUpdated) {
-      const previousAdvisor = this.student.getAdvisor(
-        Role.Advisor.ByYear.Previous
-      );
-      this.file.removeEditor(previousAdvisor.email);
-
-      this.meta.permissionsUpdated = true;
-      if (primary) {
-        this.student.folder.makeInactive(false);
-      }
-    }
-  }
 }
 
-namespace CoursePlan {
-  export type BindToImplementation = (
-    | { student: Role.Student; hostId?: never }
-    | { student?: never; hostId: Base.Inventory.Key }
-  ) &
-    (
-      | {
-        spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet;
-        spreadsheetId?: never;
-      }
-      | { spreadsheet?: never; spreadsheetId: string }
-    );
-}
+namespace CoursePlan { }
 
 export { CoursePlan as default };

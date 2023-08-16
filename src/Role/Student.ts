@@ -4,9 +4,11 @@ import CoursePlan from '../Inventory/CoursePlans/CoursePlan';
 import StudentFolder from '../Inventory/StudentFolders/StudentFolder';
 import lib from '../lib';
 import Advisor from './Advisor';
+import Form from './Form';
 
-class Student {
+class Student implements g.HtmlService.Element.Picker.Pickable {
   private static data?: any[][];
+  private static cache: { [hostId: Inventory.Key]: Student } = {};
 
   public readonly hostId: string;
   public readonly email: string;
@@ -58,30 +60,32 @@ class Student {
   }
 
   public static getByHostId(id: string) {
-    const [
-      hostId,
-      email,
-      firstName,
-      lastName,
-      gradYear,
-      ,
-      ,
-      ,
-      newStudent,
-      newAdvisor
-    ] = Student.getData().find(([hostId]) => hostId == id) || [];
-    return (
-      hostId &&
-      new Student({
+    if (!this.cache[id]) {
+      const [
         hostId,
+        email,
         firstName,
         lastName,
-        email,
         gradYear,
+        ,
+        ,
+        ,
         newStudent,
         newAdvisor
-      })
-    );
+      ] = Student.getData().find(([hostId]) => hostId == id) || [];
+      if (hostId) {
+        this.cache[id] = new Student({
+          hostId,
+          firstName,
+          lastName,
+          email,
+          gradYear,
+          newStudent,
+          newAdvisor
+        });
+      }
+    }
+    return this.cache[id] || undefined;
   }
 
   private _plan?: CoursePlan;
@@ -114,20 +118,24 @@ class Student {
   public static all(): Student[] {
     const thisYear = lib.currentSchoolYear();
     return Student.getData()
-      .map((row) => new Student(row))
-      .filter((student) => student.gradYear != thisYear);
+      .filter(([, , , , gradYear]) => gradYear != thisYear)
+      .map((row) => new Student(row));
   }
 
   public static getByForm(gradYear: number): Student[] {
     return Student.getData()
-      .map((row) => new Student(row))
-      .filter((student) => student.gradYear == gradYear);
+      .filter(([, , , , gradYear]) => gradYear == gradYear)
+      .map((row) => new Student(row));
   }
 
-  public static getForms(): number[] {
-    return [
-      ...new Set(Student.getData().map(([, , , , gradYear]) => gradYear))
-    ].sort();
+  public static forms() {
+    return [...new Set(Student.getData().map(([, , , , gradYear]) => gradYear))]
+      .sort()
+      .map((f) => new Form(f));
+  }
+
+  toOption(): g.HtmlService.Element.Picker.Option {
+    return { name: this.getFormattedName(), value: this.hostId };
   }
 }
 

@@ -8,7 +8,7 @@ global.ueh_pp = () =>
   g.HtmlService.Element.Picker.showModalDialog(
     SpreadsheetApp,
     {
-      list: lib.Picker.allPlans(),
+      list: planList(),
       message:
         'Please choose a student for whom to update their enrollment history',
       actionName: 'Update Enrollment History',
@@ -17,11 +17,16 @@ global.ueh_pp = () =>
     'Update Enrollment History'
   );
 
+const planList = () => 'ueh_pl';
+const ueh_pl: g.HtmlService.Element.Picker.OptionsCallback = () =>
+  Inventory.CoursePlans.all().map((p) => p.toOption());
+global.ueh_pl = ueh_pl;
+
 const updateEnrollmentHistoryFor = () => 'ueh_uehf';
 global.ueh_uehf = (hostId: string, thread: string) => {
   lib.Progress.setThread(thread);
   lib.Progress.setMax(CoursePlan.stepCount.updateEnrollmentHistory);
-  const plan = CoursePlan.for(hostId);
+  const plan = Inventory.CoursePlans.get(hostId);
   plan.updateEnrollmentHistory();
   lib.Progress.setComplete({
     html: `<div>Updated course plan for ${plan.student.getFormattedName()}.</div>

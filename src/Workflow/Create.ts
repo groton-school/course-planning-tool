@@ -9,13 +9,20 @@ global.c_ps = () =>
   g.HtmlService.Element.Picker.showModalDialog(
     SpreadsheetApp,
     {
-      list: lib.Picker.allStudents(),
+      list: studentsWithoutCoursePlans(),
       message: 'Please choose a student for whom to create a course plan',
       actionName: 'Create Course Plan',
       callback: createPlanFor()
     },
     'Create Course Plan'
   );
+
+const studentsWithoutCoursePlans = () => 'c_swcp';
+const c_swcp: g.HtmlService.Element.Picker.OptionsCallback = () =>
+  Role.Student.all()
+    .filter((s) => !Inventory.CoursePlans.has(s.hostId))
+    .map((s) => s.toOption());
+global.c_swcp = c_swcp;
 
 const createPlanFor = () => 'c_cpf';
 global.c_cpf = (hostId: string, thread: string) => {
@@ -33,13 +40,18 @@ global.c_pf = () =>
   g.HtmlService.Element.Picker.showModalDialog(
     SpreadsheetApp,
     {
-      list: lib.Picker.allForms(),
+      list: formList(),
       message: 'Please choose a form for which to create course plans',
       actionName: 'Create Course Plans',
       callback: 'createAll'
     },
     'Create Course Plans'
   );
+
+const formList = () => 'c_fl';
+const c_fl: g.HtmlService.Element.Picker.OptionsCallback = () =>
+  Role.Student.forms().map((f) => f.toOption());
+global.c_fl = c_fl;
 
 export const all = () => 'c_a';
 global.c_a = (gradYear?: number, thread?: string) => {

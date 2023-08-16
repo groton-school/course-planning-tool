@@ -8,7 +8,7 @@ global.d_pp = () =>
   g.HtmlService.Element.Picker.showModalDialog(
     SpreadsheetApp,
     {
-      list: lib.Picker.allPlans(),
+      list: planList(),
       message: 'Please select a student course plan to delete',
       actionName: 'Delete Course Plan',
       confirmation:
@@ -17,6 +17,11 @@ global.d_pp = () =>
     },
     'Delete Course Plan'
   );
+
+const planList = () => 'd_pl';
+const d_pl: g.HtmlService.Element.Picker.OptionsCallback = () =>
+  Inventory.CoursePlans.all().map((p) => p.toOption());
+global.d_pl = d_pl;
 
 const deletePlanFor = () => 'd_dpf';
 global.d_dpf = (hostId: string, thread: string) => {

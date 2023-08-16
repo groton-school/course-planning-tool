@@ -1,6 +1,4 @@
 import g from '@battis/gas-lighter';
-import Inventory from '../Inventory';
-import Role from '../Role';
 
 class Progress {
   private constructor() { }
@@ -46,26 +44,41 @@ class Progress {
     return this.progress.setComplete(completion);
   }
 
-  public static setStatus(message: string): void;
+  public static log(message: any, context?: Partial<Progress.Contextable>) {
+    Logger.log({
+      message,
+      context: Progress.Contextable.isContextable(context)
+        ? context.toContext()
+        : undefined
+    });
+  }
+
   public static setStatus(
     message: string,
-    plan: Inventory.Module.CoursePlans.CoursePlan
-  ): void;
-  public static setStatus(message: string, student: Role.Student): void;
-  public static setStatus(message: string, source?: object): void {
-    if (source instanceof Role.Student) {
-      this.progress.setStatus(`${source.getFormattedName()} (${message})`);
-    } else if (source instanceof Inventory.Module.CoursePlans.CoursePlan) {
-      this.progress.setStatus(
-        `${source.student.getFormattedName()} (${message})`
-      );
-    } else {
-      this.progress.setStatus(message);
+    source?: Progress.Sourceable & Partial<Progress.Contextable>
+  ): void {
+    if (source) {
+      message = `${source.toSourceString()} (${message})`;
     }
+    this.log(message, source);
+    this.progress.setStatus(message);
+
     this.progress.incrementValue();
   }
 }
 
-namespace Progress { }
+namespace Progress {
+  export interface Sourceable {
+    toSourceString(): string;
+  }
+  export interface Contextable {
+    toContext(): { [key: string]: any };
+  }
+  export namespace Contextable {
+    export function isContextable(obj?: object): obj is Progress.Contextable {
+      return obj && 'toContext' in obj && typeof obj.toContext === 'function';
+    }
+  }
+}
 
 export { Progress as default };

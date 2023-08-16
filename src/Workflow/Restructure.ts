@@ -7,7 +7,7 @@ global.r_psedo = () => {
   g.HtmlService.Element.Picker.showModalDialog(
     SpreadsheetApp,
     {
-      list: lib.Picker.allPlans(),
+      list: planList(),
       message:
         'Please choose a student for whom to expand their options per department',
       actionName: 'Expand Dept. Options',
@@ -16,6 +16,11 @@ global.r_psedo = () => {
     'Expand Dept. Options'
   );
 };
+
+const planList = () => 'r_pl';
+const r_pl: g.HtmlService.Element.Picker.OptionsCallback = () =>
+  Inventory.CoursePlans.all().map((p) => p.toOption());
+global.r_pl = r_pl;
 
 const expandStudentDeptOptionsFor = () => 'r_esdof';
 global.r_esdof = (hostId: string, thread: string) => {

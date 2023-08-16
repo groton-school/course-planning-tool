@@ -1,7 +1,6 @@
 import g from '@battis/gas-lighter';
 import Inventory from '../Inventory';
 import lib from '../lib';
-import Role from '../Role';
 
 export const rolloverAcademicYear = () => 'a_ray';
 global.a_ray = () => {
@@ -74,11 +73,11 @@ global.a_ray = () => {
   });
 };
 
-const studentsWithNewAdvisor = () => 'a_swna';
-global.a_swna = () =>
-  Role.Student.all()
-    .filter((s) => s.newAdvisor)
-    .map((s) => ({ name: s.getFormattedName(), value: s.hostId }));
+const plansWithNewAdvisor = () => 'a_pwna';
+global.a_pwna = () =>
+  Inventory.CoursePlans.all()
+    .filter((p) => p.meta.newAdvisor && !p.meta.permissionsUpdated)
+    .map((p) => p.toOption());
 
 export const pickStudentToAssignToCurrentAdvisor = () => 'a_pstatca';
 global.a_pstatca = () =>
@@ -86,7 +85,7 @@ global.a_pstatca = () =>
     SpreadsheetApp,
     {
       message: 'Please select a student to re-assign to their current advisor',
-      list: studentsWithNewAdvisor(),
+      list: plansWithNewAdvisor(),
       callback: assignToCurrentAdvisor(),
       actionName: 'Re-assign'
     },
@@ -97,7 +96,17 @@ const assignToCurrentAdvisor = () => 'a_atca';
 global.a_atca = (hostId: string, thread: string) => {
   lib.Progress.setThread(thread);
   lib.Progress.reset();
-  const student = Role.Student.getByHostId(hostId);
-  student.plan.assignToCurrentAdvisor();
-  lib.Progress.setComplete(true);
+  lib.Progress.setMax(
+    Inventory.Module.CoursePlans.CoursePlan.stepCount.reassign
+  );
+  const plan = Inventory.CoursePlans.get(hostId);
+  plan.assignToCurrentAdvisor();
+  lib.Progress.setComplete({
+    html: `<div>Reassigned course plan for ${plan.student.getFormattedName()} to ${plan.advisor.getFormattedName()}.</div>
+            <div>
+              <a id="button" class="btn btn-primary" onclick="google.script.host.close()" href="${plan.spreadsheet.getUrl()}" target="_blank">Open Plan</a>
+              <a id="button" class="btn btn-secondary" onclick="google.script.host.close()" href="${plan.student.folder.folder.getUrl()}" target="_blank">Open Student Folder</a>
+              <a id="button" class="btn btn-secondary" onclick="google.script.host.close()" href="${plan.advisor.folder.getUrl()}" target="_blank">Open Advisor Folder</a>
+            </div>`
+  });
 };
