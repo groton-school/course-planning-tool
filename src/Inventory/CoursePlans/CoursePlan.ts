@@ -213,7 +213,10 @@ class CoursePlan
     previousAdvisor =
       previousAdvisor || this.student.getAdvisor(Role.Advisor.ByYear.Previous);
     if (this.meta.newAdvisor && !this.meta.permissionsUpdated) {
-      lib.Progress.setStatus(`updating course plan permissions`, this); // #reassign
+      lib.Progress.setStatus(`updating course plan permissions`, this, {
+        current: this.advisor.email,
+        previous: previousAdvisor.email
+      }); // #reassign
       g.DriveApp.Permission.add(
         this.file.getId(),
         this.advisor.email,

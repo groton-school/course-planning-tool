@@ -1,13 +1,14 @@
 import g from '@battis/gas-lighter';
 import Inventory from '../Inventory';
-import CoursePlan from '../Inventory/CoursePlans/CoursePlan';
 import lib from '../lib';
 
 const updateCourseListFor = () => 'ucl_uclf';
 global.ucl_uclf = (hostId: string, thread: string) => {
   lib.Progress.setThread(thread);
   lib.Progress.reset();
-  lib.Progress.setMax(CoursePlan.stepCount.updateCourseList);
+  lib.Progress.setMax(
+    Inventory.Module.CoursePlans.CoursePlan.stepCount.updateCourseList
+  );
   const plan = Inventory.CoursePlans.get(hostId);
   plan.updateCourseList();
   lib.Progress.setComplete({
@@ -39,7 +40,10 @@ global.ucl_a = () => {
   lib.Progress.reset();
   lib.Progress.showModalDialog(SpreadsheetApp, 'Update Course Lists');
   const plans = Inventory.CoursePlans.all();
-  lib.Progress.setMax(plans.length * CoursePlan.stepCount.updateCourseList);
+  lib.Progress.setMax(
+    plans.length *
+    Inventory.Module.CoursePlans.CoursePlan.stepCount.updateCourseList
+  );
   plans.forEach((plan) => plan.updateCourseList());
   lib.Progress.setComplete(true);
 };

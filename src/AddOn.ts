@@ -14,10 +14,22 @@ export function onOpen() {
       Workflow.UpdateCourseList.all()
     )
     .addSeparator()
-    .addItem('Roll-over Academic Year', Workflow.Annual.rolloverAcademicYear())
-    .addItem(
-      'Assign a student to current advisor…',
-      Workflow.Annual.pickStudentToAssignToCurrentAdvisor()
+    .addSubMenu(
+      SpreadsheetApp.getUi()
+        .createMenu('Roll-over Academic Year')
+        .addItem(
+          'Roll-over Student/Advisor Lists',
+          Workflow.Annual.rolloverAcademicYear()
+        )
+        .addSeparator()
+        .addItem(
+          'Assign a student to current advisor…',
+          Workflow.Annual.pickStudentToAssignToCurrentAdvisor()
+        )
+        .addItem(
+          'Assign all students to current advisor',
+          Workflow.Annual.assignAllToCurrentAdvisor()
+        )
     )
     .addSeparator()
     .addItem('Create a single course plan…', Workflow.Create.pickStudent())

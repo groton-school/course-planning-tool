@@ -47,7 +47,10 @@ class StudentFolder
     previousAdvisor =
       previousAdvisor || this.student.getAdvisor(Role.Advisor.ByYear.Previous);
     if (this.meta.newAdvisor && !this.meta.permissionsUpdated) {
-      lib.Progress.setStatus('updating student folder permissions', this); // #reassign
+      lib.Progress.setStatus('updating student folder permissions', this, {
+        current: this.student.advisor.email,
+        previous: previousAdvisor.email
+      }); // #reassign
       g.DriveApp.Permission.add(
         this.studentFolder.getId(),
         this.student.advisor.email,

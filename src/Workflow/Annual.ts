@@ -110,3 +110,17 @@ global.a_atca = (hostId: string, thread: string) => {
             </div>`
   });
 };
+
+export const assignAllToCurrentAdvisor = () => 'a_aatca';
+global.a_aatca = () => {
+  lib.Progress.reset();
+  lib.Progress.showModalDialog(SpreadsheetApp, 'Assign to Current Advisors');
+  const plans = Inventory.CoursePlans.all().filter(
+    (plan) => plan.meta.newAdvisor && !plan.meta.permissionsUpdated
+  );
+  lib.Progress.setMax(
+    plans.length * Inventory.Module.CoursePlans.CoursePlan.stepCount.reassign
+  );
+  plans.forEach((plan) => plan.assignToCurrentAdvisor());
+  lib.Progress.setComplete(true);
+};

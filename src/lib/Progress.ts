@@ -44,23 +44,31 @@ class Progress {
     return this.progress.setComplete(completion);
   }
 
-  public static log(message: any, context?: Partial<Progress.Contextable>) {
+  public static log(
+    message: any,
+    context?: Partial<Progress.Contextable>,
+    additionalContext: { [key: string]: any } = {}
+  ) {
     Logger.log({
       message,
-      context: Progress.Contextable.isContextable(context)
-        ? context.toContext()
-        : undefined
+      context: {
+        ...(Progress.Contextable.isContextable(context)
+          ? context.toContext()
+          : {}),
+        ...additionalContext
+      }
     });
   }
 
   public static setStatus(
     message: string,
-    source?: Progress.Sourceable & Partial<Progress.Contextable>
+    source?: Progress.Sourceable & Partial<Progress.Contextable>,
+    additionalContext: { [key: string]: any } = {}
   ): void {
     if (source) {
       message = `${source.toSourceString()} (${message})`;
     }
-    this.log(message, source);
+    this.log(message, source, additionalContext);
     this.progress.setStatus(message);
 
     this.progress.incrementValue();
