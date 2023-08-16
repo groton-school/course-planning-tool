@@ -45,7 +45,7 @@ class StudentFolder
   public assignToCurrentAdvisor(previousAdvisor?: Role.Advisor) {
     const primary = !previousAdvisor;
     previousAdvisor =
-      previousAdvisor || this.student.getAdvisor(Role.Advisor.ByYear.Previous);
+      previousAdvisor || this.student.getAdvisor(Role.Year.Previous);
     if (this.meta.newAdvisor && !this.meta.permissionsUpdated) {
       lib.Progress.setStatus('updating student folder permissions', this, {
         current: this.student.advisor.email,
@@ -89,7 +89,7 @@ class StudentFolder
   public makeInactive(previousAdvisor?: Role.Advisor) {
     const primary = !previousAdvisor;
     previousAdvisor =
-      previousAdvisor || this.student.getAdvisor(Role.Advisor.ByYear.Previous);
+      previousAdvisor || this.student.getAdvisor(Role.Year.Previous);
     if (this.meta.inactive && !this.meta.permissionsUpdated) {
       const shortcuts = previousAdvisor.folder.getFilesByType(
         MimeType.SHORTCUT

@@ -5,9 +5,20 @@ import StudentFolder from '../Inventory/StudentFolders/StudentFolder';
 import lib from '../lib';
 import Advisor from './Advisor';
 import Form from './Form';
+import Year from './Year';
 
 class Student implements g.HtmlService.Element.Picker.Pickable {
-  private static data?: any[][];
+  private static _data: { [k in Year]?: any[][] } = {};
+  private static getData(year = Year.Current) {
+    if (!this._data[year]) {
+      this._data[year] = g.SpreadsheetApp.Range.getEntireSheet(
+        SpreadsheetApp.getActive().getSheetByName(year.toString())
+      ).getValues();
+      this._data[year].shift(); // strip column labels
+    }
+    return this._data[year];
+  }
+
   private static cache: { [hostId: Inventory.Key]: Student } = {};
 
   public readonly hostId: string;
@@ -47,19 +58,7 @@ class Student implements g.HtmlService.Element.Picker.Pickable {
   public getFormattedName = () =>
     `${this.firstName} ${this.lastName} ‘${this.gradYear - 2000}`;
 
-  protected static getData() {
-    if (!Student.data) {
-      Student.data = g.SpreadsheetApp.Range.getEntireSheet(
-        SpreadsheetApp.getActive().getSheetByName(
-          lib.CoursePlanningData.sheet.AdvisorList
-        )
-      ).getValues();
-      Student.data.shift(); // strip column labels
-    }
-    return Student.data;
-  }
-
-  public static getByHostId(id: string) {
+  public static getByHostId(id: string, year = Year.Current) {
     if (!this.cache[id]) {
       const [
         hostId,
@@ -72,7 +71,7 @@ class Student implements g.HtmlService.Element.Picker.Pickable {
         ,
         newStudent,
         newAdvisor
-      ] = Student.getData().find(([hostId]) => hostId == id) || [];
+      ] = Student.getData(year).find(([hostId]) => hostId == id) || [];
       if (hostId) {
         this.cache[id] = new Student({
           hostId,
@@ -112,24 +111,26 @@ class Student implements g.HtmlService.Element.Picker.Pickable {
     return this._advisor;
   }
 
-  public getAdvisor = (year = Advisor.ByYear.Current) =>
+  public getAdvisor = (year = Year.Current) =>
     Advisor.getByAdvisee(this.hostId, year);
 
-  public static all(): Student[] {
+  public static all(year = Year.Current): Student[] {
     const thisYear = lib.currentSchoolYear();
-    return Student.getData()
+    return Student.getData(year)
       .filter(([, , , , gradYear]) => gradYear != thisYear)
       .map((row) => new Student(row));
   }
 
-  public static getByForm(gradYear: number): Student[] {
-    return Student.getData()
-      .filter(([, , , , gradYear]) => gradYear == gradYear)
+  public static getByForm(gradYear: number, year = Year.Current): Student[] {
+    return Student.getData(year)
+      .filter(([, , , , g]) => g == gradYear)
       .map((row) => new Student(row));
   }
 
-  public static forms() {
-    return [...new Set(Student.getData().map(([, , , , gradYear]) => gradYear))]
+  public static forms(year = Year.Current) {
+    return [
+      ...new Set(Student.getData(year).map(([, , , , gradYear]) => gradYear))
+    ]
       .sort()
       .map((f) => new Form(f));
   }

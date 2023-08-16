@@ -23,12 +23,21 @@ export function onOpen() {
         )
         .addSeparator()
         .addItem(
-          'Assign a student to current advisor…',
+          'Assign a plan to current advisor…',
           Workflow.Annual.pickStudentToAssignToCurrentAdvisor()
         )
         .addItem(
-          'Assign all students to current advisor',
+          'Assign all plans to current advisor',
           Workflow.Annual.assignAllToCurrentAdvisor()
+        )
+        .addSeparator()
+        .addItem(
+          'Deactivate an inactive course plan…',
+          Workflow.Annual.pickStudentToMakeInactive()
+        )
+        .addItem(
+          'Deactivate all inactive course plans',
+          Workflow.Annual.makeAllPlansInactive()
         )
     )
     .addSeparator()

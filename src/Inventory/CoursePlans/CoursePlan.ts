@@ -40,6 +40,13 @@ class CoursePlan
   public get student() {
     if (!this._student) {
       this._student = Role.Student.getByHostId(this.hostId);
+      if (!this._student) {
+        Logger.log('attempting to find student in previous year', this);
+        this._student = Role.Student.getByHostId(
+          this.hostId,
+          Role.Year.Previous
+        );
+      }
     }
     return this._student;
   }
@@ -211,7 +218,7 @@ class CoursePlan
   public assignToCurrentAdvisor(previousAdvisor?: Role.Advisor) {
     const primary = !previousAdvisor;
     previousAdvisor =
-      previousAdvisor || this.student.getAdvisor(Role.Advisor.ByYear.Previous);
+      previousAdvisor || this.student.getAdvisor(Role.Year.Previous);
     if (this.meta.newAdvisor && !this.meta.permissionsUpdated) {
       lib.Progress.setStatus(`updating course plan permissions`, this, {
         current: this.advisor.email,
@@ -263,7 +270,7 @@ class CoursePlan
   public makeInactive(previousAdvisor?: Role.Advisor) {
     const primary = !previousAdvisor;
     previousAdvisor =
-      previousAdvisor || this.student.getAdvisor(Role.Advisor.ByYear.Previous);
+      previousAdvisor || this.student.getAdvisor(Role.Year.Previous);
     if (this.meta.inactive && !this.meta.permissionsUpdated) {
       lib.Progress.setStatus('removing previous advisor', this); // #inactive
       try {

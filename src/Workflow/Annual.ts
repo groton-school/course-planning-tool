@@ -124,3 +124,57 @@ global.a_aatca = () => {
   plans.forEach((plan) => plan.assignToCurrentAdvisor());
   lib.Progress.setComplete(true);
 };
+
+const plansToMakeInactive = () => 'a_ptmi';
+const a_ptmi: g.HtmlService.Element.Picker.OptionsCallback = () => {
+  return Inventory.CoursePlans.all()
+    .filter((plan) => plan.meta.inactive && !plan.meta.permissionsUpdated)
+    .map((plan) => plan.toOption());
+};
+global.a_ptmi = a_ptmi;
+
+export const pickStudentToMakeInactive = () => 'a_pstmi';
+global.a_pstmi = () => {
+  g.HtmlService.Element.Picker.showModalDialog(
+    SpreadsheetApp,
+    {
+      message: 'Please select a student to make inactive',
+      list: plansToMakeInactive(),
+      actionName: 'Make Inactive',
+      callback: makePlanInactive()
+    },
+    'Make Inactive'
+  );
+};
+
+const makePlanInactive = () => 'a_mpi';
+global.a_mpi = (hostId: string, thread: string) => {
+  lib.Progress.setThread(thread);
+  lib.Progress.reset();
+  lib.Progress.setMax(
+    Inventory.Module.CoursePlans.CoursePlan.stepCount.inactive
+  );
+  const plan = Inventory.CoursePlans.get(hostId);
+  plan.makeInactive();
+  lib.Progress.setComplete({
+    html: `<div>Made course plan for ${plan.student.getFormattedName()} inactive.</div>
+            <div>
+              <a id="button" class="btn btn-primary" onclick="google.script.host.close()" href="${plan.spreadsheet.getUrl()}" target="_blank">Open Plan</a>
+              <a id="button" class="btn btn-secondary" onclick="google.script.host.close()" href="${plan.student.folder.folder.getUrl()}" target="_blank">Open Student Folder</a>
+            </div>`
+  });
+};
+
+export const makeAllPlansInactive = () => 'a_mapi';
+global.a_mapi = () => {
+  lib.Progress.reset();
+  lib.Progress.showModalDialog(SpreadsheetApp, 'Deactivate Inactive Plans');
+  const plans = Inventory.CoursePlans.all().filter(
+    (plan) => plan.meta.inactive && !plan.meta.permissionsUpdated
+  );
+  lib.Progress.setMax(
+    plans.length * Inventory.Module.CoursePlans.CoursePlan.stepCount.inactive
+  );
+  plans.forEach((plan) => plan.makeInactive());
+  lib.Progress.setComplete(true);
+};
