@@ -14,6 +14,9 @@ class Metadata extends Folders.Metadata {
       lib.CoursePlanningData.column.StudentFolders.Inactive
     );
   }
+  public get active() {
+    return !this.inactive;
+  }
   public get newAdvisor() {
     return this.inventory.getMetadata(
       this.k,

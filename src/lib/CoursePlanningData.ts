@@ -63,7 +63,7 @@ class CoursePlanningData {
       Url: i('C')
     },
     AdvisorFolders: {
-      PermissionsSet: i('F')
+      Inactive: i('F')
     },
     StudentFolders: {
       Inactive: i('G'),

@@ -10,6 +10,8 @@ export default class FormFoldersOfCoursePlans extends Folders.Inventory {
     return this._instance;
   }
 
+  protected getter = this.getAsFolder;
+
   private constructor() {
     super(lib.CoursePlanningData.sheet.PlansFormFolderInventory, (gradYear) =>
       lib.Format.apply(lib.Config.getFormFolderNameFormat(), {

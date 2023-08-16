@@ -8,19 +8,14 @@ class Metadata extends Folders.Metadata {
     super(inventory, advisorEmail);
   }
 
-  public get permissionsSet() {
+  public get inactive() {
     return this.inventory.getMetadata(
       this.k,
-      lib.CoursePlanningData.column.AdvisorFolders.PermissionsSet
+      lib.CoursePlanningData.column.AdvisorFolders.Inactive
     );
   }
-
-  public set permissionsSet(permissionsSet: boolean) {
-    this.inventory.setMetadata(
-      this.k,
-      lib.CoursePlanningData.column.AdvisorFolders.PermissionsSet,
-      permissionsSet
-    );
+  public get active() {
+    return !this.inactive;
   }
 }
 

@@ -1,5 +1,5 @@
-import lib from '../../lib';
 import Role from '../../Role';
+import lib from '../../lib';
 import Base from '../Base';
 import Folders from '../Folders';
 import AdvisorFolder from './AdvisorFolder';
@@ -22,10 +22,16 @@ class Inventory extends Folders.Inventory<AdvisorFolder> {
     );
   }
 
+  protected getter(folderId: string, key?: Base.Inventory.Key) {
+    return new AdvisorFolder(this, folderId, key);
+  }
+
   protected creator(key: Base.Inventory.Key): AdvisorFolder {
     const folder = this.root.folder.createFolder(this.formatter(key));
     this.add([key, folder.getId(), folder.getUrl()]);
-    return new AdvisorFolder(this, folder.getId(), key);
+    const advisorFolder = new AdvisorFolder(this, folder.getId(), key);
+    advisorFolder.resetPermissions();
+    return advisorFolder;
   }
 }
 

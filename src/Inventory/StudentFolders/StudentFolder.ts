@@ -42,6 +42,21 @@ class StudentFolder
     return this._formFolder;
   }
 
+  public resetPermissions() {
+    if (this.meta.active) {
+      g.DriveApp.Permission.add(
+        this.studentFolder.getId(),
+        this.student.advisor.email,
+        g.DriveApp.Permission.Role.Reader
+      );
+      g.DriveApp.Permission.add(
+        this.studentFolder.getId(),
+        this.student.email,
+        g.DriveApp.Permission.Role.Reader
+      );
+    }
+  }
+
   public assignToCurrentAdvisor(previousAdvisor?: Role.Advisor) {
     const primary = !previousAdvisor;
     previousAdvisor =
@@ -51,11 +66,7 @@ class StudentFolder
         current: this.student.advisor.email,
         previous: previousAdvisor.email
       }); // #reassign
-      g.DriveApp.Permission.add(
-        this.studentFolder.getId(),
-        this.student.advisor.email,
-        g.DriveApp.Permission.Role.Reader
-      );
+      this.resetPermissions();
       const shortcuts = previousAdvisor.folder.getFilesByType(
         MimeType.SHORTCUT
       );
