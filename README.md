@@ -194,7 +194,7 @@ To rebuild this project from scratch…
 - Update the Parameters sheet of the Course Planning data spreadsheet with…
   - CCO and SC group emails
   - URL of the Course Plan Template
-- Create a folder on the shared drive to hold all course plan form folders, giving CCO Contributor access, and update the ID and URL columns of the Plan Form Folders Inventory sheet row for Form ROOT with that folder’s ID and URL.
+- Create a folder on the shared drive to hold all course plan form folders, giving CCO and AO Contributor access, and update the ID and URL columns of the Plan Form Folders Inventory sheet row for Form ROOT with that folder’s ID and URL.
 - Create a folder on the shared drive to hold all advisory group folders, and update the ID and URL columns of the Advisor Folder Inventory sheet row for Advisor Email ROOT with that folder’s ID and URL.
 - Create a folder on the shared drive to hold all student folder form folders, giving CCO Content Manager access, and update the ID and URL columns of the Folder Form Folders Inventory sheet row for Form ROOT with that folder's ID and URl/
 - In the Course Planning Data spreadsheet, go to Extensions > Apps Script to open the embedded script for that sheet

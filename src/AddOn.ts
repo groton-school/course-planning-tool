@@ -55,12 +55,28 @@ export function onOpen() {
     .addSeparator()
     .addSubMenu(
       SpreadsheetApp.getUi()
-        .createMenu('Restructure')
+        .createMenu('Permissions')
         .addItem(
-          'Reset folder permissions',
-          Workflow.Restructure.resetFolderPermissions()
+          'Reset a single course plan permissions…',
+          Workflow.Permissions.pickPlanToResetPermissions()
         )
         .addSeparator()
+        .addItem(
+          'Reset Course Plan permissions',
+          Workflow.Permissions.resetCoursePlanPermissions()
+        )
+        .addItem(
+          'Reset Student Folder permissions',
+          Workflow.Permissions.resetStudentFolderPermissions()
+        )
+        .addItem(
+          'Reset Advisor Folder permissions',
+          Workflow.Permissions.resetAdvisorFolderPermissions()
+        )
+    )
+    .addSubMenu(
+      SpreadsheetApp.getUi()
+        .createMenu('Restructure')
         .addItem(
           "Expand a single course plan's dept. options…",
           Workflow.Restructure.pickStudentExpandDeptOptions()

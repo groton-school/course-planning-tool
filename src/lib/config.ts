@@ -51,6 +51,9 @@ class Config {
   public static getCoursePlanNameFormat = () =>
     this.getParam(CoursePlanningData.namedRange.ParamCoursePlanNameFormat);
 
+  public static getAcademicOffice = () =>
+    this.getParam(CoursePlanningData.namedRange.ParamAcademicOffice);
+
   public static getStudiesCommittee = () =>
     this.getParam(CoursePlanningData.namedRange.ParamStudiesCommittee);
 

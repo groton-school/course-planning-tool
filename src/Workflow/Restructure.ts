@@ -46,37 +46,3 @@ global.r_eado = () => {
   });
   lib.Progress.setComplete(true);
 };
-
-export const resetFolderPermissions = () => 'r_rfp';
-global.r_rfp = () => {
-  lib.Progress.reset();
-  lib.Progress.showModalDialog(SpreadsheetApp, 'Reset Folder Permissions');
-  const studentFolders = Inventory.StudentFolders.all();
-  const advisorFolders = Inventory.AdvisorFolders.all();
-  lib.Progress.setMax(studentFolders.length + advisorFolders.length);
-  studentFolders.forEach((folder) => {
-    lib.Progress.setStatus(
-      `Reset folder permissions on ${folder.studentFolder.getName()}`
-    );
-    try {
-      folder.resetPermissions();
-    } catch (e) {
-      lib.Progress.log(
-        `Error resetting permissions for student folder ${folder.id}`
-      );
-    }
-  });
-  advisorFolders.forEach((folder) => {
-    lib.Progress.setStatus(
-      `Reset folder permissions on ${folder.advisorFolder.getName()}`
-    );
-    try {
-      folder.resetPermissions();
-    } catch (e) {
-      lib.Progress.log(
-        `Error resetting permissions for advisor folder ${folder.id}`
-      );
-    }
-  });
-  lib.Progress.setComplete(true);
-};

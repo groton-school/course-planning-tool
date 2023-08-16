@@ -33,6 +33,7 @@ class CoursePlanningData {
     ParamStudentFolderNameFormat: 'Param_StudentFolderNameFormat',
     ParamAdvisorFolderNameFormat: 'Param_AdvisorFolderNameFormat',
     ParamCoursePlanNameFormat: 'Param_CoursePlanNameFormat',
+    ParamAcademicOffice: 'Param_AcademicOffice',
     ParamStudiesCommittee: 'Param_StudiesCommittee',
     ParamCollegeCounseling: 'Param_CollegeCounselingOffice',
     ParamCoursePlanTemplate: 'Param_CoursePlanTemplate',

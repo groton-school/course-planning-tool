@@ -22,6 +22,12 @@ class CoursePlan
     inactive: parseInt(INACTIVE_STEPS)
   };
 
+  private static readonly NO_EDITS = 'No Edits';
+  private static readonly COMMENTS_FROM_ADVISOR =
+    'Comments from Faculty Advisor';
+  private static readonly COMMENTS_FROM_CCO =
+    'Comments from College Counseling Office';
+
   private static _coursesByDepartment: any[][];
   private static get coursesByDepartment(): string[][] {
     if (!this._coursesByDepartment) {
@@ -289,6 +295,31 @@ class CoursePlan
     }
   }
 
+  public resetPermissions() {
+    if (this.meta.active) {
+      lib.Progress.setStatus('file permissions and location', this);
+      this.setPermissions();
+      const protections = this.planSheet.getProtections(
+        SpreadsheetApp.ProtectionType.RANGE
+      );
+      lib.Progress.setStatus('range protections', this);
+      for (const protection of protections) {
+        g.SpreadsheetApp.Protection.clearEditors(protection);
+        switch (protection.getDescription()) {
+          case CoursePlan.COMMENTS_FROM_ADVISOR:
+            protection.addEditor(this.advisor.email);
+            protection.addEditor(lib.Config.getAcademicOffice());
+            break;
+          case CoursePlan.COMMENTS_FROM_CCO:
+            protection.addEditor(lib.Config.getCollegeCounseling());
+          case CoursePlan.NO_EDITS:
+          default:
+            break;
+        }
+      }
+    }
+  }
+
   public updateEnrollmentHistory() {
     this.populateEnrollmentHistory(false);
   }
@@ -296,15 +327,15 @@ class CoursePlan
   private createFromStudent(student: Role.Student) {
     this.student = student;
     this.createFromTemplate();
-    this.populateEnrollmentHistory();
-    this.populateHeaders();
-    this.setPermissions();
     this.inventory.add([
       this.hostId,
       this.spreadsheet.getId(),
       this.spreadsheet.getUrl()
     ]);
     this.meta.incomplete = true;
+    this.populateEnrollmentHistory();
+    this.populateHeaders();
+    this.setPermissions();
     this.putInPlace();
     this.prepareCommentBlanks();
     this.updateCourseList();
@@ -414,9 +445,11 @@ class CoursePlan
 
   private setPermissions() {
     lib.Progress.setStatus('setting permissions', this); // #create
-    this.file.moveTo(this.formFolder);
-    g.DriveApp.Permission.add(this.file.getId(), this.student.email);
-    g.DriveApp.Permission.add(this.file.getId(), this.advisor.email);
+    if (this.meta.active) {
+      this.file.moveTo(this.formFolder);
+      g.DriveApp.Permission.add(this.file.getId(), this.student.email);
+      g.DriveApp.Permission.add(this.file.getId(), this.advisor.email);
+    }
   }
 
   public putInPlace() {
@@ -445,12 +478,12 @@ class CoursePlan
     lib.Progress.setStatus('making room for comments', this); // #create
     const commentors = [
       {
-        name: 'Comments from Faculty Advisor',
+        name: CoursePlan.COMMENTS_FROM_ADVISOR,
         range: lib.CoursePlanTemplate.namedRange.ProtectAdvisor,
         editor: this.advisor.email
       },
       {
-        name: 'Comments from College Counseling Office',
+        name: CoursePlan.COMMENTS_FROM_CCO,
         range: lib.CoursePlanTemplate.namedRange.ProtectCollegeCounseling,
         editor: lib.Config.getCollegeCounseling()
       }
@@ -527,7 +560,7 @@ class CoursePlan
       const protection = this.planSheet
         .getRange(range)
         .protect()
-        .setDescription('No Edits');
+        .setDescription(CoursePlan.NO_EDITS);
       g.SpreadsheetApp.Protection.clearEditors(protection);
     }
   }
