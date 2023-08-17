@@ -1,9 +1,9 @@
-import MConfig from './Config';
-import MCoursePlanningData from './CoursePlanningData';
 import CoursePlanTemplate from './CoursePlanTemplate';
-import currentSchoolYear from './currentSchoolYear';
+import MCoursePlanningData from './CoursePlanningData';
 import * as MFormat from './Format';
+import MParameters from './Parameters';
 import MProgress from './Progress';
+import currentSchoolYear from './currentSchoolYear';
 
 class lib {
   private constructor() {
@@ -16,7 +16,7 @@ class lib {
 }
 
 namespace lib {
-  export import Config = MConfig;
+  export import Parameters = MParameters;
   export import Format = MFormat;
   export import CoursePlanningData = MCoursePlanningData;
   export import Progress = MProgress;

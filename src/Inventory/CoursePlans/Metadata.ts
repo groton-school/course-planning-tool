@@ -17,21 +17,6 @@ class Metadata extends Base.Metadata {
     );
   }
 
-  public get numComments() {
-    return this.inventory.getMetadata(
-      this.k,
-      lib.CoursePlanningData.column.CoursePlans.NumComments
-    );
-  }
-
-  public set numComments(numComments: number) {
-    this.inventory.setMetadata(
-      this.k,
-      lib.CoursePlanningData.column.CoursePlans.NumComments,
-      numComments
-    );
-  }
-
   public get inactive() {
     return this.inventory.getMetadata(
       this.k,

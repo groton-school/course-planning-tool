@@ -6,7 +6,7 @@ export const rolloverAcademicYear = () => 'a_ray';
 global.a_ray = () => {
   const spreadsheet = SpreadsheetApp.getActive();
   const now = new Date();
-  const lastRollOver = lib.Config.getRollOverAcademicYear();
+  const lastRollOver = lib.Parameters.rollOverAcademicYearDate;
   if (now.getTime() - lastRollOver.getTime() < 11 * 30 * 24 * 60 * 60 * 1000) {
     throw new Error(
       'last academic year roll over was within the past 11 months'
@@ -55,7 +55,7 @@ global.a_ray = () => {
     .uncheck();
 
   lib.Progress.setStatus('Noting academic year roll-over');
-  lib.Config.setRollOverAcademicYear(new Date());
+  lib.Parameters.rollOverAcademicYearDate = new Date();
 
   SpreadsheetApp.setActiveSheet(advisorList);
   lib.Progress.setComplete({
@@ -176,5 +176,44 @@ global.a_mapi = () => {
     plans.length * Inventory.Module.CoursePlans.CoursePlan.stepCount.inactive
   );
   plans.forEach((plan) => plan.makeInactive());
+  lib.Progress.setComplete(true);
+};
+
+const allActivePlans = () => 'a_aap';
+const a_aap: g.HtmlService.Element.Picker.OptionsCallback = () =>
+  Inventory.CoursePlans.all()
+    .filter((plan) => plan.meta.active)
+    .map((plan) => plan.toOption());
+
+global.a_aap = a_aap;
+
+export const pickStudentToExpandComments = () => 'a_pstec';
+global.a_pstec = () =>
+  g.HtmlService.Element.Picker.showModalDialog(
+    SpreadsheetApp,
+    {
+      message: 'Please select a student for whose plan to expand comments',
+      actionName: 'Expand Comments',
+      list: allActivePlans(),
+      callback: expandCommentsFor()
+    },
+    'Expand Comments'
+  );
+
+const expandCommentsFor = () => 'a_ecf';
+global.a_ecf = (hostId: string, thread: string) => {
+  lib.Progress.setThread(thread);
+  lib.Progress.reset();
+  Inventory.CoursePlans.get(hostId).expandComments();
+  lib.Progress.setComplete(true);
+};
+
+export const expandAllComments = () => 'a_eac';
+global.a_eac = () => {
+  lib.Progress.reset();
+  lib.Progress.showModalDialog(SpreadsheetApp, 'Expand Comments');
+  const plans = Inventory.CoursePlans.all().filter((plan) => plan.meta.active);
+  lib.Progress.setMax(plans.length);
+  plans.forEach((plan) => plan.expandComments());
   lib.Progress.setComplete(true);
 };

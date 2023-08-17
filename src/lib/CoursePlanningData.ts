@@ -74,12 +74,11 @@ class CoursePlanningData {
     },
     CoursePlans: {
       NumOptionsPerDepartment: i('N'),
-      NumComments: i('O'),
-      Inactive: i('P'),
-      NewAdvisor: i('Q'),
-      PermissionsUpdated: i('R'),
-      Version: i('S'),
-      Incomplete: i('T')
+      Inactive: i('O'),
+      NewAdvisor: i('P'),
+      PermissionsUpdated: i('Q'),
+      Version: i('R'),
+      Incomplete: i('S')
     }
   };
 }

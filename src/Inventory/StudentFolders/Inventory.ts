@@ -9,17 +9,16 @@ class Inventory extends Folders.Inventory<StudentFolder> {
   private static _instance?: Inventory;
   public static getInstance(): Inventory {
     if (!this._instance) {
-      this._instance = new Inventory();
+      this._instance = new Inventory(
+        lib.CoursePlanningData.sheet.StudentFolderInventory,
+        (hostId) =>
+          lib.Format.apply(
+            lib.Parameters.nameFormat.studentFolder,
+            Role.Student.getByHostId(hostId.toString())
+          )
+      );
     }
     return this._instance;
-  }
-  private constructor() {
-    super(lib.CoursePlanningData.sheet.StudentFolderInventory, (hostId) =>
-      lib.Format.apply(
-        lib.Config.getStudentFolderNameFormat(),
-        Role.Student.getByHostId(hostId.toString())
-      )
-    );
   }
 
   protected creator(hostId: Base.Inventory.Key) {

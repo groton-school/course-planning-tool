@@ -19,7 +19,9 @@ abstract class Inventory<
     return this.get(Inventory.ROOT) as Folder;
   }
 
-  protected formatter = (key: Base.Inventory.Key) => key.toString();
+  protected formatter(key: Base.Inventory.Key) {
+    return key.toString();
+  }
 
   protected getAsFolder(folderId: string, key?: Base.Inventory.Key) {
     return new Folder(this, folderId, key);

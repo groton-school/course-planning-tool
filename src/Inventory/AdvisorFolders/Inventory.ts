@@ -8,18 +8,17 @@ class Inventory extends Folders.Inventory<AdvisorFolder> {
   private static _instance?: Inventory;
   public static getInstance() {
     if (!this._instance) {
-      this._instance = new Inventory();
+      this._instance = new Inventory(
+        lib.CoursePlanningData.sheet.AdvisorFolderInventory,
+        (email) => {
+          return lib.Format.apply(
+            lib.Parameters.nameFormat.advisorFolder,
+            Role.Advisor.getByEmail(email.toString())
+          );
+        }
+      );
     }
     return this._instance;
-  }
-
-  private constructor() {
-    super(lib.CoursePlanningData.sheet.AdvisorFolderInventory, (email) =>
-      lib.Format.apply(
-        lib.Config.getAdvisorFolderNameFormat(),
-        Role.Advisor.getByEmail(email.toString())
-      )
-    );
   }
 
   protected getter(folderId: string, key?: Base.Inventory.Key) {

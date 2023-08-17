@@ -129,7 +129,7 @@ global.d_dtf = (id: string, delayInSeconds = 5) => {
 
 export const downloadEmptyCoursePlanTemplate = () => 'd_decpt';
 global.d_decpt = () => {
-  const template = SpreadsheetApp.openByUrl(lib.Config.getCoursePlanTemplate());
+  const template = SpreadsheetApp.openByUrl(lib.Parameters.planTemplateUrl);
   SpreadsheetApp.getUi().showModalDialog(
     g.HtmlService.Template.createTemplate(
       `

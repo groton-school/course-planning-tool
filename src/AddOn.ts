@@ -5,6 +5,7 @@ export function onOpen() {
     .createMenu('Course Planning')
     .addItem('Create all course plans', Workflow.Create.all())
     .addItem('Create course plans by form…', Workflow.Create.pickForm())
+    .addSeparator()
     .addItem(
       'Update all course plan enrollment histories',
       Workflow.UpdateEnrollmentHistory.all()
@@ -13,31 +14,22 @@ export function onOpen() {
       'Update all course plan course lists',
       Workflow.UpdateCourseList.all()
     )
+    .addItem(
+      'Assign all plans to current advisor',
+      Workflow.Annual.assignAllToCurrentAdvisor()
+    )
+    .addItem(
+      'Deactivate all inactive course plans',
+      Workflow.Annual.makeAllPlansInactive()
+    )
+    .addItem(
+      'Expand comments in all plans',
+      Workflow.Annual.expandAllComments()
+    )
     .addSeparator()
-    .addSubMenu(
-      SpreadsheetApp.getUi()
-        .createMenu('Roll-over Academic Year')
-        .addItem(
-          'Roll-over Student/Advisor Lists',
-          Workflow.Annual.rolloverAcademicYear()
-        )
-        .addItem(
-          'Assign all plans to current advisor',
-          Workflow.Annual.assignAllToCurrentAdvisor()
-        )
-        .addItem(
-          'Deactivate all inactive course plans',
-          Workflow.Annual.makeAllPlansInactive()
-        )
-        .addSeparator()
-        .addItem(
-          'Assign a plan to current advisor…',
-          Workflow.Annual.pickStudentToAssignToCurrentAdvisor()
-        )
-        .addItem(
-          'Deactivate an inactive course plan…',
-          Workflow.Annual.pickStudentToMakeInactive()
-        )
+    .addItem(
+      'Roll-over Student/Advisor Lists',
+      Workflow.Annual.rolloverAcademicYear()
     )
     .addSeparator()
     .addSubMenu(
@@ -49,6 +41,18 @@ export function onOpen() {
           Workflow.UpdateEnrollmentHistory.pickPlan()
         )
         .addItem('Update course list…', Workflow.UpdateCourseList.pickPlan())
+        .addItem(
+          'Assign to current advisor…',
+          Workflow.Annual.pickStudentToAssignToCurrentAdvisor()
+        )
+        .addItem(
+          'Deactivate inactive…',
+          Workflow.Annual.pickStudentToMakeInactive()
+        )
+        .addItem(
+          'Expand comments…',
+          Workflow.Annual.pickStudentToExpandComments()
+        )
         .addSeparator()
         .addItem('Delete…', Workflow.Delete.pickPlan())
     )

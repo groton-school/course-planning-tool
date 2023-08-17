@@ -47,7 +47,10 @@ class CoursePlan
     if (!this._student) {
       this._student = Role.Student.getByHostId(this.hostId);
       if (!this._student) {
-        Logger.log('attempting to find student in previous year', this);
+        Logger.log(
+          `attempting to find student ${this.hostId} in previous year`,
+          this
+        );
         this._student = Role.Student.getByHostId(
           this.hostId,
           Role.Year.Previous
@@ -184,30 +187,37 @@ class CoursePlan
     );
   }
 
-  private numOptionsPerDepartment?: number = null;
+  private _numOptionsPerDepartment?: number;
   // TODO could this be pulled by looking at merged cells?
-  private getNumOptionsPerDepartment(): number {
-    if (this.numOptionsPerDepartment === null) {
+  private get numOptionsPerDepartment() {
+    if (this._numOptionsPerDepartment === null) {
       if (this.inventory.has(this.hostId)) {
-        this.numOptionsPerDepartment = this.meta.numOptionsPerDepartment;
+        this._numOptionsPerDepartment = this.meta.numOptionsPerDepartment;
       } else {
-        this.numOptionsPerDepartment = lib.Config.getNumOptionsPerDepartment();
+        this._numOptionsPerDepartment = lib.Parameters.numOptionsPerDepartment;
       }
     }
     return this.numOptionsPerDepartment;
   }
 
-  private numComments?: number = null;
-  // TODO could this be pulled from the data protection model?
-  private getNumComments(): number {
-    if (this.numComments === null) {
-      if (this.inventory.has(this.hostId)) {
-        this.numComments = this.meta.numComments;
-      } else {
-        this.numComments = lib.Config.getNumComments();
-      }
+  private _advisorCommentCount?: number;
+  private get advisorCommentCount() {
+    if (this._advisorCommentCount === undefined) {
+      this._advisorCommentCount = this.planSheet
+        .getRange(lib.CoursePlanTemplate.namedRange.ProtectAdvisor)
+        .getNumRows();
     }
-    return this.numComments;
+    return this._advisorCommentCount;
+  }
+
+  private _collegeCounselingCommentCount?: number;
+  private get collegeCounselingCOmmentCount() {
+    if (this._collegeCounselingCommentCount === undefined) {
+      this._collegeCounselingCommentCount = this.planSheet
+        .getRange(lib.CoursePlanTemplate.namedRange.ProtectCollegeCounseling)
+        .getNumRows();
+    }
+    return this._collegeCounselingCommentCount;
   }
 
   public constructor(
@@ -308,15 +318,53 @@ class CoursePlan
         switch (protection.getDescription()) {
           case CoursePlan.COMMENTS_FROM_ADVISOR:
             protection.addEditor(this.advisor.email);
-            protection.addEditor(lib.Config.getAcademicOffice());
+            protection.addEditor(lib.Parameters.email.academicOffice);
             break;
           case CoursePlan.COMMENTS_FROM_CCO:
-            protection.addEditor(lib.Config.getCollegeCounseling());
+            protection.addEditor(lib.Parameters.email.collegeCounseling);
           case CoursePlan.NO_EDITS:
           default:
             break;
         }
       }
+    }
+  }
+
+  public expandComments() {
+    this.expandCommentsIn(
+      lib.CoursePlanTemplate.namedRange.ProtectAdvisor,
+      this.advisorCommentCount
+    );
+    this.expandCommentsIn(
+      lib.CoursePlanTemplate.namedRange.ProtectCollegeCounseling,
+      this.collegeCounselingCOmmentCount
+    );
+  }
+
+  private expandCommentsIn(namedRange: string, currentCommentCount: number) {
+    const range = this.planSheet.getRange(namedRange);
+    const comments = range.getValues();
+    let empty: number;
+    for (empty = 0; empty < comments.length; empty++) {
+      if (
+        !comments[currentCommentCount - empty - 1].reduce(
+          (isEmpty, cell) => isEmpty && cell === '',
+          true
+        )
+      ) {
+        break;
+      }
+    }
+    const additionalComments = lib.Parameters.numComments - empty;
+    if (additionalComments > 0) {
+      lib.Progress.setStatus(
+        `adding ${additionalComments} comments to ${namedRange}`,
+        this
+      );
+      this.additionalComments(range.getRow(), additionalComments);
+      range.setValues(comments);
+    } else {
+      lib.Progress.setStatus(`${namedRange} has enough empty rows`, this);
     }
   }
 
@@ -340,19 +388,16 @@ class CoursePlan
     this.prepareCommentBlanks();
     this.updateCourseList();
     lib.Progress.setStatus('updating inventory', this); // #create
-    this.meta.numOptionsPerDepartment = this.getNumOptionsPerDepartment();
-    this.meta.numComments = this.getNumComments();
+    this.meta.numOptionsPerDepartment = this.numOptionsPerDepartment;
     this.meta.version = APP_VERSION;
     this.meta.incomplete = false;
   }
 
   private createFromTemplate() {
     lib.Progress.setStatus('creating course plan from template', this); // #create
-    const template = SpreadsheetApp.openByUrl(
-      lib.Config.getCoursePlanTemplate()
-    );
+    const template = SpreadsheetApp.openByUrl(lib.Parameters.planTemplateUrl);
     this.spreadsheet = template.copy(
-      lib.Format.apply(lib.Config.getCoursePlanNameFormat(), this.student)
+      lib.Format.apply(lib.Parameters.nameFormat.coursePlan, this.student)
     );
     this.file = DriveApp.getFileById(this.spreadsheet.getId());
   }
@@ -414,7 +459,7 @@ class CoursePlan
     lib.Progress.setStatus('publishing enrollment history', this); // #create, #update-history
     for (let row = 0; row < values.length; row++) {
       const target = this.getAnchorOffset(
-        row * this.getNumOptionsPerDepartment(),
+        row * this.numOptionsPerDepartment,
         0,
         1,
         values[row].length
@@ -485,7 +530,7 @@ class CoursePlan
       {
         name: CoursePlan.COMMENTS_FROM_CCO,
         range: lib.CoursePlanTemplate.namedRange.ProtectCollegeCounseling,
-        editor: lib.Config.getCollegeCounseling()
+        editor: lib.Parameters.email.collegeCounseling
       }
     ];
     for (const { name, range, editor } of commentors) {
@@ -522,7 +567,7 @@ class CoursePlan
 
   // TODO adjust row height to accommodate actual content lines
   private insertAndMergeOptionsRows(valueWidth: number) {
-    const numOptions = lib.Config.getNumOptionsPerDepartment();
+    const numOptions = lib.Parameters.numOptionsPerDepartment;
     for (
       let row = 0;
       row < this.numDepartments * numOptions;
@@ -541,9 +586,12 @@ class CoursePlan
     }
   }
 
-  private additionalComments(row: number) {
-    this.planSheet.insertRowsAfter(row, this.getNumComments() - 2);
-    for (let i = 0; i < this.getNumComments() - 2; i++) {
+  private additionalComments(
+    row: number,
+    numAdditionalComments = lib.Parameters.numComments - 2
+  ) {
+    this.planSheet.insertRowsAfter(row, numAdditionalComments);
+    for (let i = 0; i < lib.Parameters.numComments - 2; i++) {
       this.planSheet.getRange(row + i + 1, 3, 1, 3).mergeAcross();
     }
   }
@@ -566,8 +614,8 @@ class CoursePlan
   }
 
   public expandDeptOptionsIfFewerThanParams() {
-    const current = this.getNumOptionsPerDepartment();
-    const target = lib.Config.getNumOptionsPerDepartment();
+    const current = this.numOptionsPerDepartment;
+    const target = lib.Parameters.numOptionsPerDepartment;
     if (current < target) {
       for (
         let row =
