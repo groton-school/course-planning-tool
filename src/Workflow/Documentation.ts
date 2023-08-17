@@ -17,6 +17,7 @@ global.d_decpd = () => {
     [lib.CoursePlanningData.sheet.FoldersFormFolderInventory]: true
   };
   const imports = {
+    [lib.CoursePlanningData.sheet.StudentList]: 5,
     [lib.CoursePlanningData.sheet.AdvisorList]: 8,
     [lib.CoursePlanningData.sheet.AdvisorListPreviousYear]: 8,
     [lib.CoursePlanningData.sheet.CourseList]: 5,
