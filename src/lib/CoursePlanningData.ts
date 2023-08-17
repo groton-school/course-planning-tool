@@ -15,6 +15,7 @@ class CoursePlanningData {
     AdvisorFolderInventory: 'Advisor Folder Inventory',
     PlansFormFolderInventory: 'Plans Form Folder Inventory',
     FoldersFormFolderInventory: 'Folders Form Folder Inventory',
+    StudentList: 'Student List',
     AdvisorList: 'Advisor List',
     AdvisorListPreviousYear: 'Advisor List (Previous Year)',
     CourseList: 'Course List',
@@ -67,9 +68,9 @@ class CoursePlanningData {
       Inactive: i('F')
     },
     StudentFolders: {
-      Inactive: i('G'),
-      NewAdvisor: i('H'),
-      PermissionsUpdated: i('I')
+      Inactive: i('H'),
+      NewAdvisor: i('I'),
+      PermissionsUpdated: i('J')
     },
     CoursePlans: {
       NumOptionsPerDepartment: i('N'),

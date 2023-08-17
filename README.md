@@ -7,7 +7,7 @@
 Queries or functions that need to be updated annually are listed here:
 
 1. [Historical Enrollment](#refresh-historical-enrollment) needs to be updated, as noted.
-2. Advisor List, Course List, and Historical Enrollment sheets in Course Planning Data all need to be updated to current values (recommend using [Blackbaud Lists](https://github.com/groton-school/blackbaud-to-google-lists) add-on)
+2. Student List, Advisor List, Course List, and Historical Enrollment sheets in Course Planning Data all need to be updated to current values (recommend using [Blackbaud Lists](https://github.com/groton-school/blackbaud-to-google-lists) add-on)
 3. Available Courses needs to be reviewed for accuracy.
 4. Review `cp-cco`, `cp-ao`, `cp-sc` group memberships for accuracy.
 
