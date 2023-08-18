@@ -5,6 +5,7 @@ import lib from '../lib';
 export const allStudentFolders = () => 'fr_asf';
 const fr_asf: g.HtmlService.Element.Picker.OptionsCallback = () =>
   Inventory.StudentFolders.all()
+    .filter((folder) => folder.meta.active)
     .map((folder) => folder.toOption())
     .sort();
 global.fr_asf = fr_asf;
