@@ -1,17 +1,32 @@
 import g from '@battis/gas-lighter';
 import Inventory from '../Inventory';
-import Year from './Year';
+import lib from '../lib';
+import Student from './Student';
 
 class Advisor {
-  private static _data: { [k in Year]?: any[][] } = {};
-  private static getData(year = Year.Current) {
-    if (!this._data[year]) {
-      this._data[year] = g.SpreadsheetApp.Range.getEntireSheet(
-        SpreadsheetApp.getActive().getSheetByName(year.toString())
+  private static _data: { [k in lib.CoursePlanningData.SheetName]?: any[][] } =
+    {};
+  private static getData(sheet = lib.CoursePlanningData.sheet.AdvisorList) {
+    if (!this._data[sheet]) {
+      this._data[sheet] = g.SpreadsheetApp.Range.getEntireSheet(
+        SpreadsheetApp.getActive().getSheetByName(sheet)
       ).getValues();
-      this._data[year].shift(); // strip column labels
+      this._data[sheet].shift(); // strip column labels
     }
-    return this._data[year];
+    return this._data[sheet];
+  }
+
+  private static cache: { [email: Inventory.Key]: Advisor } = {};
+  private static getFromCache(data: any[]) {
+    if (
+      this.cache[data[lib.CoursePlanningData.column.AdvisorList.AdvisorEmail]]
+    ) {
+      return this.cache[
+        data[lib.CoursePlanningData.column.AdvisorList.AdvisorEmail]
+      ];
+    } else {
+      return new Advisor(data);
+    }
   }
 
   public readonly email: string;
@@ -26,33 +41,67 @@ class Advisor {
     return this._folder;
   }
 
-  private constructor(data: object) {
+  public constructor(data: Advisor.ConstructorParameter) {
     if (Array.isArray(data)) {
-      const [email, firstName, lastName] = data;
+      const [, , , , , email, firstName, lastName] = data;
       data = { email, firstName, lastName };
     }
     Object.assign(this, data);
+    Advisor.cache[this.email] = this;
   }
 
   public get formattedName() {
     return `${this.firstName} ${this.lastName}`;
   }
 
-  public static getByEmail(email: string, year = Year.Current) {
-    const [, , , , , e, firstName, lastName] = Advisor.getData(year).filter(
-      ([, , , , , e]) => e == email
-    )[0];
-    return new Advisor({ email: e, firstName, lastName });
+  public static get(
+    email: string,
+    sheet = lib.CoursePlanningData.sheet.AdvisorList
+  ) {
+    if (this.cache[email]) {
+      return this.cache[email];
+    } else {
+      return new Advisor(
+        Advisor.getData(sheet).find(
+          (row) =>
+            row[lib.CoursePlanningData.column.AdvisorList.AdvisorEmail] == email
+        )
+      );
+    }
   }
 
-  public static getByAdvisee(hostId: string, year = Year.Current) {
-    const [, , , , , email, firstName, lastName] = Advisor.getData(year).filter(
-      ([id]) => id == hostId
+  public static for(
+    hostId: string,
+    sheet = lib.CoursePlanningData.sheet.AdvisorList
+  ) {
+    const row = Advisor.getData(sheet).filter(
+      (row) => row[lib.CoursePlanningData.column.AdvisorList.HostId] == hostId
     )[0];
-    return new Advisor({ email, firstName, lastName });
+    return (row && this.getFromCache(row)) || undefined;
+  }
+
+  public static getPreviousYearStudent(hostId: string) {
+    const row = this.getData(
+      lib.CoursePlanningData.sheet.AdvisorListPreviousYear
+    ).find(([id]) => id === hostId);
+    let student: Student;
+    if (row) {
+      student = new Student(
+        row.slice(0, lib.CoursePlanningData.column.StudentList.GradYear)
+      );
+    }
+    return student;
   }
 }
 
-namespace Advisor { }
+namespace Advisor {
+  export type ConstructorParameter =
+    | any[]
+    | {
+      email: string;
+      firstName: string;
+      lastName: string;
+    };
+}
 
 export { Advisor as default };

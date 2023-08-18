@@ -61,7 +61,7 @@ global.c_a = (gradYear?: number, thread?: string) => {
     lib.Progress.showModalDialog(SpreadsheetApp, 'Create Course Plans');
   }
   const students = gradYear
-    ? Role.Student.getByForm(gradYear)
+    ? Role.Student.getFormOf(gradYear)
     : Role.Student.all();
   lib.Progress.setMax(students.length * CoursePlan.stepCount.create);
   students.forEach((student: Role.Student) => {

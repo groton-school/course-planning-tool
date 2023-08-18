@@ -7,7 +7,7 @@ abstract class Inventory<ItemType extends Item = Item> {
   protected get data() {
     if (!this._data) {
       this._data = g.SpreadsheetApp.Range.getEntireSheet(
-        this.getSheet()
+        this.sheet
       ).getValues();
       this._data.shift(); // strip column labels
     }
@@ -16,7 +16,13 @@ abstract class Inventory<ItemType extends Item = Item> {
 
   private cache: { [key: Inventory.Key]: ItemType } = {};
 
-  private sheet: GoogleAppsScript.Spreadsheet.Sheet;
+  private _sheet: GoogleAppsScript.Spreadsheet.Sheet;
+  public get sheet() {
+    return this._sheet;
+  }
+  private set sheet(sheet: GoogleAppsScript.Spreadsheet.Sheet) {
+    this._sheet = sheet;
+  }
 
   constructor(sheetName: lib.CoursePlanningData.SheetName) {
     this.sheet = SpreadsheetApp.getActive().getSheetByName(sheetName);
@@ -32,7 +38,7 @@ abstract class Inventory<ItemType extends Item = Item> {
     this.data.forEach((entry, row: number) => {
       if (entry[0] == key) {
         entry[column] = value;
-        this.getSheet()
+        this.sheet
           .getRange(row + 2, column + 1) // 0-indexed array without headers --> 1-indexed sheet with headers
           .setValue(value);
       }
@@ -46,11 +52,8 @@ abstract class Inventory<ItemType extends Item = Item> {
       const [, id] = this.data.find(([k]) => k == key) || [];
       if (!id) {
         this.cache[key] = this.creator(key);
-      }
-      try {
+      } else {
         this.cache[key] = this.getter(id, key);
-      } catch (e) {
-        this.cache[key] = this.getter(id); // not everyone _wants_ the key!
       }
     }
     return this.cache[key];
@@ -70,14 +73,12 @@ abstract class Inventory<ItemType extends Item = Item> {
   public remove(key: Inventory.Key) {
     const row = this.data.findIndex(([k]) => k == key);
     this._data = this.data.splice(row, 1);
-    this.getSheet().deleteRow(row + 1);
+    this.sheet.deleteRow(row + 2); // 0-indexed array index to 1-indexed spreadsheet row with a header
   }
 
   public all() {
     return this.data.map(([key, id]) => this.getter(id, key));
   }
-
-  public getSheet = () => this.sheet;
 }
 
 namespace Inventory {

@@ -13,7 +13,7 @@ class Inventory extends Folders.Inventory<AdvisorFolder> {
         (email) => {
           return lib.Format.apply(
             lib.Parameters.nameFormat.advisorFolder,
-            Role.Advisor.getByEmail(email.toString())
+            Role.Advisor.get(email.toString())
           );
         }
       );

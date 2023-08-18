@@ -14,7 +14,7 @@ class Inventory extends Folders.Inventory<StudentFolder> {
         (hostId) =>
           lib.Format.apply(
             lib.Parameters.nameFormat.studentFolder,
-            Role.Student.getByHostId(hostId.toString())
+            Role.Student.get(hostId.toString())
           )
       );
     }
@@ -22,7 +22,7 @@ class Inventory extends Folders.Inventory<StudentFolder> {
   }
 
   protected creator(hostId: Base.Inventory.Key) {
-    const student = Role.Student.getByHostId(hostId.toString());
+    const student = Role.Student.get(hostId.toString());
     const folder = FormFoldersOfStudentFolders.getInstance()
       .get(student.gradYear)
       .driveFolder.createFolder(this.formatter(hostId));

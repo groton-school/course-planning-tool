@@ -70,7 +70,8 @@ const listOfPlansToResetPermissions = () => 'p_loptrp';
 const p_loptrp: g.HtmlService.Element.Picker.OptionsCallback = () =>
   Inventory.CoursePlans.all()
     .filter((plan) => plan.meta.active)
-    .map((plan) => plan.toOption());
+    .map((plan) => plan.toOption())
+    .sort();
 global.p_loptrp = p_loptrp;
 
 export const pickPlanToResetPermissions = () => 'p_pptrp';

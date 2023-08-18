@@ -41,14 +41,14 @@ global.a_ray = () => {
   previous.getRange('A:H').setValues(advisorList.getRange('A:H').getValues());
 
   lib.Progress.setStatus('Resetting course plan permissions flags…');
-  Inventory.CoursePlans.getSheet()
+  Inventory.CoursePlans.sheet
     .getRange(lib.CoursePlanningData.namedRange.RollOverCoursePlanPermissoons)
     .uncheck();
 
   lib.Progress.setStatus(
     `Resetting ${lib.CoursePlanningData.sheet.StudentFolderInventory}…`
   );
-  Inventory.StudentFolders.getSheet()
+  Inventory.StudentFolders.sheet
     .getRange(
       lib.CoursePlanningData.namedRange.RollOverStudentFolderPermissions
     )
@@ -102,11 +102,11 @@ global.a_atca = (hostId: string, thread: string) => {
   const plan = Inventory.CoursePlans.get(hostId);
   plan.assignToCurrentAdvisor();
   lib.Progress.setCompleteLink({
-    message: `Assigned course plan for ${plan.student.formattedName} to ${plan.advisor.formattedName}.`,
+    message: `Assigned course plan for ${plan.student.formattedName} to ${plan.advisor?.formattedName}.`,
     url: {
       'Open Plan': plan.url,
       'Open Student Folder': plan.student.folder.url,
-      'Open Advisor Folder': plan.advisor.folder.url
+      'Open Advisor Folder': plan.advisor.folder?.url
     }
   });
 };
@@ -129,7 +129,8 @@ const plansToMakeInactive = () => 'a_ptmi';
 const a_ptmi: g.HtmlService.Element.Picker.OptionsCallback = () => {
   return Inventory.CoursePlans.all()
     .filter((plan) => plan.meta.inactive && !plan.meta.permissionsUpdated)
-    .map((plan) => plan.toOption());
+    .map((plan) => plan.toOption())
+    .sort();
 };
 global.a_ptmi = a_ptmi;
 

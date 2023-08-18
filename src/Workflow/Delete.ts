@@ -15,12 +15,15 @@ global.d_pp = () =>
         'Are you sure that you want to delete this course plan? Recovery from this can be time-consuming.',
       callback: deletePlanFor()
     },
-    'Delete Course Plan'
+    'Delete Course Plan',
+    135
   );
 
 const planList = () => 'd_pl';
 const d_pl: g.HtmlService.Element.Picker.OptionsCallback = () =>
-  Inventory.CoursePlans.all().map((p) => p.toOption());
+  Inventory.CoursePlans.all()
+    .map((p) => p.toOption())
+    .sort();
 global.d_pl = d_pl;
 
 const deletePlanFor = () => 'd_dpf';

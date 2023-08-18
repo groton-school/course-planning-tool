@@ -1,6 +1,6 @@
 import semverLt from 'semver/functions/lt';
-import lib from '../../lib';
 import Role from '../../Role';
+import lib from '../../lib';
 import Base from '../Base';
 import CoursePlan from './CoursePlan';
 
@@ -24,11 +24,11 @@ class Inventory extends Base.Inventory<CoursePlan> {
   }
   // added to Inventory by CoursePlan constructor directly
   protected creator(key: Base.Inventory.Key) {
-    const student = Role.Student.getByHostId(key.toString());
+    const student = Role.Student.get(key.toString());
     return new CoursePlan(this, student, student.hostId);
   }
 
-  public getSpreadsheet = () => this.getSheet().getParent();
+  public getSpreadsheet = () => this.sheet.getParent();
 
   public get minVersion() {
     return this.data.reduce(

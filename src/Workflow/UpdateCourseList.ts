@@ -32,7 +32,9 @@ global.ucl_pp = () =>
 
 const planList = () => 'ucl_pl';
 const ucl_pl: g.HtmlService.Element.Picker.OptionsCallback = () =>
-  Inventory.CoursePlans.all().map((p) => p.toOption());
+  Inventory.CoursePlans.all()
+    .map((p) => p.toOption())
+    .sort();
 global.ucl_pl = ucl_pl;
 
 export const all = () => 'ucl_a';

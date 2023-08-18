@@ -19,7 +19,9 @@ global.ueh_pp = () =>
 
 const planList = () => 'ueh_pl';
 const ueh_pl: g.HtmlService.Element.Picker.OptionsCallback = () =>
-  Inventory.CoursePlans.all().map((p) => p.toOption());
+  Inventory.CoursePlans.all()
+    .map((p) => p.toOption())
+    .sort();
 global.ueh_pl = ueh_pl;
 
 const updateEnrollmentHistoryFor = () => 'ueh_uehf';

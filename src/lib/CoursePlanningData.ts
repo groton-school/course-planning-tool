@@ -91,6 +91,16 @@ class CoursePlanningData {
       PreviousAdvisorEmail: i('I'),
       NewAdvisor: i('L'),
       HasPlan: i('M')
+    },
+    AdvisorList: {
+      HostId: i('A'),
+      StudentEmail: i('B'),
+      StudentFirstName: i('C'),
+      StudentLastName: i('D'),
+      GradYear: i('E'),
+      AdvisorEmail: i('F'),
+      AdvisorFirstName: i('G'),
+      AdvisorLastName: i('H')
     }
   };
 }

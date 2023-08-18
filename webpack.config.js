@@ -5,10 +5,6 @@ const coursePlanModule = fs
   .readFileSync('src/Inventory/CoursePlans/CoursePlan.ts')
   .toString();
 
-const studentFolderModule = fs
-  .readFileSync('src/Inventory/StudentFolders/StudentFolder.ts')
-  .toString();
-
 module.exports = require('@battis/gas-lighter/webpack.config')({
   root: __dirname,
   plugins: [
@@ -25,17 +21,15 @@ module.exports = require('@battis/gas-lighter/webpack.config')({
       ),
       DELETE_STEPS: JSON.stringify(coursePlanModule.match(/#delete/).length),
       REASSIGN_STEPS: JSON.stringify(
-        coursePlanModule.match(/#reassign/).length +
-        studentFolderModule.match(/#reassign/).length
+        coursePlanModule.match(/#reassign/).length
       ),
       INACTIVE_STEPS: JSON.stringify(
-        coursePlanModule.match(/#inactive/).length +
-        studentFolderModule.match(/#inactive/).length
+        coursePlanModule.match(/#inactive/).length
       ),
       RESET_PERMISSIONS_STEPS: JSON.stringify(
         coursePlanModule.match(/#reset-permissions/).length
       )
     })
   ],
-  production: false
+  production: true
 });

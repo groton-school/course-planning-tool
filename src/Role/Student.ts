@@ -5,25 +5,29 @@ import StudentFolder from '../Inventory/StudentFolders/StudentFolder';
 import lib from '../lib';
 import Advisor from './Advisor';
 import Form from './Form';
-import Year from './Year';
 
 class Student implements g.HtmlService.Element.Picker.Pickable {
-  private static _data: { [k in Year]?: any[][] } = {};
-  private static getData(year = Year.Current) {
-    if (!this._data[year]) {
-      this._data[year] = g.SpreadsheetApp.Range.getEntireSheet(
+  private static _data: any[][];
+  private static get data() {
+    if (!this._data) {
+      this._data = g.SpreadsheetApp.Range.getEntireSheet(
         SpreadsheetApp.getActive().getSheetByName(
-          year == Year.Current
-            ? lib.CoursePlanningData.sheet.StudentList
-            : year.toString()
+          lib.CoursePlanningData.sheet.StudentList
         )
       ).getValues();
-      this._data[year].shift(); // strip column labels
+      this._data.shift(); // strip column labels
     }
-    return this._data[year];
+    return this._data;
   }
 
   private static cache: { [hostId: Inventory.Key]: Student } = {};
+  private static getFromCache(data: any[]) {
+    if (this.cache[data[lib.CoursePlanningData.column.StudentList.HostId]]) {
+      return this.cache[data[lib.CoursePlanningData.column.StudentList.HostId]];
+    } else {
+      return new Student(data);
+    }
+  }
 
   public readonly hostId: string;
   public readonly email: string;
@@ -31,31 +35,7 @@ class Student implements g.HtmlService.Element.Picker.Pickable {
   public readonly lastName: string;
   public readonly gradYear: number;
   public readonly abbrevGradYear: number;
-
-  private constructor([hostId, email, firstName, lastName, gradYear]: any[]) {
-    Object.assign(this, {
-      hostId,
-      email,
-      firstName,
-      lastName,
-      gradYear,
-      abbrevGradYear: gradYear - 2000
-    });
-  }
-
-  public get formattedName() {
-    return lib.Format.apply(lib.Parameters.nameFormat.student, this);
-  }
-
-  public static getByHostId(id: string, year = Year.Current) {
-    if (!this.cache[id]) {
-      const row = Student.getData(year).find(([hostId]) => hostId == id) || [];
-      if (row) {
-        this.cache[id] = new Student(row);
-      }
-    }
-    return this.cache[id] || undefined;
-  }
+  public readonly newAdvisor: boolean;
 
   private _plan?: CoursePlan;
   public get plan() {
@@ -74,33 +54,110 @@ class Student implements g.HtmlService.Element.Picker.Pickable {
   }
 
   private _advisor?: Advisor;
-  public get advisor() {
+  public get advisor(): Advisor | undefined {
     if (!this._advisor) {
-      this._advisor = this.getAdvisor();
+      this._advisor = Advisor.for(this.hostId);
     }
     return this._advisor;
   }
 
-  public getAdvisor = (year = Year.Current) =>
-    Advisor.getByAdvisee(this.hostId, year);
-
-  public static all(year = Year.Current): Student[] {
-    const thisYear = lib.currentSchoolYear();
-    return Student.getData(year)
-      .filter(([, , , , gradYear]) => gradYear != thisYear)
-      .map((row) => new Student(row));
+  private _previousAdvisor?: Advisor;
+  public get previousAdvisor() {
+    if (!this._previousAdvisor) {
+      this._previousAdvisor = Advisor.for(
+        this.hostId,
+        lib.CoursePlanningData.sheet.AdvisorListPreviousYear
+      );
+    }
+    return this._previousAdvisor;
   }
 
-  public static getByForm(gradYear: number, year = Year.Current): Student[] {
-    return Student.getData(year)
-      .filter(([, , , , g]) => g == gradYear)
-      .map((row) => new Student(row));
+  public constructor(data: Student.ConstructorParameter) {
+    if (Array.isArray(data)) {
+      const [
+        hostId,
+        email,
+        firstName,
+        lastName,
+        gradYear,
+        advisorEmail,
+        advisorFirstName,
+        advisorLastName,
+        previousAdvisorEmail,
+        previousAdvisorFirstName,
+        previousAdvisorLastName
+      ] = data;
+      data = { hostId, email, firstName, lastName, gradYear };
+      if (advisorEmail && advisorFirstName && advisorLastName) {
+        data.advisor = {
+          email: advisorEmail,
+          firstName: advisorFirstName,
+          lastName: advisorLastName
+        };
+      }
+      if (
+        previousAdvisorEmail &&
+        previousAdvisorFirstName &&
+        previousAdvisorLastName
+      ) {
+        data.previousAdvisor = {
+          email: previousAdvisorEmail,
+          firstName: previousAdvisorFirstName,
+          lastName: previousAdvisorLastName
+        };
+      }
+    }
+    if (data.advisor) {
+      this._advisor = new Advisor(data.advisor);
+    }
+    delete data.advisor;
+
+    if (data.previousAdvisor) {
+      this._previousAdvisor = new Advisor(data.previousAdvisor);
+    }
+    delete data.previousAdvisor;
+
+    Object.assign(this, {
+      ...data,
+      abbrevGradYear: data.gradYear - 2000
+    });
+    Student.cache[this.hostId] = this;
   }
 
-  public static forms(year = Year.Current) {
-    return [
-      ...new Set(Student.getData(year).map(([, , , , gradYear]) => gradYear))
-    ]
+  public get formattedName() {
+    return lib.Format.apply(lib.Parameters.nameFormat.student, this);
+  }
+
+  public static get(hostId: string, fallbackToPreviousYear = false) {
+    if (!this.cache[hostId]) {
+      const row =
+        this.data.find(
+          (row) =>
+            row[lib.CoursePlanningData.column.StudentList.HostId] == hostId
+        ) || [];
+      if (row) {
+        this.cache[hostId] = new Student(row);
+      } else if (fallbackToPreviousYear) {
+        return Advisor.getPreviousYearStudent(hostId);
+      }
+    }
+    return this.cache[hostId] || undefined;
+  }
+
+  public static all(): Student[] {
+    return this.data
+      .map((row) => this.getFromCache(row))
+      .filter((student) => student.gradYear !== lib.currentSchoolYear());
+  }
+
+  public static getFormOf(gradYear: number): Student[] {
+    return Student.data
+      .map((row) => this.getFromCache(row))
+      .filter((student) => student.gradYear === gradYear);
+  }
+
+  public static forms() {
+    return [...new Set(Student.data.map(([, , , , gradYear]) => gradYear))]
       .sort()
       .map((f) => new Form(f));
   }
@@ -110,6 +167,20 @@ class Student implements g.HtmlService.Element.Picker.Pickable {
   }
 }
 
-namespace Student { }
+namespace Student {
+  export type ConstructorParameter =
+    | any[]
+    | {
+      hostId: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      gradYear: number;
+      advisor?: Advisor.ConstructorParameter;
+      previousAdvisor?: Advisor.ConstructorParameter;
+      previousAdvisorLastName?: boolean;
+      newAdvisor?: boolean;
+    };
+}
 
 export { Student as default };

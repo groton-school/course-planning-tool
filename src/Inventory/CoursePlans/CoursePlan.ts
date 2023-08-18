@@ -4,7 +4,6 @@ import lib from '../../lib';
 import Base from '../Base';
 import Folders from '../Folders';
 import FormFoldersOfCoursePlans from '../FormFoldersOfCoursePlans';
-import StudentFolders from '../StudentFolders';
 import Inventory from './Inventory';
 import Metadata from './Metadata';
 
@@ -51,13 +50,7 @@ class CoursePlan
   private _student?: Role.Student;
   public get student() {
     if (!this._student) {
-      this._student = Role.Student.getByHostId(this.hostId);
-      if (!this._student) {
-        this._student = Role.Student.getByHostId(
-          this.hostId,
-          Role.Year.Previous
-        );
-      }
+      this._student = Role.Student.get(this.hostId, true);
     }
     return this._student;
   }
@@ -75,9 +68,6 @@ class CoursePlan
       this._advisor = this.student.advisor;
     }
     return this._advisor;
-  }
-  private set advisor(advisor: Role.Advisor) {
-    this._advisor = advisor;
   }
 
   private _formFolder?: Folders.Folder;
@@ -105,16 +95,8 @@ class CoursePlan
     spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet
   ) {
     this._spreadsheet = spreadsheet;
-    Logger.log({
-      message: `assigning spreadsheet ${spreadsheet.getId()} to ${this.key}`,
-      id: this.id
-    });
     if (!this._id) {
       this._id = spreadsheet.getId();
-      Logger.log({
-        message: `stored spreadsheet ID as ID for ${this.key}`,
-        id: this.id
-      });
     }
   }
 
@@ -214,26 +196,6 @@ class CoursePlan
     return this._numOptionsPerDepartment;
   }
 
-  private _advisorCommentCount?: number;
-  private get advisorCommentCount() {
-    if (this._advisorCommentCount === undefined) {
-      this._advisorCommentCount = this.planSheet
-        .getRange(lib.CoursePlanTemplate.namedRange.ProtectAdvisor)
-        .getNumRows();
-    }
-    return this._advisorCommentCount;
-  }
-
-  private _collegeCounselingCommentCount?: number;
-  private get collegeCounselingCommentCount() {
-    if (this._collegeCounselingCommentCount === undefined) {
-      this._collegeCounselingCommentCount = this.planSheet
-        .getRange(lib.CoursePlanTemplate.namedRange.ProtectCollegeCounseling)
-        .getNumRows();
-    }
-    return this._collegeCounselingCommentCount;
-  }
-
   public constructor(
     inventory: Inventory,
     content: string | Role.Student,
@@ -245,14 +207,11 @@ class CoursePlan
     }
   }
 
-  public assignToCurrentAdvisor(previousAdvisor?: Role.Advisor) {
-    const primary = !previousAdvisor;
-    previousAdvisor =
-      previousAdvisor || this.student.getAdvisor(Role.Year.Previous);
-    if (this.meta.newAdvisor && !this.meta.permissionsUpdated) {
+  public assignToCurrentAdvisor() {
+    if (this.meta.newAdvisor && !this.meta.permissionsUpdated && this.advisor) {
       lib.Progress.setStatus(`updating course plan permissions`, this, {
         current: this.advisor.email,
-        previous: previousAdvisor.email
+        previous: this.student.previousAdvisor.email
       }); // #reassign
       g.DriveApp.Permission.add(
         this.file.getId(),
@@ -265,58 +224,46 @@ class CoursePlan
       for (const protection of protections) {
         const editors = protection.getEditors();
         for (const editor of editors) {
-          if (editor.getEmail() === previousAdvisor.email) {
+          if (editor.getEmail() === this.student.previousAdvisor.email) {
             protection.addEditor(this.advisor.email);
-            protection.removeEditor(previousAdvisor.email);
+            protection.removeEditor(this.student.previousAdvisor.email);
           }
         }
       }
       try {
-        this.file.removeEditor(previousAdvisor.email);
+        this.file.removeEditor(this.student.previousAdvisor.email);
       } catch (e) {
         lib.Progress.log(
-          `${previousAdvisor.email} was not a course plan editor`,
+          `${this.student.previousAdvisor.email} was not a course plan editor`,
           this
         );
       }
 
-      lib.Progress.setStatus('updating advisor on course plan', this); // #reassign
-      g.SpreadsheetApp.Value.set(
-        this.planSheet,
-        lib.CoursePlanTemplate.namedRange.TemplateNames,
-        [
-          [this.student.formattedName],
-          [`Advisor: ${this.advisor.formattedName}`]
-        ]
-      );
+      this.updateNames();
 
       this.meta.permissionsUpdated = true;
     }
-    if (primary) {
-      this.student.folder.assignToCurrentAdvisor(previousAdvisor);
-    }
+
+    lib.Progress.setStatus('moving into current advisor folder', this); // #reassign
+    this.student.folder.assignToCurrentAdvisor();
   }
 
-  public makeInactive(previousAdvisor?: Role.Advisor) {
-    const primary = !previousAdvisor;
-    previousAdvisor =
-      previousAdvisor || this.student.getAdvisor(Role.Year.Previous);
+  public makeInactive() {
     if (this.meta.inactive && !this.meta.permissionsUpdated) {
       lib.Progress.setStatus('removing previous advisor', this); // #inactive
       try {
-        this.file.removeEditor(previousAdvisor.email);
+        this.file.removeEditor(this.student.previousAdvisor.email);
       } catch (e) {
         lib.Progress.log(
-          `${previousAdvisor.email} as not a course plan editor`,
+          `${this.student.previousAdvisor.email} as not a course plan editor`,
           this
         );
       }
 
       this.meta.permissionsUpdated = true;
     }
-    if (primary) {
-      this.student.folder.makeInactive(previousAdvisor);
-    }
+    lib.Progress.setStatus('remove from advisor folder', this); // #inactive
+    this.student.folder.makeInactive();
   }
 
   public resetPermissions() {
@@ -327,17 +274,13 @@ class CoursePlan
   }
 
   public expandComments() {
+    this.expandCommentsIn(lib.CoursePlanTemplate.namedRange.ProtectAdvisor);
     this.expandCommentsIn(
-      lib.CoursePlanTemplate.namedRange.ProtectAdvisor,
-      this.advisorCommentCount
-    );
-    this.expandCommentsIn(
-      lib.CoursePlanTemplate.namedRange.ProtectCollegeCounseling,
-      this.collegeCounselingCommentCount
+      lib.CoursePlanTemplate.namedRange.ProtectCollegeCounseling
     );
   }
 
-  private expandCommentsIn(namedRange: string, currentCommentCount: number) {
+  private expandCommentsIn(namedRange: string) {
     const oldRange = this.planSheet.getRange(namedRange);
     const existingComments = oldRange
       .getValues()
@@ -464,13 +407,21 @@ class CoursePlan
     }
   }
 
-  private populateHeaders() {
-    lib.Progress.setStatus('filling in the labels', this); // #create
+  private updateNames() {
+    lib.Progress.setStatus('updating advisor on course plan', this); // #create, #reassign
     g.SpreadsheetApp.Value.set(
       this.planSheet,
       lib.CoursePlanTemplate.namedRange.TemplateNames,
-      [[this.student.formattedName], [`Advisor: ${this.advisor.formattedName}`]]
+      [
+        [this.student.formattedName],
+        [`Advisor: ${this.advisor?.formattedName || ''}`]
+      ]
     );
+  }
+
+  private populateHeaders() {
+    lib.Progress.setStatus('filling in the labels', this); // #create
+    this.updateNames();
     g.SpreadsheetApp.Value.set(
       this.planSheet,
       lib.CoursePlanTemplate.namedRange.TemplateYears,
@@ -492,18 +443,7 @@ class CoursePlan
         'giving student and advisor access to student folder',
         this
       ); // #create, #reset-permissions
-      g.DriveApp.Permission.add(
-        this.student.folder.id,
-        this.student.email,
-        g.DriveApp.Permission.Role.Reader
-      );
-      if (this.advisor) {
-        g.DriveApp.Permission.add(
-          this.student.folder.id,
-          this.advisor.email,
-          g.DriveApp.Permission.Role.Reader
-        );
-      }
+      this.student.folder.resetPermissions();
     } else {
       lib.Progress.setStatus('inactive, not setting plan permissions', this);
       lib.Progress.setStatus(
@@ -518,31 +458,10 @@ class CoursePlan
     this.file.moveTo(this.formFolder.driveFolder);
 
     lib.Progress.setStatus('adding shortcut in student folder', this); // #create
-    const studentFolder = StudentFolders.Inventory.getInstance().get(
-      this.hostId
-    );
-    const shortcut = studentFolder.driveFolder.createShortcut(
-      this.file.getId()
-    );
-    shortcut.setName(this.student.formattedName);
+    this.student.folder.driveFolder.createShortcut(this.file.getId());
 
     lib.Progress.setStatus('adding shortcut to advisor folder', this); // #create
-    if (this.advisor) {
-      const shortcuts = this.advisor.folder.driveFolder.getFilesByType(
-        MimeType.SHORTCUT
-      );
-      let shortcutExists = false;
-      for (
-        let shortcut: GoogleAppsScript.Drive.File;
-        !shortcutExists && shortcuts.hasNext();
-        shortcut = shortcuts.next()
-      ) {
-        shortcutExists = shortcut?.getTargetId() == studentFolder.id;
-      }
-      if (!shortcutExists) {
-        this.advisor.folder.driveFolder.createShortcut(studentFolder.id);
-      }
-    }
+    this.student.folder.assignToCurrentAdvisor();
   }
 
   private setCommentEditors() {
@@ -551,7 +470,7 @@ class CoursePlan
       {
         name: CoursePlan.protectionDescription.COMMENTS_FROM_ADVISOR,
         range: lib.CoursePlanTemplate.namedRange.ProtectAdvisor,
-        editors: [this.advisor.email, lib.Parameters.email.academicOffice]
+        editors: [this.advisor?.email, lib.Parameters.email.academicOffice]
       },
       {
         name: CoursePlan.protectionDescription.COMMENTS_FROM_CCO,
@@ -565,7 +484,13 @@ class CoursePlan
         .protect()
         .setDescription(name);
       g.SpreadsheetApp.Protection.clearEditors(protection);
-      editors.forEach((editor) => protection.addEditor(editor));
+      editors.forEach((editor) => {
+        try {
+          protection.addEditor(editor);
+        } catch (e) {
+          // guessing that an undefined advisor will throw an error -- which we will ignore
+        }
+      });
       this.additionalComments(protection.getRange().getRow());
     }
   }
@@ -677,21 +602,13 @@ class CoursePlan
 
   public delete() {
     const file = this.file;
-    lib.Progress.setStatus('removing from inventory', this); // #delete
+    lib.Progress.setStatus('removing plan from inventory', this); // #delete
     this.inventory.remove(this.hostId);
 
-    lib.Progress.setStatus('trashing shortcuts to plan', this); // #delete
-    const shortcuts = StudentFolders.Inventory.getInstance()
-      .get(this.hostId)
-      .driveFolder.getFilesByType(MimeType.SHORTCUT);
-    while (shortcuts.hasNext()) {
-      const shortcut = shortcuts.next();
-      if (shortcut.getTargetId() == file.getId()) {
-        shortcut.setTrashed(true);
-      }
-    }
+    lib.Progress.setStatus('moving shortcuts to trash', this); // #delete
+    this.student.folder.delete();
 
-    lib.Progress.setStatus('trashing plan', this); // #delete
+    lib.Progress.setStatus('moving plan to trash', this); // #delete
     file.setTrashed(true);
   }
 }

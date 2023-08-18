@@ -19,7 +19,9 @@ global.r_psedo = () => {
 
 const planList = () => 'r_pl';
 const r_pl: g.HtmlService.Element.Picker.OptionsCallback = () =>
-  Inventory.CoursePlans.all().map((p) => p.toOption());
+  Inventory.CoursePlans.all()
+    .map((p) => p.toOption())
+    .sort();
 global.r_pl = r_pl;
 
 const expandStudentDeptOptionsFor = () => 'r_esdof';
