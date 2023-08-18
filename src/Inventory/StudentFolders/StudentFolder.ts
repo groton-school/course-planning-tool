@@ -1,7 +1,6 @@
 import g from '@battis/gas-lighter';
 import Role from '../../Role';
 import lib from '../../lib';
-import Base from '../Base';
 import Folders from '../Folders';
 import FormFoldersOfStudentFolders from '../FormFoldersOfStudentFolders';
 import Inventory from './Inventory';
@@ -10,14 +9,6 @@ import Metadata from './Metadata';
 class StudentFolder
   extends Folders.Folder
   implements lib.Progress.Contextable, lib.Progress.Sourceable {
-  public constructor(
-    inventory: Inventory,
-    folderId: string,
-    hostId: Base.Inventory.Key
-  ) {
-    super(inventory, folderId, hostId);
-  }
-
   public meta = new Metadata(this.inventory as Inventory, this.key);
 
   private _student?: Role.Student;

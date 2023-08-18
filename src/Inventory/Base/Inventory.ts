@@ -56,9 +56,15 @@ abstract class Inventory<ItemType extends Item = Item> {
     return this.cache[key];
   }
 
-  public add(entry: Inventory.Entry) {
-    this.sheet.appendRow(entry);
-    this.data.push(entry);
+  public add(entry: Inventory.Entry): void;
+  public add(item: ItemType): void;
+  public add(addable: ItemType | Inventory.Entry) {
+    if (addable instanceof Item) {
+      this.cache[addable.key] = addable;
+    }
+    const row = [addable.key, addable.id, addable.url];
+    this.sheet.appendRow(row);
+    this.data.push(row);
   }
 
   public remove(key: Inventory.Key) {
@@ -76,7 +82,7 @@ abstract class Inventory<ItemType extends Item = Item> {
 
 namespace Inventory {
   export type Key = number | string;
-  export type Entry = [Key, string, string];
+  export type Entry = { key: Key; id: string; url: string };
   export type Formatter = (key: Key) => string;
 }
 

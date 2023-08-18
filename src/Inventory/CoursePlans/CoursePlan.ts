@@ -42,6 +42,10 @@ class CoursePlan
 
   public meta = new Metadata(this.inventory as Inventory, this.key);
 
+  public get url() {
+    return this.spreadsheet.getUrl();
+  }
+
   private _student?: Role.Student;
   public get student() {
     if (!this._student) {
@@ -94,7 +98,7 @@ class CoursePlan
       if (this.id) {
         this._spreadsheet = SpreadsheetApp.openById(this.id);
       } else {
-        throw new Error(`File ID not defined for Host ID ${this.key}`);
+        throw new Error(`File ID not defined for Host ID ${this.key}: ${this}`);
       }
     }
     return this._spreadsheet;
@@ -114,7 +118,9 @@ class CoursePlan
       if (this.id) {
         this._file = DriveApp.getFileById(this.id);
       } else {
-        throw new Error(`Spreadsheet ID not defined for Host ID ${this.key}`);
+        throw new Error(
+          `Spreadsheet ID not defined for Host ID ${this.key}: ${this}`
+        );
       }
     }
     return this._file;
@@ -398,7 +404,7 @@ class CoursePlan
       lib.Format.apply(lib.Parameters.nameFormat.coursePlan, this.student)
     );
     this.file = DriveApp.getFileById(this.spreadsheet.getId());
-    this.inventory.add([this.hostId, this.id, this.spreadsheet.getUrl()]);
+    this.inventory.add(this);
     this.meta.incomplete = true;
   }
 
@@ -627,6 +633,14 @@ class CoursePlan
       }
     }
     this.meta.numOptionsPerDepartment = target;
+  }
+
+  public toString(): string {
+    const arr: { [k: string]: any } = {};
+    for (const prop in this) {
+      arr[prop] = typeof this[prop] === 'object' ? 'object' : this[prop];
+    }
+    return JSON.stringify(arr);
   }
 
   public toOption(): g.HtmlService.Element.Picker.Option {

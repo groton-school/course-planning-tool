@@ -1,5 +1,5 @@
-import lib from '../../lib';
 import Role from '../../Role';
+import lib from '../../lib';
 import Base from '../Base';
 import Folders from '../Folders';
 import FormFoldersOfStudentFolders from '../FormFoldersOfStudentFolders';
@@ -26,8 +26,7 @@ class Inventory extends Folders.Inventory<StudentFolder> {
     const folder = FormFoldersOfStudentFolders.getInstance()
       .get(student.gradYear)
       .folder.createFolder(this.formatter(hostId));
-    this.add([hostId, folder.getId(), folder.getUrl()]);
-
+    this.add({ key: hostId, id: folder.getId(), url: folder.getUrl() });
     return new StudentFolder(this, folder.getId(), hostId);
   }
 

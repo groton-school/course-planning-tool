@@ -3,7 +3,7 @@ import Metadata from './Metadata';
 
 const itemKind = 'kind#Inventory.Item';
 
-class Item {
+abstract class Item {
   public readonly kind = itemKind;
 
   public constructor(
@@ -25,6 +25,8 @@ class Item {
   public get key() {
     return this._key;
   }
+
+  public abstract get url();
 }
 
 namespace Item {

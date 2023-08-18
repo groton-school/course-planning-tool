@@ -9,6 +9,19 @@ class Folder extends Base.Item {
     key: Base.Inventory.Key
   ) {
     super(inventory, folderId, key);
+    if (!this.inventory || !this._id || !this._key) {
+      throw new Error(
+        `Required constructor args not present ${JSON.stringify({
+          inventory: inventory ? typeof inventory : inventory,
+          folderId,
+          key
+        })}`
+      );
+    }
+  }
+
+  public get url() {
+    return this.folder.getUrl();
   }
 
   private _folder?: GoogleAppsScript.Drive.Folder;
