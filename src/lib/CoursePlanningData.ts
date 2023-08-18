@@ -89,8 +89,8 @@ class CoursePlanningData {
       GradYear: i('E'),
       CurrentAdvisorEmail: i('F'),
       PreviousAdvisorEmail: i('I'),
-      NewAdvisor: i('L'),
-      HasPlan: i('M')
+      NewAdvisor: i('M'),
+      HasPlan: i('N')
     },
     AdvisorList: {
       HostId: i('A'),
