@@ -103,7 +103,9 @@ class CoursePlan
     spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet
   ) {
     this._spreadsheet = spreadsheet;
-    // FIXME does this.id need to be updated?
+    if (!this._id) {
+      this._id = spreadsheet.getId();
+    }
   }
 
   private _file?: GoogleAppsScript.Drive.File;
@@ -119,7 +121,9 @@ class CoursePlan
   }
   private set file(file) {
     this._file = file;
-    // FIXME does this.id need to be updated?
+    if (!this._id) {
+      this._id = file.getId();
+    }
   }
 
   private _anchor?: GoogleAppsScript.Spreadsheet.Range;
@@ -375,12 +379,6 @@ class CoursePlan
   private createFromStudent(student: Role.Student) {
     this.student = student;
     this.createFromTemplate();
-    this.inventory.add([
-      this.hostId,
-      this.spreadsheet.getId(),
-      this.spreadsheet.getUrl()
-    ]);
-    this.meta.incomplete = true;
     this.populateEnrollmentHistory();
     this.populateHeaders();
     this.setPermissions();
@@ -400,6 +398,8 @@ class CoursePlan
       lib.Format.apply(lib.Parameters.nameFormat.coursePlan, this.student)
     );
     this.file = DriveApp.getFileById(this.spreadsheet.getId());
+    this.inventory.add([this.hostId, this.id, this.spreadsheet.getUrl()]);
+    this.meta.incomplete = true;
   }
 
   private populateEnrollmentHistory(create = true) {
