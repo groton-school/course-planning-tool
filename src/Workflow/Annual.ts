@@ -101,13 +101,13 @@ global.a_atca = (hostId: string, thread: string) => {
   );
   const plan = Inventory.CoursePlans.get(hostId);
   plan.assignToCurrentAdvisor();
-  lib.Progress.setComplete({
-    html: `<div>Reassigned course plan for ${plan.student.getFormattedName()} to ${plan.advisor.getFormattedName()}.</div>
-            <div>
-              <a id="button" class="btn btn-primary" onclick="google.script.host.close()" href="${plan.spreadsheet.getUrl()}" target="_blank">Open Plan</a>
-              <a id="button" class="btn btn-secondary" onclick="google.script.host.close()" href="${plan.student.folder.folder.getUrl()}" target="_blank">Open Student Folder</a>
-              <a id="button" class="btn btn-secondary" onclick="google.script.host.close()" href="${plan.advisor.folder.getUrl()}" target="_blank">Open Advisor Folder</a>
-            </div>`
+  lib.Progress.setCompleteLink({
+    message: `Assigned course plan for ${plan.student.formattedName} to ${plan.advisor.formattedName}.`,
+    url: {
+      'Open Plan': plan.url,
+      'Open Student Folder': plan.student.folder.url,
+      'Open Advisor Folder': plan.advisor.folder.url
+    }
   });
 };
 
@@ -156,12 +156,12 @@ global.a_mpi = (hostId: string, thread: string) => {
   );
   const plan = Inventory.CoursePlans.get(hostId);
   plan.makeInactive();
-  lib.Progress.setComplete({
-    html: `<div>Made course plan for ${plan.student.getFormattedName()} inactive.</div>
-            <div>
-              <a id="button" class="btn btn-primary" onclick="google.script.host.close()" href="${plan.spreadsheet.getUrl()}" target="_blank">Open Plan</a>
-              <a id="button" class="btn btn-secondary" onclick="google.script.host.close()" href="${plan.student.folder.folder.getUrl()}" target="_blank">Open Student Folder</a>
-            </div>`
+  lib.Progress.setCompleteLink({
+    message: `Made course plan for ${plan.student.formattedName} inactive.`,
+    url: {
+      'Open Plan': plan.url,
+      'Open Student Folder': plan.student.folder.url
+    }
   });
 };
 
@@ -206,11 +206,9 @@ global.a_ecf = (hostId: string, thread: string) => {
   lib.Progress.reset();
   const plan = Inventory.CoursePlans.get(hostId);
   plan.expandComments();
-  lib.Progress.setComplete({
-    html: `<div>Expanded comments for ${plan.student.getFormattedName()}.</div>
-            <div>
-              <a id="button" class="btn btn-primary" onclick="google.script.host.close()" href="${plan.spreadsheet.getUrl()}" target="_blank">Open Plan</a>
-            </div>`
+  lib.Progress.setCompleteLink({
+    message: `Expanded comments for ${plan.student.formattedName}.`,
+    url: plan.spreadsheet.getUrl()
   });
 };
 

@@ -1,8 +1,11 @@
+import g from '@battis/gas-lighter';
 import Base from '../Base';
 import Inventory from './Inventory';
 import Metadata from './Metadata';
 
-class Folder extends Base.Item {
+class Folder
+  extends Base.Item
+  implements g.HtmlService.Element.Picker.Pickable {
   public constructor(
     inventory: Inventory,
     folderId: string,
@@ -21,18 +24,22 @@ class Folder extends Base.Item {
   }
 
   public get url() {
-    return this.folder.getUrl();
+    return this.driveFolder.getUrl();
   }
 
-  private _folder?: GoogleAppsScript.Drive.Folder;
-  public get folder() {
-    if (!this._folder) {
-      this._folder = DriveApp.getFolderById(this.id);
+  private _driveFolder?: GoogleAppsScript.Drive.Folder;
+  public get driveFolder() {
+    if (!this._driveFolder) {
+      this._driveFolder = DriveApp.getFolderById(this.id);
     }
-    return this._folder;
+    return this._driveFolder;
   }
 
   public meta = new Metadata(this.inventory as Inventory, this.key);
+
+  public toOption(): g.HtmlService.Element.Picker.Option {
+    return { name: this.id, value: this.key.toString() };
+  }
 }
 
 namespace Folder {

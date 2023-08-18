@@ -12,7 +12,11 @@ class Student implements g.HtmlService.Element.Picker.Pickable {
   private static getData(year = Year.Current) {
     if (!this._data[year]) {
       this._data[year] = g.SpreadsheetApp.Range.getEntireSheet(
-        SpreadsheetApp.getActive().getSheetByName(year.toString())
+        SpreadsheetApp.getActive().getSheetByName(
+          year == Year.Current
+            ? lib.CoursePlanningData.sheet.StudentList
+            : year.toString()
+        )
       ).getValues();
       this._data[year].shift(); // strip column labels
     }
@@ -27,61 +31,27 @@ class Student implements g.HtmlService.Element.Picker.Pickable {
   public readonly lastName: string;
   public readonly gradYear: number;
   public readonly abbrevGradYear: number;
-  public readonly newStudent: boolean;
-  public readonly newAdvisor: boolean;
 
-  private constructor(data: object) {
-    if (Array.isArray(data)) {
-      const [
-        hostId,
-        email,
-        firstName,
-        lastName,
-        gradYear,
-        newStudent,
-        newAdvisor
-      ] = data;
-      data = {
-        hostId,
-        email,
-        firstName,
-        lastName,
-        gradYear,
-        newStudent,
-        newAdvisor
-      };
-    }
-    Object.assign(this, data);
-    this.abbrevGradYear = this.gradYear - 2000;
+  private constructor([hostId, email, firstName, lastName, gradYear]: any[]) {
+    Object.assign(this, {
+      hostId,
+      email,
+      firstName,
+      lastName,
+      gradYear,
+      abbrevGradYear: gradYear - 2000
+    });
   }
 
-  public getFormattedName = () =>
-    `${this.firstName} ${this.lastName} ‘${this.gradYear - 2000}`;
+  public get formattedName() {
+    return lib.Format.apply(lib.Parameters.nameFormat.student, this);
+  }
 
   public static getByHostId(id: string, year = Year.Current) {
     if (!this.cache[id]) {
-      const [
-        hostId,
-        email,
-        firstName,
-        lastName,
-        gradYear,
-        ,
-        ,
-        ,
-        newStudent,
-        newAdvisor
-      ] = Student.getData(year).find(([hostId]) => hostId == id) || [];
-      if (hostId) {
-        this.cache[id] = new Student({
-          hostId,
-          firstName,
-          lastName,
-          email,
-          gradYear,
-          newStudent,
-          newAdvisor
-        });
+      const row = Student.getData(year).find(([hostId]) => hostId == id) || [];
+      if (row) {
+        this.cache[id] = new Student(row);
       }
     }
     return this.cache[id] || undefined;
@@ -136,7 +106,7 @@ class Student implements g.HtmlService.Element.Picker.Pickable {
   }
 
   toOption(): g.HtmlService.Element.Picker.Option {
-    return { name: this.getFormattedName(), value: this.hostId };
+    return { name: this.formattedName, value: this.hostId };
   }
 }
 

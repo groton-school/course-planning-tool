@@ -11,9 +11,9 @@ global.ucl_uclf = (hostId: string, thread: string) => {
   );
   const plan = Inventory.CoursePlans.get(hostId);
   plan.updateCourseList();
-  lib.Progress.setComplete({
-    html: `<div>Updated course list for ${plan.student.getFormattedName()}.</div>
-            <div><a id="button" class="btn btn-primary" onclick="google.script.host.close()" href="${plan.spreadsheet.getUrl()}" target="_blank">Open Plan</a></div>`
+  lib.Progress.setCompleteLink({
+    message: `Updated course list for ${plan.student.formattedName}.`,
+    url: plan.url
   });
 };
 

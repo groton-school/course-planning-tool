@@ -6,3 +6,4 @@ declare const UPDATE_COURSES_STEPS: string;
 declare const DELETE_STEPS: string;
 declare const REASSIGN_STEPS: string;
 declare const INACTIVE_STEPS: string;
+declare const RESET_PERMISSIONS_STEPS: string;

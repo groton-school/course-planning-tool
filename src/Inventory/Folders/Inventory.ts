@@ -33,7 +33,7 @@ abstract class Inventory<
   ): FolderType;
 
   protected creator(key: Base.Inventory.Key) {
-    const folder = this.root.folder.createFolder(this.formatter(key));
+    const folder = this.root.driveFolder.createFolder(this.formatter(key));
     this.add({ key, id: folder.getId(), url: folder.getUrl() });
     return new Folder(this, folder.getId(), key) as FolderType;
   }

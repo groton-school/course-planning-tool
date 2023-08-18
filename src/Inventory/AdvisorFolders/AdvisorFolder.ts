@@ -14,13 +14,9 @@ class AdvisorFolder extends Folders.Folder {
     return this._advisor;
   }
 
-  public get advisorFolder() {
-    return this.folder;
-  }
-
   public resetPermissions() {
     g.DriveApp.Permission.add(
-      this.folder.getId(),
+      this.id,
       this.key.toString(),
       g.DriveApp.Permission.Role.Reader
     );

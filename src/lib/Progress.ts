@@ -44,6 +44,31 @@ class Progress {
     return this.progress.setComplete(completion);
   }
 
+  public static setCompleteLink({
+    message = 'Complete.',
+    url = '#',
+    actionName = 'Open'
+  }: {
+    message: string;
+    url: string | { [actionName: string]: string };
+    actionName?: string;
+  }) {
+    if (typeof url === 'string') {
+      return this.progress.setComplete({
+        html: `<div>${message}</div>
+                  <div><a id="button" class="btn btn-primary" onclick="google.script.host.close()" href="${url}" target="_blank">${actionName}</a></div>`
+      });
+    } else {
+      let html = `<div>${message}</div>`;
+      for (const actionName in url) {
+        html = `${html} <div><a id="button" class="btn btn-primary" onclick="google.script.host.close()" href="${url[actionName]}" target="_blank">${actionName}</a></div>`;
+      }
+      return this.progress.setComplete({
+        html
+      });
+    }
+  }
+
   public static log(
     message: any,
     context?: Partial<Progress.Contextable>,

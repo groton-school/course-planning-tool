@@ -13,7 +13,7 @@ global.p_rsfp = () => {
   lib.Progress.setMax(studentFolders.length);
   studentFolders.forEach((folder) => {
     lib.Progress.setStatus(
-      `Reset folder permissions on ${folder.studentFolder.getName()}`
+      `Reset folder permissions on ${folder.driveFolder.getName()}`
     );
     try {
       folder.resetPermissions();
@@ -37,7 +37,7 @@ global.p_rafp = () => {
   lib.Progress.setMax(advisorFolders.length);
   advisorFolders.forEach((folder) => {
     lib.Progress.setStatus(
-      `Reset folder permissions on ${folder.advisorFolder.getName()}`
+      `Reset folder permissions on ${folder.driveFolder.getName()}`
     );
     try {
       folder.resetPermissions();
@@ -55,9 +55,12 @@ global.p_rcpp = () => {
   lib.Progress.reset();
   lib.Progress.showModalDialog(SpreadsheetApp, 'Reset Course Plan Permissions');
   const plans = Inventory.CoursePlans.all();
-  lib.Progress.setMax(plans.length);
+  lib.Progress.setMax(
+    plans.length *
+    Inventory.Module.CoursePlans.CoursePlan.stepCount.resetPermissions
+  );
   plans.forEach((plan) => {
-    lib.Progress.setStatus(plan.student.getFormattedName());
+    lib.Progress.setStatus(plan.student.formattedName);
     plan.resetPermissions();
   });
   lib.Progress.setComplete(true);
@@ -89,7 +92,10 @@ global.p_rpf = (hostId: string, thread: string) => {
   lib.Progress.setThread(thread);
   lib.Progress.reset();
   const plan = Inventory.CoursePlans.get(hostId);
-  lib.Progress.setStatus(plan.student.getFormattedName());
+  lib.Progress.setStatus(plan.student.formattedName);
   plan.resetPermissions();
-  lib.Progress.setComplete(true);
+  lib.Progress.setCompleteLink({
+    message: `Reset permissions for ${plan.student.formattedName}.`,
+    url: plan.url
+  });
 };

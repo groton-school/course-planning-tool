@@ -2,10 +2,11 @@ import g from '@battis/gas-lighter';
 import Role from '../../Role';
 import lib from '../../lib';
 import Base from '../Base';
+import Folders from '../Folders';
 import FormFoldersOfCoursePlans from '../FormFoldersOfCoursePlans';
 import StudentFolders from '../StudentFolders';
-import Metadata from './/Metadata';
 import Inventory from './Inventory';
+import Metadata from './Metadata';
 
 class CoursePlan
   extends Base.Item
@@ -19,14 +20,15 @@ class CoursePlan
     updateCourseList: parseInt(UPDATE_COURSES_STEPS),
     delete: parseInt(DELETE_STEPS),
     reassign: parseInt(REASSIGN_STEPS),
-    inactive: parseInt(INACTIVE_STEPS)
+    inactive: parseInt(INACTIVE_STEPS),
+    resetPermissions: parseInt(RESET_PERMISSIONS_STEPS)
   };
 
-  private static readonly NO_EDITS = 'No Edits';
-  private static readonly COMMENTS_FROM_ADVISOR =
-    'Comments from Faculty Advisor';
-  private static readonly COMMENTS_FROM_CCO =
-    'Comments from College Counseling Office';
+  private static readonly protectionDescription = {
+    NO_EDITS: 'No Edits',
+    COMMENTS_FROM_ADVISOR: 'Comments from Faculty Advisor',
+    COMMENTS_FROM_CCO: 'Comments from College Counseling Office'
+  };
 
   private static _coursesByDepartment: any[][];
   private static get coursesByDepartment(): string[][] {
@@ -51,10 +53,6 @@ class CoursePlan
     if (!this._student) {
       this._student = Role.Student.getByHostId(this.hostId);
       if (!this._student) {
-        Logger.log(
-          `attempting to find student ${this.hostId} in previous year`,
-          this
-        );
         this._student = Role.Student.getByHostId(
           this.hostId,
           Role.Year.Previous
@@ -82,12 +80,12 @@ class CoursePlan
     this._advisor = advisor;
   }
 
-  private _formFolder?: GoogleAppsScript.Drive.Folder;
+  private _formFolder?: Folders.Folder;
   public get formFolder() {
     if (!this._formFolder) {
       this._formFolder = FormFoldersOfCoursePlans.getInstance().get(
         this.student.gradYear
-      ).folder;
+      );
     }
     return this._formFolder;
   }
@@ -98,7 +96,7 @@ class CoursePlan
       if (this.id) {
         this._spreadsheet = SpreadsheetApp.openById(this.id);
       } else {
-        throw new Error(`File ID not defined for Host ID ${this.key}: ${this}`);
+        throw new Error(`File ID not defined for ${this.key}: ${this}`);
       }
     }
     return this._spreadsheet;
@@ -107,8 +105,16 @@ class CoursePlan
     spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet
   ) {
     this._spreadsheet = spreadsheet;
+    Logger.log({
+      message: `assigning spreadsheet ${spreadsheet.getId()} to ${this.key}`,
+      id: this.id
+    });
     if (!this._id) {
       this._id = spreadsheet.getId();
+      Logger.log({
+        message: `stored spreadsheet ID as ID for ${this.key}`,
+        id: this.id
+      });
     }
   }
 
@@ -118,9 +124,7 @@ class CoursePlan
       if (this.id) {
         this._file = DriveApp.getFileById(this.id);
       } else {
-        throw new Error(
-          `Spreadsheet ID not defined for Host ID ${this.key}: ${this}`
-        );
+        throw new Error(`Spreadsheet ID not defined for ${this.key}: ${this}`);
       }
     }
     return this._file;
@@ -281,8 +285,8 @@ class CoursePlan
         this.planSheet,
         lib.CoursePlanTemplate.namedRange.TemplateNames,
         [
-          [this.student.getFormattedName()],
-          [`Advisor: ${this.advisor.getFormattedName()}`]
+          [this.student.formattedName],
+          [`Advisor: ${this.advisor.formattedName}`]
         ]
       );
 
@@ -317,26 +321,8 @@ class CoursePlan
 
   public resetPermissions() {
     if (this.meta.active) {
-      lib.Progress.setStatus('file permissions and location', this);
       this.setPermissions();
-      const protections = this.planSheet.getProtections(
-        SpreadsheetApp.ProtectionType.RANGE
-      );
-      lib.Progress.setStatus('range protections', this);
-      for (const protection of protections) {
-        g.SpreadsheetApp.Protection.clearEditors(protection);
-        switch (protection.getDescription()) {
-          case CoursePlan.COMMENTS_FROM_ADVISOR:
-            protection.addEditor(this.advisor.email);
-            protection.addEditor(lib.Parameters.email.academicOffice);
-            break;
-          case CoursePlan.COMMENTS_FROM_CCO:
-            protection.addEditor(lib.Parameters.email.collegeCounseling);
-          case CoursePlan.NO_EDITS:
-          default:
-            break;
-        }
-      }
+      this.setCommentEditors();
     }
   }
 
@@ -387,13 +373,12 @@ class CoursePlan
     this.createFromTemplate();
     this.populateEnrollmentHistory();
     this.populateHeaders();
-    this.setPermissions();
-    this.putInPlace();
-    this.prepareCommentBlanks();
     this.updateCourseList();
-    lib.Progress.setStatus('updating inventory', this); // #create
-    this.meta.numOptionsPerDepartment = this.numOptionsPerDepartment;
-    this.meta.version = APP_VERSION;
+    this.setPermissions();
+    this.setCommentEditors(); // must happen after permissions
+    this.createFolders();
+
+    lib.Progress.setStatus('completing plan creation', this); // #create
     this.meta.incomplete = false;
   }
 
@@ -404,8 +389,12 @@ class CoursePlan
       lib.Format.apply(lib.Parameters.nameFormat.coursePlan, this.student)
     );
     this.file = DriveApp.getFileById(this.spreadsheet.getId());
+
+    lib.Progress.setStatus('adding plan to inventory', this); // #create
     this.inventory.add(this);
     this.meta.incomplete = true;
+    this.meta.numOptionsPerDepartment = this.numOptionsPerDepartment;
+    this.meta.version = APP_VERSION;
   }
 
   private populateEnrollmentHistory(create = true) {
@@ -480,10 +469,7 @@ class CoursePlan
     g.SpreadsheetApp.Value.set(
       this.planSheet,
       lib.CoursePlanTemplate.namedRange.TemplateNames,
-      [
-        [this.student.getFormattedName()],
-        [`Advisor: ${this.advisor.getFormattedName()}`]
-      ]
+      [[this.student.formattedName], [`Advisor: ${this.advisor.formattedName}`]]
     );
     g.SpreadsheetApp.Value.set(
       this.planSheet,
@@ -495,57 +481,91 @@ class CoursePlan
   }
 
   private setPermissions() {
-    lib.Progress.setStatus('setting permissions', this); // #create
     if (this.meta.active) {
-      this.file.moveTo(this.formFolder);
+      lib.Progress.setStatus('giving student and advisor access to plan', this); // #create, #reset-permissions
       g.DriveApp.Permission.add(this.file.getId(), this.student.email);
-      g.DriveApp.Permission.add(this.file.getId(), this.advisor.email);
+      if (this.advisor) {
+        g.DriveApp.Permission.add(this.file.getId(), this.advisor.email);
+      }
+
+      lib.Progress.setStatus(
+        'giving student and advisor access to student folder',
+        this
+      ); // #create, #reset-permissions
+      g.DriveApp.Permission.add(
+        this.student.folder.id,
+        this.student.email,
+        g.DriveApp.Permission.Role.Reader
+      );
+      if (this.advisor) {
+        g.DriveApp.Permission.add(
+          this.student.folder.id,
+          this.advisor.email,
+          g.DriveApp.Permission.Role.Reader
+        );
+      }
+    } else {
+      lib.Progress.setStatus('inactive, not setting plan permissions', this);
+      lib.Progress.setStatus(
+        'inactive, not setting student folder permissions',
+        this
+      );
     }
   }
 
-  public putInPlace() {
-    lib.Progress.setStatus('filing in student folder', this); // #create
-    const creating = !StudentFolders.Inventory.getInstance().has(this.hostId);
-    const { studentFolder } = StudentFolders.Inventory.getInstance().get(
+  public createFolders() {
+    lib.Progress.setStatus('moving original plan to form folder', this); // #create
+    this.file.moveTo(this.formFolder.driveFolder);
+
+    lib.Progress.setStatus('adding shortcut in student folder', this); // #create
+    const studentFolder = StudentFolders.Inventory.getInstance().get(
       this.hostId
     );
-    studentFolder.createShortcut(this.file.getId());
-    if (creating) {
-      this.advisor.folder.createShortcut(studentFolder.getId());
+    const shortcut = studentFolder.driveFolder.createShortcut(
+      this.file.getId()
+    );
+    shortcut.setName(this.student.formattedName);
+
+    lib.Progress.setStatus('adding shortcut to advisor folder', this); // #create
+    if (this.advisor) {
+      const shortcuts = this.advisor.folder.driveFolder.getFilesByType(
+        MimeType.SHORTCUT
+      );
+      let shortcutExists = false;
+      for (
+        let shortcut: GoogleAppsScript.Drive.File;
+        !shortcutExists && shortcuts.hasNext();
+        shortcut = shortcuts.next()
+      ) {
+        shortcutExists = shortcut?.getTargetId() == studentFolder.id;
+      }
+      if (!shortcutExists) {
+        this.advisor.folder.driveFolder.createShortcut(studentFolder.id);
+      }
     }
-    g.DriveApp.Permission.add(
-      studentFolder.getId(),
-      this.student.email,
-      g.DriveApp.Permission.Role.Reader
-    );
-    g.DriveApp.Permission.add(
-      studentFolder.getId(),
-      this.advisor.email,
-      g.DriveApp.Permission.Role.Reader
-    );
   }
 
-  private prepareCommentBlanks() {
-    lib.Progress.setStatus('making room for comments', this); // #create
+  private setCommentEditors() {
+    lib.Progress.setStatus('setting comment editors', this); // #create, #reset-permissions
     const commentors = [
       {
-        name: CoursePlan.COMMENTS_FROM_ADVISOR,
+        name: CoursePlan.protectionDescription.COMMENTS_FROM_ADVISOR,
         range: lib.CoursePlanTemplate.namedRange.ProtectAdvisor,
-        editor: this.advisor.email
+        editors: [this.advisor.email, lib.Parameters.email.academicOffice]
       },
       {
-        name: CoursePlan.COMMENTS_FROM_CCO,
+        name: CoursePlan.protectionDescription.COMMENTS_FROM_CCO,
         range: lib.CoursePlanTemplate.namedRange.ProtectCollegeCounseling,
-        editor: lib.Parameters.email.collegeCounseling
+        editors: [lib.Parameters.email.collegeCounseling]
       }
     ];
-    for (const { name, range, editor } of commentors) {
+    for (const { name, range, editors } of commentors) {
       const protection = this.planSheet
         .getRange(range)
         .protect()
         .setDescription(name);
       g.SpreadsheetApp.Protection.clearEditors(protection);
-      protection.addEditor(editor);
+      editors.forEach((editor) => protection.addEditor(editor));
       this.additionalComments(protection.getRange().getRow());
     }
   }
@@ -614,7 +634,7 @@ class CoursePlan
       const protection = this.planSheet
         .getRange(range)
         .protect()
-        .setDescription(CoursePlan.NO_EDITS);
+        .setDescription(CoursePlan.protectionDescription.NO_EDITS);
       g.SpreadsheetApp.Protection.clearEditors(protection);
     }
   }
@@ -644,11 +664,11 @@ class CoursePlan
   }
 
   public toOption(): g.HtmlService.Element.Picker.Option {
-    return { name: this.student.getFormattedName(), value: this.hostId };
+    return { name: this.student.formattedName, value: this.hostId };
   }
 
   public toSourceString(): string {
-    return this.student.getFormattedName();
+    return this.student.formattedName;
   }
 
   public toContext(): { [key: string]: any } {
@@ -663,7 +683,7 @@ class CoursePlan
     lib.Progress.setStatus('trashing shortcuts to plan', this); // #delete
     const shortcuts = StudentFolders.Inventory.getInstance()
       .get(this.hostId)
-      .folder.getFilesByType(MimeType.SHORTCUT);
+      .driveFolder.getFilesByType(MimeType.SHORTCUT);
     while (shortcuts.hasNext()) {
       const shortcut = shortcuts.next();
       if (shortcut.getTargetId() == file.getId()) {

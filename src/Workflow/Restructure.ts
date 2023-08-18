@@ -28,9 +28,9 @@ global.r_esdof = (hostId: string, thread: string) => {
   lib.Progress.reset();
   const plan = Inventory.CoursePlans.get(hostId);
   plan.expandDeptOptionsIfFewerThanParams();
-  lib.Progress.setComplete({
-    html: `<div>Expanded dept.options for ${plan.student.getFormattedName()}.</div>
-                <div><a id="button" class="btn btn-primary" onclick="google.script.host.close()" href="${plan.spreadsheet.getUrl()}" target="_blank">Open Plan</a></div>`
+  lib.Progress.setCompleteLink({
+    message: `Expanded dept.options for ${plan.student.formattedName}.`,
+    url: plan.url
   });
 };
 

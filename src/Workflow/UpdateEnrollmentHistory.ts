@@ -28,9 +28,9 @@ global.ueh_uehf = (hostId: string, thread: string) => {
   lib.Progress.setMax(CoursePlan.stepCount.updateEnrollmentHistory);
   const plan = Inventory.CoursePlans.get(hostId);
   plan.updateEnrollmentHistory();
-  lib.Progress.setComplete({
-    html: `<div>Updated course plan for ${plan.student.getFormattedName()}.</div>
-          <div><a id="button" class="btn btn-primary" onclick="google.script.host.close()" href="${plan.spreadsheet.getUrl()}" target="_blank">Open Plan</a></div>`
+  lib.Progress.setCompleteLink({
+    message: `Updated course plan for ${plan.student.formattedName}.`,
+    url: plan.url
   });
 };
 

@@ -30,6 +30,7 @@ class CoursePlanningData {
   public static readonly namedRange = {
     ParamNumOptionsPerDepartment: 'Param_NumOptionsPerDepartment',
     ParamNumComments: 'Param_NumComments',
+    ParamStudentNameFormat: 'Param_StudentNameFormat',
     ParamFormFolderNameFormat: 'Param_FormFolderNameFormat',
     ParamStudentFolderNameFormat: 'Param_StudentFolderNameFormat',
     ParamAdvisorFolderNameFormat: 'Param_AdvisorFolderNameFormat',

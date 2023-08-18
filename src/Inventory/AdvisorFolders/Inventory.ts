@@ -26,7 +26,7 @@ class Inventory extends Folders.Inventory<AdvisorFolder> {
   }
 
   protected creator(key: Base.Inventory.Key): AdvisorFolder {
-    const folder = this.root.folder.createFolder(this.formatter(key));
+    const folder = this.root.driveFolder.createFolder(this.formatter(key));
     this.add({ key, id: folder.getId(), url: folder.getUrl() });
     const advisorFolder = new AdvisorFolder(this, folder.getId(), key);
     advisorFolder.resetPermissions();

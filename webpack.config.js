@@ -31,6 +31,9 @@ module.exports = require('@battis/gas-lighter/webpack.config')({
       INACTIVE_STEPS: JSON.stringify(
         coursePlanModule.match(/#inactive/).length +
         studentFolderModule.match(/#inactive/).length
+      ),
+      RESET_PERMISSIONS_STEPS: JSON.stringify(
+        coursePlanModule.match(/#reset-permissions/).length
       )
     })
   ],

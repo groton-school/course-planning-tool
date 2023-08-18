@@ -19,16 +19,12 @@ class StudentFolder
     return this._student;
   }
 
-  public get studentFolder() {
-    return this.folder;
-  }
-
-  private _formFolder?: GoogleAppsScript.Drive.Folder;
+  private _formFolder?: Folders.Folder;
   public get formFolder() {
     if (!this._formFolder) {
       this._formFolder = FormFoldersOfStudentFolders.getInstance().get(
         this.student.gradYear
-      ).folder;
+      );
     }
     return this._formFolder;
   }
@@ -36,12 +32,12 @@ class StudentFolder
   public resetPermissions() {
     if (this.meta.active) {
       g.DriveApp.Permission.add(
-        this.studentFolder.getId(),
+        this.id,
         this.student.advisor.email,
         g.DriveApp.Permission.Role.Reader
       );
       g.DriveApp.Permission.add(
-        this.studentFolder.getId(),
+        this.id,
         this.student.email,
         g.DriveApp.Permission.Role.Reader
       );
@@ -58,7 +54,7 @@ class StudentFolder
         previous: previousAdvisor.email
       }); // #reassign
       this.resetPermissions();
-      const shortcuts = previousAdvisor.folder.getFilesByType(
+      const shortcuts = previousAdvisor.folder.driveFolder.getFilesByType(
         MimeType.SHORTCUT
       );
 
@@ -68,12 +64,12 @@ class StudentFolder
       ); // #reassign
       while (shortcuts.hasNext()) {
         const shortcut = shortcuts.next();
-        if (shortcut.getTargetId() === this.studentFolder.getId()) {
-          shortcut.moveTo(this.student.advisor.folder);
+        if (shortcut.getTargetId() === this.id) {
+          shortcut.moveTo(this.student.advisor.folder.driveFolder);
         }
       }
       try {
-        this.studentFolder.removeViewer(previousAdvisor.email);
+        this.driveFolder.removeViewer(previousAdvisor.email);
       } catch (e) {
         lib.Progress.log(
           `${previousAdvisor.email} as not a student folder viewer`,
@@ -82,6 +78,24 @@ class StudentFolder
       }
 
       this.meta.permissionsUpdated = true;
+    } else {
+      const shortcuts = this.student.advisor.folder.driveFolder.getFilesByType(
+        MimeType.SHORTCUT
+      );
+      let shortcutExists = false;
+      for (
+        let shortcut: GoogleAppsScript.Drive.File;
+        !shortcutExists && shortcuts.hasNext();
+        shortcut = shortcuts.next()
+      ) {
+        shortcutExists = shortcut?.getTargetId() == this.id;
+      }
+      if (!shortcutExists) {
+        const shortcut = this.student.advisor.folder.driveFolder.createShortcut(
+          this.id
+        );
+        shortcut.setName(this.student.formattedName);
+      }
     }
     if (primary) {
       this.student.plan.assignToCurrentAdvisor(previousAdvisor);
@@ -93,7 +107,7 @@ class StudentFolder
     previousAdvisor =
       previousAdvisor || this.student.getAdvisor(Role.Year.Previous);
     if (this.meta.inactive && !this.meta.permissionsUpdated) {
-      const shortcuts = previousAdvisor.folder.getFilesByType(
+      const shortcuts = previousAdvisor.folder.driveFolder.getFilesByType(
         MimeType.SHORTCUT
       );
       lib.Progress.setStatus(
@@ -102,12 +116,12 @@ class StudentFolder
       ); // #inactive
       while (shortcuts.hasNext()) {
         const shortcut = shortcuts.next();
-        if (shortcut.getTargetId() === this.studentFolder.getId()) {
+        if (shortcut.getTargetId() === this.id) {
           shortcut.setTrashed(true);
         }
       }
       try {
-        this.studentFolder.removeViewer(previousAdvisor.email);
+        this.driveFolder.removeViewer(previousAdvisor.email);
       } catch (e) {
         lib.Progress.log(
           `${previousAdvisor.email} was not a student folder viewer`,
@@ -122,8 +136,18 @@ class StudentFolder
     }
   }
 
+  public resetName() {
+    this.driveFolder.setName(
+      lib.Format.apply(lib.Parameters.nameFormat.studentFolder, this.student)
+    );
+  }
+
+  public toOption(): g.HtmlService.Element.Picker.Option {
+    return { name: this.student.formattedName, value: this.key.toString() };
+  }
+
   public toSourceString(): string {
-    return this.student.getFormattedName();
+    return this.student.formattedName;
   }
 
   public toContext(): { [key: string]: any } {

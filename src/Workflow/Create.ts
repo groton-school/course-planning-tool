@@ -1,8 +1,8 @@
 import g from '@battis/gas-lighter';
 import Inventory from '../Inventory';
 import CoursePlan from '../Inventory/CoursePlans/CoursePlan';
-import lib from '../lib';
 import Role from '../Role';
+import lib from '../lib';
 
 export const pickStudent = () => 'c_ps';
 global.c_ps = () =>
@@ -29,9 +29,9 @@ global.c_cpf = (hostId: string, thread: string) => {
   lib.Progress.setThread(thread);
   lib.Progress.setMax(CoursePlan.stepCount.create);
   const plan = Inventory.CoursePlans.get(hostId);
-  lib.Progress.setComplete({
-    html: `<div>Created course plan for ${plan.student.getFormattedName()}.</div>
-              <div><a id="button" class="btn btn-primary" onclick="google.script.host.close()" href="${plan.spreadsheet.getUrl()}" target="_blank">Open Plan</a></div>`
+  lib.Progress.setCompleteLink({
+    message: `Created course plan for ${plan.student.formattedName}.`,
+    url: plan.url
   });
 };
 

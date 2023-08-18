@@ -25,7 +25,7 @@ class Inventory extends Folders.Inventory<StudentFolder> {
     const student = Role.Student.getByHostId(hostId.toString());
     const folder = FormFoldersOfStudentFolders.getInstance()
       .get(student.gradYear)
-      .folder.createFolder(this.formatter(hostId));
+      .driveFolder.createFolder(this.formatter(hostId));
     this.add({ key: hostId, id: folder.getId(), url: folder.getUrl() });
     return new StudentFolder(this, folder.getId(), hostId);
   }

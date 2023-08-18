@@ -81,6 +81,19 @@ export function onOpen() {
     )
     .addSubMenu(
       SpreadsheetApp.getUi()
+        .createMenu('Folders')
+        .addItem(
+          'Rename all student folders',
+          Workflow.FolderRename.renameAllStudentFolders()
+        )
+        .addSeparator()
+        .addItem(
+          'Rename a student folder…',
+          Workflow.FolderRename.pickStudentFolderToRename()
+        )
+    )
+    .addSubMenu(
+      SpreadsheetApp.getUi()
         .createMenu('Restructure')
         .addItem(
           "Expand a single course plan's dept. options…",

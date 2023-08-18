@@ -43,6 +43,10 @@ class Config {
     return this.getParam(CoursePlanningData.namedRange.ParamNumComments);
   }
 
+  private static get studentNameFormat() {
+    return this.getParam(CoursePlanningData.namedRange.ParamStudentNameFormat);
+  }
+
   private static get formFolderNameFormat() {
     return this.getParam(
       CoursePlanningData.namedRange.ParamFormFolderNameFormat
@@ -68,6 +72,7 @@ class Config {
   }
 
   public static nameFormat = {
+    student: this.studentNameFormat,
     formFolder: this.formFolderNameFormat,
     studentFolder: this.studentFolderNameFormat,
     advisorFolder: this.advisorFolderNameFormat,

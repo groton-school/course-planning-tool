@@ -18,10 +18,10 @@ class Advisor {
   public readonly firstName: string;
   public readonly lastName: string;
 
-  private _folder?: GoogleAppsScript.Drive.Folder;
-  public get folder(): GoogleAppsScript.Drive.Folder {
+  private _folder?: Inventory.Module.AdvisorFolders.AdvisorFolder;
+  public get folder() {
     if (!this._folder) {
-      this._folder = Inventory.AdvisorFolders.get(this.email).folder;
+      this._folder = Inventory.AdvisorFolders.get(this.email);
     }
     return this._folder;
   }
@@ -34,7 +34,9 @@ class Advisor {
     Object.assign(this, data);
   }
 
-  public getFormattedName = () => `${this.firstName} ${this.lastName}`;
+  public get formattedName() {
+    return `${this.firstName} ${this.lastName}`;
+  }
 
   public static getByEmail(email: string, year = Year.Current) {
     const [, , , , , e, firstName, lastName] = Advisor.getData(year).filter(
