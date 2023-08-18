@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@battis/gas-lighter':
-    specifier: ^0.3.3
-    version: 0.3.3
+    specifier: file:../gas-lighter
+    version: file:../gas-lighter
   '@types/semver':
     specifier: ^7.5.0
     version: 7.5.0
@@ -87,32 +87,6 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
-
-  /@battis/gas-lighter@0.3.3:
-    resolution: {integrity: sha512-by3+D88UbUTyA/sxrPAZlnzbAHpxsMP9pNjNHosblp9/Zg+vIH/HcULfoU68uSpGyRaRh8x0nC/I9sFAUuetng==}
-    engines: {node: '>=12.17'}
-    dependencies:
-      '@google/clasp': 2.4.2
-      '@tsconfig/recommended': 1.0.2
-      '@types/google-apps-script': 1.0.67
-      '@types/node': 18.17.5
-      app-root-path: 3.1.0
-      clean-webpack-plugin: 4.0.0(webpack@5.88.2)
-      gas-webpack-plugin: 2.5.0
-      ts-loader: 9.4.4(typescript@4.9.5)(webpack@5.88.2)
-      typescript: 4.9.5
-      webpack: 5.88.2(webpack-cli@5.1.4)
-      webpack-cli: 5.1.4(webpack@5.88.2)
-    transitivePeerDependencies:
-      - '@swc/core'
-      - '@webpack-cli/generators'
-      - encoding
-      - esbuild
-      - supports-color
-      - uglify-js
-      - webpack-bundle-analyzer
-      - webpack-dev-server
-    dev: false
 
   /@battis/partly-gcloudy@0.3.0:
     resolution: {integrity: sha512-GyGO/YY7+Y2jRXk6bUzTG2pra6toXAZJ8RNrFcNeUHsHLGjUWYKMcGVUYZx8kNwoR6bbOKpO002PsA1p30/Lrw==}
@@ -1862,7 +1836,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001521
-      electron-to-chromium: 1.4.492
+      electron-to-chromium: 1.4.494
       node-releases: 2.0.13
       update-browserslist-db: 1.0.11(browserslist@4.21.10)
 
@@ -2885,8 +2859,8 @@ packages:
   /ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
 
-  /electron-to-chromium@1.4.492:
-    resolution: {integrity: sha512-36K9b/6skMVwAIEsC7GiQ8I8N3soCALVSHqWHzNDtGemAcI9Xu8hP02cywWM0A794rTHm0b0zHPeLJHtgFVamQ==}
+  /electron-to-chromium@1.4.494:
+    resolution: {integrity: sha512-KF7wtsFFDu4ws1ZsSOt4pdmO1yWVNWCFtijVYZPUeW4SV7/hy/AESjLn/+qIWgq7mHscNOKAwN5AIM1+YAy+Ww==}
 
   /email-validator@2.0.4:
     resolution: {integrity: sha512-gYCwo7kh5S3IDyZPLZf6hSS0MnZT8QmJFqYvbqlDZSbwdZlY6QZWxJ4i/6UhITOJ4XzyI647Bm2MXKCLqnJ4nQ==}
@@ -5395,8 +5369,8 @@ packages:
       tslib: 2.6.1
     dev: true
 
-  /node-abi@3.46.0:
-    resolution: {integrity: sha512-LXvP3AqTIrtvH/jllXjkNVbYifpRbt9ThTtymSMSuHmhugQLAWr99QQFTm+ZRht9ziUvdGOgB+esme1C6iE6Lg==}
+  /node-abi@3.47.0:
+    resolution: {integrity: sha512-2s6B2CWZM//kPgwnuI0KrYwNjfdByE25zvAaEpq9IH4zcNsarH8Ihu/UuX6XMPEogDAxkuUFeZn60pXNHAqn3A==}
     engines: {node: '>=10'}
     dependencies:
       semver: 7.5.4
@@ -6691,7 +6665,7 @@ packages:
       minimist: 1.2.8
       mkdirp-classic: 0.5.3
       napi-build-utils: 1.0.2
-      node-abi: 3.46.0
+      node-abi: 3.47.0
       pump: 3.0.0
       rc: 1.2.8
       simple-get: 4.0.1
@@ -8618,3 +8592,30 @@ packages:
       property-expr: 2.0.5
       toposort: 2.0.2
     dev: true
+
+  file:../gas-lighter:
+    resolution: {directory: ../gas-lighter, type: directory}
+    name: '@battis/gas-lighter'
+    engines: {node: '>=12.17'}
+    dependencies:
+      '@google/clasp': 2.4.2
+      '@tsconfig/recommended': 1.0.2
+      '@types/google-apps-script': 1.0.67
+      '@types/node': 18.17.5
+      app-root-path: 3.1.0
+      clean-webpack-plugin: 4.0.0(webpack@5.88.2)
+      gas-webpack-plugin: 2.5.0
+      ts-loader: 9.4.4(typescript@4.9.5)(webpack@5.88.2)
+      typescript: 4.9.5
+      webpack: 5.88.2(webpack-cli@5.1.4)
+      webpack-cli: 5.1.4(webpack@5.88.2)
+    transitivePeerDependencies:
+      - '@swc/core'
+      - '@webpack-cli/generators'
+      - encoding
+      - esbuild
+      - supports-color
+      - uglify-js
+      - webpack-bundle-analyzer
+      - webpack-dev-server
+    dev: false

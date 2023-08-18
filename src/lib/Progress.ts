@@ -52,6 +52,7 @@ class Progress {
     Logger.log({
       message,
       context: {
+        thread: this.progress.getThread(),
         ...(Progress.Contextable.isContextable(context)
           ? context.toContext()
           : {}),

@@ -79,6 +79,17 @@ class CoursePlanningData {
       PermissionsUpdated: i('Q'),
       Version: i('R'),
       Incomplete: i('S')
+    },
+    StudentList: {
+      HostId: i('A'),
+      Email: i('B'),
+      FirstName: i('C'),
+      Lastname: i('D'),
+      GradYear: i('E'),
+      CurrentAdvisorEmail: i('F'),
+      PreviousAdvisorEmail: i('I'),
+      NewAdvisor: i('L'),
+      HasPlan: i('M')
     }
   };
 }

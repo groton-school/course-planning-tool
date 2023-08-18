@@ -197,7 +197,7 @@ class CoursePlan
         this._numOptionsPerDepartment = lib.Parameters.numOptionsPerDepartment;
       }
     }
-    return this.numOptionsPerDepartment;
+    return this._numOptionsPerDepartment;
   }
 
   private _advisorCommentCount?: number;
@@ -211,7 +211,7 @@ class CoursePlan
   }
 
   private _collegeCounselingCommentCount?: number;
-  private get collegeCounselingCOmmentCount() {
+  private get collegeCounselingCommentCount() {
     if (this._collegeCounselingCommentCount === undefined) {
       this._collegeCounselingCommentCount = this.planSheet
         .getRange(lib.CoursePlanTemplate.namedRange.ProtectCollegeCounseling)
@@ -337,32 +337,32 @@ class CoursePlan
     );
     this.expandCommentsIn(
       lib.CoursePlanTemplate.namedRange.ProtectCollegeCounseling,
-      this.collegeCounselingCOmmentCount
+      this.collegeCounselingCommentCount
     );
   }
 
   private expandCommentsIn(namedRange: string, currentCommentCount: number) {
-    const range = this.planSheet.getRange(namedRange);
-    const comments = range.getValues();
-    let empty: number;
-    for (empty = 0; empty < comments.length; empty++) {
-      if (
-        !comments[currentCommentCount - empty - 1].reduce(
-          (isEmpty, cell) => isEmpty && cell === '',
-          true
-        )
-      ) {
-        break;
-      }
-    }
-    const additionalComments = lib.Parameters.numComments - empty;
+    const oldRange = this.planSheet.getRange(namedRange);
+    const existingComments = oldRange
+      .getValues()
+      .filter(
+        (row) => !row.reduce((isEmpty, cell) => isEmpty && cell === '', true)
+      );
+    const additionalComments =
+      existingComments.length +
+      lib.Parameters.numComments -
+      oldRange.getNumRows();
     if (additionalComments > 0) {
       lib.Progress.setStatus(
         `adding ${additionalComments} comments to ${namedRange}`,
         this
       );
-      this.additionalComments(range.getRow(), additionalComments);
-      range.setValues(comments);
+      this.additionalComments(oldRange.getRow(), additionalComments);
+      const newRange = this.planSheet.getRange(namedRange);
+      newRange.clearContent();
+      newRange
+        .offset(0, 0, existingComments.length)
+        .setValues(existingComments);
     } else {
       lib.Progress.setStatus(`${namedRange} has enough empty rows`, this);
     }
@@ -591,7 +591,7 @@ class CoursePlan
     numAdditionalComments = lib.Parameters.numComments - 2
   ) {
     this.planSheet.insertRowsAfter(row, numAdditionalComments);
-    for (let i = 0; i < lib.Parameters.numComments - 2; i++) {
+    for (let i = 0; i < numAdditionalComments; i++) {
       this.planSheet.getRange(row + i + 1, 3, 1, 3).mergeAcross();
     }
   }

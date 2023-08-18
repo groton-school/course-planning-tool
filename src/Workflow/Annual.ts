@@ -204,16 +204,32 @@ const expandCommentsFor = () => 'a_ecf';
 global.a_ecf = (hostId: string, thread: string) => {
   lib.Progress.setThread(thread);
   lib.Progress.reset();
-  Inventory.CoursePlans.get(hostId).expandComments();
-  lib.Progress.setComplete(true);
+  const plan = Inventory.CoursePlans.get(hostId);
+  plan.expandComments();
+  lib.Progress.setComplete({
+    html: `<div>Expanded comments for ${plan.student.getFormattedName()}.</div>
+            <div>
+              <a id="button" class="btn btn-primary" onclick="google.script.host.close()" href="${plan.spreadsheet.getUrl()}" target="_blank">Open Plan</a>
+            </div>`
+  });
 };
 
 export const expandAllComments = () => 'a_eac';
-global.a_eac = () => {
-  lib.Progress.reset();
-  lib.Progress.showModalDialog(SpreadsheetApp, 'Expand Comments');
+global.a_eac = (thread = Utilities.getUuid(), step = 0) => {
+  lib.Progress.log({ thread, step });
+  lib.Progress.setThread(thread);
+  if (!step) {
+    lib.Progress.reset();
+    lib.Progress.showModalDialog(SpreadsheetApp, 'Expand Comments');
+  }
   const plans = Inventory.CoursePlans.all().filter((plan) => plan.meta.active);
   lib.Progress.setMax(plans.length);
-  plans.forEach((plan) => plan.expandComments());
+  for (let i = step; i < plans.length && i < 20; i++) {
+    plans[i].expandComments();
+    if (i >= step + 5) {
+      lib.Progress.setComplete({ callback: expandAllComments(), step: i + 1 });
+      return;
+    }
+  }
   lib.Progress.setComplete(true);
 };

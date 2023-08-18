@@ -34,8 +34,9 @@ export function onOpen() {
     .addSeparator()
     .addSubMenu(
       SpreadsheetApp.getUi()
-        .createMenu('For a single course plan…')
+        .createMenu('Single Course Plan')
         .addItem('Create…', Workflow.Create.pickStudent())
+        .addSeparator()
         .addItem(
           'Update enrollment history…',
           Workflow.UpdateEnrollmentHistory.pickPlan()

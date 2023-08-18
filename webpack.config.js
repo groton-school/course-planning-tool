@@ -34,5 +34,5 @@ module.exports = require('@battis/gas-lighter/webpack.config')({
       )
     })
   ],
-  production: true
+  production: false
 });
