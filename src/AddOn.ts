@@ -16,16 +16,10 @@ export function onOpen() {
     )
     .addItem(
       'Assign all plans to current advisor',
-      Workflow.Annual.assignAllToCurrentAdvisor()
+      Workflow.AssignToCurrentAdvisor.all()
     )
-    .addItem(
-      'Deactivate all inactive course plans',
-      Workflow.Annual.makeAllPlansInactive()
-    )
-    .addItem(
-      'Expand comments in all plans',
-      Workflow.Annual.expandAllComments()
-    )
+    .addItem('Deactivate all inactive course plans', Workflow.Deactivate.all())
+    .addItem('Expand comments in all plans', Workflow.ExpandComments.all())
     .addSeparator()
     .addItem(
       'Roll-over Student/Advisor Lists',
@@ -44,16 +38,10 @@ export function onOpen() {
         .addItem('Update course list…', Workflow.UpdateCourseList.pickPlan())
         .addItem(
           'Assign to current advisor…',
-          Workflow.Annual.pickStudentToAssignToCurrentAdvisor()
+          Workflow.AssignToCurrentAdvisor.pickStudent()
         )
-        .addItem(
-          'Deactivate inactive…',
-          Workflow.Annual.pickStudentToMakeInactive()
-        )
-        .addItem(
-          'Expand comments…',
-          Workflow.Annual.pickStudentToExpandComments()
-        )
+        .addItem('Deactivate inactive…', Workflow.Deactivate.pickStudent())
+        .addItem('Expand comments…', Workflow.ExpandComments.pickStudent())
         .addSeparator()
         .addItem('Delete…', Workflow.Delete.pickPlan())
     )

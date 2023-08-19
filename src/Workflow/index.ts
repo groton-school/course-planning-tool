@@ -1,7 +1,10 @@
 export * as Annual from './Annual';
+export * as AssignToCurrentAdvisor from './AssignToCurrentAdvisor';
 export * as Create from './Create';
+export * as Deactivate from './Deactivate';
 export * as Delete from './Delete';
 export * as Documentation from './Documentation';
+export * as ExpandComments from './ExpandComments';
 export * as FolderRename from './FolderRename';
 export * as Permissions from './Permissions';
 export * as Restructure from './Restructure';

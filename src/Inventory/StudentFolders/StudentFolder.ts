@@ -84,7 +84,7 @@ class StudentFolder
     }
   }
 
-  public makeInactive() {
+  public deactivate() {
     if (this.meta.inactive && !this.meta.permissionsUpdated) {
       lib.Progress.log(
         'removing student folder from previous advisor folder',

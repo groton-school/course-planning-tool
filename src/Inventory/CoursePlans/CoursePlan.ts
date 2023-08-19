@@ -248,7 +248,7 @@ class CoursePlan
     this.student.folder.assignToCurrentAdvisor();
   }
 
-  public makeInactive() {
+  public deactivate() {
     if (this.meta.inactive && !this.meta.permissionsUpdated) {
       lib.Progress.setStatus('removing previous advisor', this); // #inactive
       try {
@@ -263,7 +263,7 @@ class CoursePlan
       this.meta.permissionsUpdated = true;
     }
     lib.Progress.setStatus('remove from advisor folder', this); // #inactive
-    this.student.folder.makeInactive();
+    this.student.folder.deactivate();
   }
 
   public resetPermissions() {
