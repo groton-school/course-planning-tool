@@ -54,18 +54,23 @@ const c_fl: g.HtmlService.Element.Picker.OptionsCallback = () =>
 global.c_fl = c_fl;
 
 export const all = () => 'c_a';
-global.c_a = (gradYear?: number, thread?: string) => {
+global.c_a = (thread?: string, step = 0, gradYear?: number) => {
   lib.Progress.setThread(thread);
-  lib.Progress.reset();
-  if (!gradYear) {
-    lib.Progress.showModalDialog(SpreadsheetApp, 'Create Course Plans');
-  }
-  const students = gradYear
-    ? Role.Student.getFormOf(gradYear)
-    : Role.Student.all();
-  lib.Progress.setMax(students.length * CoursePlan.stepCount.create);
-  students.forEach((student: Role.Student) => {
-    Inventory.CoursePlans.get(student.hostId);
-  });
-  lib.Progress.setComplete(true);
+  new g.HtmlService.Element.Progress.Paged(
+    thread,
+    { root: SpreadsheetApp, title: 'Create Course Plans' },
+    (step) => {
+      const students = gradYear
+        ? Role.Student.getFormOf(gradYear)
+        : Role.Student.all();
+      lib.Progress.setMax(
+        students.length *
+        Inventory.Module.CoursePlans.CoursePlan.stepCount.create
+      );
+      return students.slice(step);
+    },
+    (student) => Inventory.CoursePlans.get(student.hostId),
+    { function: all(), args: [gradYear] },
+    step
+  );
 };
