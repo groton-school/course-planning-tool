@@ -215,7 +215,7 @@ global.a_ecf = (hostId: string, thread: string) => {
 
 export const expandAllComments = () => 'a_eac';
 global.a_eac = (thread = Utilities.getUuid(), step = 0) => {
-  lib.Progress.log({ thread, step });
+  const end = new Date().getTime() + 25 * 60 * 1000;
   lib.Progress.setThread(thread);
   if (!step) {
     lib.Progress.reset();
@@ -223,9 +223,17 @@ global.a_eac = (thread = Utilities.getUuid(), step = 0) => {
   }
   const plans = Inventory.CoursePlans.all().filter((plan) => plan.meta.active);
   lib.Progress.setMax(plans.length);
-  for (let i = step; i < plans.length && i < 20; i++) {
+  let averageStep: number;
+  for (let i = step; i < plans.length && i < plans.length; i++) {
+    const stepStart = new Date().getTime();
     plans[i].expandComments();
-    if (i >= step + 5) {
+    const stepEnd = new Date().getTime();
+    if (averageStep) {
+      averageStep = (averageStep * i + (stepEnd - stepStart)) / i + 1;
+    } else {
+      averageStep = stepEnd - stepStart;
+    }
+    if (new Date().getTime() + averageStep * 3 > end) {
       lib.Progress.setComplete({ callback: expandAllComments(), step: i + 1 });
       return;
     }
