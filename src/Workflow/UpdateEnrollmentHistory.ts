@@ -37,13 +37,24 @@ global.ueh_uehf = (hostId: string, thread: string) => {
 };
 
 export const all = () => 'ueh_a';
-global.ueh_a = () => {
-  lib.Progress.reset();
-  lib.Progress.showModalDialog(SpreadsheetApp, 'Update Enrollment Histories');
-  const plans = Inventory.CoursePlans.all();
-  lib.Progress.setMax(
-    plans.length * CoursePlan.stepCount.updateEnrollmentHistory
+global.ueh_a = (thread = Utilities.getUuid(), step = 0) => {
+  lib.Progress.setThread(thread);
+  new g.HtmlService.Element.Progress.Paged(
+    thread,
+    { root: SpreadsheetApp, title: 'Update Enrollment Histories' },
+    (step) => {
+      const plans = Inventory.CoursePlans.all().filter(
+        (plan) => plan.meta.active
+      );
+      lib.Progress.setMax(
+        plans.length *
+        Inventory.Module.CoursePlans.CoursePlan.stepCount
+          .updateEnrollmentHistory
+      );
+      return plans.slice(step);
+    },
+    (plan) => plan.updateEnrollmentHistory(),
+    all(),
+    step
   );
-  plans.forEach((plan) => plan.updateEnrollmentHistory());
-  lib.Progress.setComplete(true);
 };

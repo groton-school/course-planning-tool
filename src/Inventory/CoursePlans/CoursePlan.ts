@@ -291,9 +291,13 @@ class CoursePlan
       existingComments.length +
       lib.Parameters.numComments -
       oldRange.getNumRows();
+    const pretty = namedRange
+      .replace('Protect_', '')
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
+      .toLowerCase();
     if (additionalComments > 0) {
       lib.Progress.setStatus(
-        `adding ${additionalComments} comments to ${namedRange}`,
+        `adding ${additionalComments} comments to ${pretty}`,
         this
       );
       this.additionalComments(oldRange.getRow(), additionalComments);
@@ -303,7 +307,7 @@ class CoursePlan
         .offset(0, 0, existingComments.length)
         .setValues(existingComments);
     } else {
-      lib.Progress.setStatus(`${namedRange} has enough empty rows`, this);
+      lib.Progress.setStatus(`${pretty} has enough empty rows`, this);
     }
   }
 

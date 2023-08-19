@@ -44,15 +44,23 @@ global.da_ps = () => {
 };
 
 export const all = () => 'da_a';
-global.da_a = () => {
-  lib.Progress.reset();
-  lib.Progress.showModalDialog(SpreadsheetApp, 'Deactivate Inactive Plans');
-  const plans = Inventory.CoursePlans.all().filter(
-    (plan) => plan.meta.inactive && !plan.meta.permissionsUpdated
+global.da_a = (thread = Utilities.getUuid(), step = 0) => {
+  lib.Progress.setThread(thread);
+  new g.HtmlService.Element.Progress.Paged(
+    thread,
+    { root: SpreadsheetApp, title: 'Deactivate Inactive Plans' },
+    (step) => {
+      const plans = Inventory.CoursePlans.all().filter(
+        (plan) => plan.meta.inactive && !plans.meta.permissionsUpdated
+      );
+      lib.Progress.setMax(
+        plans.length *
+        Inventory.Module.CoursePlans.CoursePlan.stepCount.inactive
+      );
+      return plans.slice(step);
+    },
+    (plan) => plan.deactivate(),
+    all(),
+    step
   );
-  lib.Progress.setMax(
-    plans.length * Inventory.Module.CoursePlans.CoursePlan.stepCount.inactive
-  );
-  plans.forEach((plan) => plan.deactivate());
-  lib.Progress.setComplete(true);
 };

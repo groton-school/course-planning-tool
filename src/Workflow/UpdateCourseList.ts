@@ -38,14 +38,23 @@ const ucl_pl: g.HtmlService.Element.Picker.OptionsCallback = () =>
 global.ucl_pl = ucl_pl;
 
 export const all = () => 'ucl_a';
-global.ucl_a = () => {
-  lib.Progress.reset();
-  lib.Progress.showModalDialog(SpreadsheetApp, 'Update Course Lists');
-  const plans = Inventory.CoursePlans.all();
-  lib.Progress.setMax(
-    plans.length *
-    Inventory.Module.CoursePlans.CoursePlan.stepCount.updateCourseList
+global.ucl_a = (thread = Utilities.getUuid(), step = 0) => {
+  lib.Progress.setThread(thread);
+  new g.HtmlService.Element.Progress.Paged(
+    thread,
+    { root: SpreadsheetApp, title: 'Update Course Lists' },
+    (step) => {
+      const plans = Inventory.CoursePlans.all().filter(
+        (plan) => plan.meta.active
+      );
+      lib.Progress.setMax(
+        plans.length *
+        Inventory.Module.CoursePlans.CoursePlan.stepCount.updateCourseList
+      );
+      return plans.slice(step);
+    },
+    (plan) => plan.updateCourseList(),
+    all(),
+    step
   );
-  plans.forEach((plan) => plan.updateCourseList());
-  lib.Progress.setComplete(true);
 };

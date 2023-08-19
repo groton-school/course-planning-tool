@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@battis/gas-lighter':
-    specifier: ^0.3.5
-    version: 0.3.5
+    specifier: ^0.4.0
+    version: 0.4.0
   '@types/semver':
     specifier: ^7.5.0
     version: 7.5.0
@@ -88,8 +88,8 @@ packages:
       - supports-color
     dev: true
 
-  /@battis/gas-lighter@0.3.5:
-    resolution: {integrity: sha512-+uGc5BPayyHPzGppMqcizNBmvKUnM2XxQqld60XepvOv2jktmbXG7KgdGzNqq4VrsbkKZzAZOGd/LRgG79M7zg==}
+  /@battis/gas-lighter@0.4.0:
+    resolution: {integrity: sha512-k/0OGePQVIiIgoP7H6l4k8CWAvvkYjEhR6wqLDkj90OgNKCcekPv7rE06w7BsiwnEQav9lYjQ4xhMvnXPU8B/A==}
     engines: {node: '>=12.17'}
     dependencies:
       '@google/clasp': 2.4.2

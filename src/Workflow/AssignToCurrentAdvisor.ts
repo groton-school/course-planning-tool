@@ -42,15 +42,23 @@ global.atca_as = (hostId: string, thread: string) => {
 };
 
 export const all = () => 'acta_a';
-global.acta_a = () => {
-  lib.Progress.reset();
-  lib.Progress.showModalDialog(SpreadsheetApp, 'Assign to Current Advisors');
-  const plans = Inventory.CoursePlans.all().filter(
-    (plan) => plan.meta.newAdvisor && !plan.meta.permissionsUpdated
+global.acta_a = (thread = Utilities.getUuid(), step = 0) => {
+  lib.Progress.setThread(thread);
+  new g.HtmlService.Element.Progress.Paged(
+    thread,
+    { root: SpreadsheetApp, title: 'Assign to Current Advisors' },
+    (step) => {
+      const plans = Inventory.CoursePlans.all().filter(
+        (plan) => plan.meta.active && !plan.meta.permissionsUpdated
+      );
+      lib.Progress.setMax(
+        plans.length *
+        Inventory.Module.CoursePlans.CoursePlan.stepCount.reassign
+      );
+      return plans.slice(step);
+    },
+    (plan) => plan.assignToCurrentAdvisor(),
+    all(),
+    step
   );
-  lib.Progress.setMax(
-    plans.length * Inventory.Module.CoursePlans.CoursePlan.stepCount.reassign
-  );
-  plans.forEach((plan) => plan.assignToCurrentAdvisor());
-  lib.Progress.setComplete(true);
 };
