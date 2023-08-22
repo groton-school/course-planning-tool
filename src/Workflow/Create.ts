@@ -54,7 +54,7 @@ const c_fl: g.HtmlService.Element.Picker.OptionsCallback = () =>
 global.c_fl = c_fl;
 
 export const all = () => 'c_a';
-global.c_a = (thread?: string, step = 0, gradYear?: number) => {
+global.c_a = (thread = Utilities.getUuid(), step = 0, gradYear?: number) => {
   lib.Progress.setThread(thread);
   new g.HtmlService.Element.Progress.Paged(
     thread,

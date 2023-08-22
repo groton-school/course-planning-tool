@@ -56,7 +56,6 @@ global.ueh_a = (thread = Utilities.getUuid(), step = 0) => {
     },
     (plan) => plan.updateEnrollmentHistory(),
     all(),
-    step,
-    true
+    step
   );
 };
