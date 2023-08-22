@@ -3,67 +3,80 @@ import Inventory from '../Inventory';
 import lib from '../lib';
 
 export const resetStudentFolderPermissions = () => 'p_rsfp';
-global.p_rsfp = () => {
-  lib.Progress.reset();
-  lib.Progress.showModalDialog(
-    SpreadsheetApp,
-    'Reset Student Folder Permissions'
-  );
-  const studentFolders = Inventory.StudentFolders.all();
-  lib.Progress.setMax(studentFolders.length);
-  studentFolders.forEach((folder) => {
-    lib.Progress.setStatus(
-      `Reset folder permissions on ${folder.driveFolder.getName()}`
-    );
-    try {
-      folder.resetPermissions();
-    } catch (e) {
-      lib.Progress.log(
-        `Error resetting permissions for student folder ${folder.id}`
+global.p_rsfp = (thread = Utilities.getUuid(), step = 0) => {
+  lib.Progress.setThread(thread);
+  new g.HtmlService.Element.Progress.Paged(
+    thread,
+    { root: SpreadsheetApp, title: 'Reset Student Folder Permissions' },
+    (step) => {
+      const folders = Inventory.StudentFolders.all().filter(
+        (folder) => folder.meta.active
       );
-    }
-  });
-  lib.Progress.setComplete(true);
+      lib.Progress.setMax(folders.length);
+      return folders.slice(step);
+    },
+    (folder) => {
+      try {
+        folder.resetPermissions();
+      } catch (error) {
+        lib.Progress.log({
+          message: `Error resetting permissions for student folder ${folder.id}`,
+          error
+        });
+      }
+    },
+    resetStudentFolderPermissions(),
+    step
+  );
 };
 
 export const resetAdvisorFolderPermissions = () => 'p_rafp';
-global.p_rafp = () => {
-  lib.Progress.reset();
-  lib.Progress.showModalDialog(
-    SpreadsheetApp,
-    'Reset Advisor Folder Permissions'
-  );
-  const advisorFolders = Inventory.AdvisorFolders.all();
-  lib.Progress.setMax(advisorFolders.length);
-  advisorFolders.forEach((folder) => {
-    lib.Progress.setStatus(
-      `Reset folder permissions on ${folder.driveFolder.getName()}`
-    );
-    try {
-      folder.resetPermissions();
-    } catch (e) {
-      lib.Progress.log(
-        `Error resetting permissions for advisor folder ${folder.id}`
+global.p_rafp = (thread = Utilities.getUuid(), step = 0) => {
+  lib.Progress.setThread(thread);
+  new g.HtmlService.Element.Progress.Paged(
+    thread,
+    { root: SpreadsheetApp, title: 'Reset Advisor Folder Permissions' },
+    (step) => {
+      const folders = Inventory.AdvisorFolders.all().filter(
+        (folder) => folder.meta.active
       );
-    }
-  });
-  lib.Progress.setComplete(true);
+      lib.Progress.setMax(folders.length);
+      return folders.slice(step);
+    },
+    (folder) => {
+      try {
+        folder.resetPermissions();
+      } catch (e) {
+        lib.Progress.log(
+          `Error resetting permissions for advisor folder ${folder.id}`
+        );
+      }
+    },
+    resetAdvisorFolderPermissions(),
+    step
+  );
 };
 
 export const resetCoursePlanPermissions = () => 'p_rcpp';
-global.p_rcpp = () => {
-  lib.Progress.reset();
-  lib.Progress.showModalDialog(SpreadsheetApp, 'Reset Course Plan Permissions');
-  const plans = Inventory.CoursePlans.all();
-  lib.Progress.setMax(
-    plans.length *
-    Inventory.Module.CoursePlans.CoursePlan.stepCount.resetPermissions
+global.p_rcpp = (thread = Utilities.getUuid(), step = 0) => {
+  lib.Progress.setThread(thread);
+  new g.HtmlService.Element.Progress.Paged(
+    thread,
+    { root: SpreadsheetApp, title: 'Reset Course Plan permissions' },
+    (step) => {
+      const plans = Inventory.CoursePlans.all().filter(
+        (plan) => plan.meta.active
+      );
+      lib.Progress.setMax(
+        plans.length *
+        Inventory.Module.CoursePlans.CoursePlan.stepCount.resetPermissions
+      );
+      return plans.slice(step);
+    },
+    (plan) => plan.resetPermissions(),
+    resetCoursePlanPermissions(),
+    step
   );
-  plans.forEach((plan) => {
-    lib.Progress.setStatus(plan.student.formattedName);
-    plan.resetPermissions();
-  });
-  lib.Progress.setComplete(true);
 };
 
 const listOfPlansToResetPermissions = () => 'p_loptrp';

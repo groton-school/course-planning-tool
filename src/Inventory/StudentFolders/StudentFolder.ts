@@ -107,9 +107,19 @@ class StudentFolder
   }
 
   public resetName() {
-    this.driveFolder.setName(
-      lib.Format.apply(lib.Parameters.nameFormat.studentFolder, this.student)
+    const oldName = this.driveFolder.getName();
+    const newName = lib.Format.apply(
+      lib.Parameters.nameFormat.studentFolder,
+      this.student
     );
+    if (oldName != newName) {
+      lib.Progress.setStatus(
+        `Renaming '${this.driveFolder.getName()}' to '${newName}'`
+      );
+      this.driveFolder.setName(newName);
+    } else {
+      lib.Progress.progress.incrementValue();
+    }
   }
 
   public delete() {

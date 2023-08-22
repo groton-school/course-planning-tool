@@ -37,14 +37,20 @@ global.r_esdof = (hostId: string, thread: string) => {
 };
 
 export const expandAllDeptOptions = () => 'r_eado';
-global.r_eado = () => {
-  lib.Progress.reset();
-  lib.Progress.showModalDialog(SpreadsheetApp, 'Expand Dept. Options');
-  const plans = Inventory.CoursePlans.all();
-  lib.Progress.setMax(plans.length * 2);
-  plans.forEach((plan) => {
-    lib.Progress.setStatus(`expanding dept. options if necessary`, plan);
-    plan.expandDeptOptionsIfFewerThanParams();
-  });
-  lib.Progress.setComplete(true);
+global.r_eado = (thread = Utilities.getUuid(), step = 0) => {
+  lib.Progress.setThread(thread);
+  new g.HtmlService.Element.Progress.Paged(
+    thread,
+    { root: SpreadsheetApp, title: 'Expand Dept. Options' },
+    (step) => {
+      const plans = Inventory.CoursePlans.all().filter(
+        (plan) => plan.meta.active
+      );
+      lib.Progress.setMax(plans.length * 2);
+      return plans.slice(step);
+    },
+    (plan) => plan.expandDeptOptionsIfFewerThanParams(),
+    expandAllDeptOptions(),
+    step
+  );
 };

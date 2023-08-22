@@ -186,7 +186,7 @@ class CoursePlan
   private _numOptionsPerDepartment?: number;
   // TODO could this be pulled by looking at merged cells?
   private get numOptionsPerDepartment() {
-    if (this._numOptionsPerDepartment === null) {
+    if (!this._numOptionsPerDepartment) {
       if (this.inventory.has(this.hostId)) {
         this._numOptionsPerDepartment = this.meta.numOptionsPerDepartment;
       } else {
@@ -384,7 +384,6 @@ class CoursePlan
     }
 
     if (create) {
-      // TODO need to incrementally expand protection when history expands
       this.protectNonCommentRanges(values[0].length, values.length);
 
       lib.Progress.setStatus('configuring data validation', this); // #create
@@ -442,18 +441,13 @@ class CoursePlan
       if (this.advisor) {
         g.DriveApp.Permission.add(this.file.getId(), this.advisor.email);
       }
-
       lib.Progress.setStatus(
         'giving student and advisor access to student folder',
         this
       ); // #create, #reset-permissions
       this.student.folder.resetPermissions();
     } else {
-      lib.Progress.setStatus('inactive, not setting plan permissions', this);
-      lib.Progress.setStatus(
-        'inactive, not setting student folder permissions',
-        this
-      );
+      lib.Progress.progress.incrementValue(2);
     }
   }
 

@@ -35,14 +35,20 @@ global.fr_rsf = (hostId: string, thread: string) => {
 };
 
 export const renameAllStudentFolders = () => 'fr_rasf';
-global.fr_rasf = () => {
-  lib.Progress.reset();
-  lib.Progress.showModalDialog(SpreadsheetApp, 'Rename Student Folders');
-  const folders = Inventory.StudentFolders.all();
-  lib.Progress.setMax(folders.length);
-  folders.forEach((folder) => {
-    lib.Progress.setStatus(`Renaming ${folder.driveFolder.getName()}`);
-    folder.resetName();
-  });
-  lib.Progress.setComplete(true);
+global.fr_rasf = (thread = Utilities.getUuid(), step = 0) => {
+  lib.Progress.setThread(thread);
+  new g.HtmlService.Element.Progress.Paged(
+    thread,
+    { root: SpreadsheetApp, title: 'Rename Studnt Folders' },
+    (step) => {
+      const folders = Inventory.StudentFolders.all().filter(
+        (folder) => folder.meta.active
+      );
+      lib.Progress.setMax(folders.length);
+      return folders.slice(step);
+    },
+    (folder) => folder.resetName(),
+    renameAllStudentFolders(),
+    step
+  );
 };

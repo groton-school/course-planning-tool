@@ -20,6 +20,7 @@ global.ueh_pp = () =>
 const planList = () => 'ueh_pl';
 const ueh_pl: g.HtmlService.Element.Picker.OptionsCallback = () =>
   Inventory.CoursePlans.all()
+    .filter((plan) => plan.meta.active)
     .map((p) => p.toOption())
     .sort();
 global.ueh_pl = ueh_pl;
@@ -55,6 +56,7 @@ global.ueh_a = (thread = Utilities.getUuid(), step = 0) => {
     },
     (plan) => plan.updateEnrollmentHistory(),
     all(),
-    step
+    step,
+    true
   );
 };
