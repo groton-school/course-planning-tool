@@ -186,8 +186,11 @@ class CoursePlan
   private _numOptionsPerDepartment?: number;
   // TODO could this be pulled by looking at merged cells?
   private get numOptionsPerDepartment() {
-    if (!this._numOptionsPerDepartment) {
-      if (this.inventory.has(this.hostId)) {
+    if (this._numOptionsPerDepartment == null) {
+      if (
+        this.inventory.has(this.hostId) &&
+        this.meta.numOptionsPerDepartment // might still be an incomplete plan!
+      ) {
         this._numOptionsPerDepartment = this.meta.numOptionsPerDepartment;
       } else {
         this._numOptionsPerDepartment = lib.Parameters.numOptionsPerDepartment;
@@ -269,7 +272,7 @@ class CoursePlan
   public resetPermissions() {
     if (this.meta.active) {
       this.setPermissions();
-      this.setCommentEditors();
+      this.setCommentEditors(false);
     }
   }
 
@@ -394,8 +397,31 @@ class CoursePlan
         validations[0].length
       ).setDataValidations(validations);
 
-      this.insertAndMergeOptionsRows(values[0].length);
+      this.insertOptionsRows();
+    } else {
+      lib.Progress.setStatus('expanding data protection', this); // #update-history
+      const protections = this.planSheet.getProtections(
+        SpreadsheetApp.ProtectionType.RANGE
+      );
+      for (const protection of protections) {
+        if (
+          protection.getRange().getRow() ===
+          this.getAnchorOffset(0, 0).getRow() &&
+          protection.getRange().getColumn() ===
+          this.getAnchorOffset(0, 0).getColumn()
+        ) {
+          protection.setRange(
+            this.getAnchorOffset(
+              0,
+              0,
+              this.numDepartments * this.numOptionsPerDepartment,
+              values[0].length
+            )
+          );
+        }
+      }
     }
+    this.mergeEnrollmentHistoryRows(values[0].length);
 
     lib.Progress.setStatus('publishing enrollment history', this); // #create, #update-history
     for (let row = 0; row < values.length; row++) {
@@ -462,7 +488,7 @@ class CoursePlan
     this.student.folder.assignToCurrentAdvisor();
   }
 
-  private setCommentEditors() {
+  private setCommentEditors(create = true) {
     lib.Progress.setStatus('setting comment editors', this); // #create, #reset-permissions
     const commentors = [
       {
@@ -476,11 +502,26 @@ class CoursePlan
         editors: [lib.Parameters.email.collegeCounseling]
       }
     ];
+    let protections: GoogleAppsScript.Spreadsheet.Protection[];
+    if (!create) {
+      protections = this.planSheet.getProtections(
+        SpreadsheetApp.ProtectionType.RANGE
+      );
+    }
     for (const { name, range, editors } of commentors) {
-      const protection = this.planSheet
-        .getRange(range)
-        .protect()
-        .setDescription(name);
+      let protection: GoogleAppsScript.Spreadsheet.Protection;
+      if (create) {
+        protection = this.planSheet
+          .getRange(range)
+          .protect()
+          .setDescription(name);
+      } else {
+        for (const p of protections) {
+          if (p.getDescription() == name) {
+            protection = p;
+          }
+        }
+      }
       g.SpreadsheetApp.Protection.clearEditors(protection);
       editors.forEach((editor) => {
         try {
@@ -489,7 +530,9 @@ class CoursePlan
           // guessing that an undefined advisor will throw an error -- which we will ignore
         }
       });
-      this.additionalComments(protection.getRange().getRow());
+      if (create) {
+        this.additionalComments(protection.getRange().getRow());
+      }
     }
   }
 
@@ -515,7 +558,7 @@ class CoursePlan
   }
 
   // TODO adjust row height to accommodate actual content lines
-  private insertAndMergeOptionsRows(valueWidth: number) {
+  private insertOptionsRows() {
     const numOptions = lib.Parameters.numOptionsPerDepartment;
     for (
       let row = 0;
@@ -526,10 +569,19 @@ class CoursePlan
         this.getAnchorOffset().getRow() + row,
         numOptions - 1
       );
+    }
+  }
+
+  private mergeEnrollmentHistoryRows(valueWidth: number) {
+    for (
+      let row = 0;
+      row < this.numDepartments * this.numOptionsPerDepartment;
+      row += this.numOptionsPerDepartment
+    ) {
       this.getAnchorOffset(
         row,
         -1,
-        numOptions,
+        this.numOptionsPerDepartment,
         valueWidth + 1
       ).mergeVertically();
     }
