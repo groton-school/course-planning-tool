@@ -33,6 +33,10 @@ global.ucl_pp = () =>
 const planList = () => 'ucl_pl';
 const ucl_pl: g.HtmlService.Element.Picker.OptionsCallback = () =>
   Inventory.CoursePlans.all()
+    .filter(
+      (plan) =>
+        plan.meta.active && plan.student.gradYear != lib.currentSchoolYear()
+    )
     .map((p) => p.toOption())
     .sort();
 global.ucl_pl = ucl_pl;
@@ -45,7 +49,8 @@ global.ucl_a = (thread = Utilities.getUuid(), step = 0) => {
     { root: SpreadsheetApp, title: 'Update Course Lists' },
     (step) => {
       const plans = Inventory.CoursePlans.all().filter(
-        (plan) => plan.meta.active
+        (plan) =>
+          plan.meta.active && plan.student.gradYear != lib.currentSchoolYear()
       );
       lib.Progress.setMax(
         plans.length *

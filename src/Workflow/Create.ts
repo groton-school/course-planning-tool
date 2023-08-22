@@ -61,8 +61,12 @@ global.c_a = (thread = Utilities.getUuid(), step = 0, gradYear?: number) => {
     { root: SpreadsheetApp, title: 'Create Course Plans' },
     (step) => {
       const students = gradYear
-        ? Role.Student.getFormOf(gradYear)
-        : Role.Student.all();
+        ? Role.Student.getFormOf(gradYear).filter(
+          (student) => !Inventory.CoursePlans.has(student.hostId)
+        )
+        : Role.Student.all().filter(
+          (student) => !Inventory.CoursePlans.has(student.hostId)
+        );
       lib.Progress.setMax(
         students.length *
         Inventory.Module.CoursePlans.CoursePlan.stepCount.create

@@ -20,7 +20,10 @@ global.ueh_pp = () =>
 const planList = () => 'ueh_pl';
 const ueh_pl: g.HtmlService.Element.Picker.OptionsCallback = () =>
   Inventory.CoursePlans.all()
-    .filter((plan) => plan.meta.active)
+    .filter(
+      (plan) =>
+        plan.meta.active && plan.student.gradYear != lib.currentSchoolYear()
+    )
     .map((p) => p.toOption())
     .sort();
 global.ueh_pl = ueh_pl;
@@ -45,7 +48,8 @@ global.ueh_a = (thread = Utilities.getUuid(), step = 0) => {
     { root: SpreadsheetApp, title: 'Update Enrollment Histories' },
     (step) => {
       const plans = Inventory.CoursePlans.all().filter(
-        (plan) => plan.meta.active
+        (plan) =>
+          plan.meta.active && plan.student.gradYear != lib.currentSchoolYear()
       );
       lib.Progress.setMax(
         plans.length *
