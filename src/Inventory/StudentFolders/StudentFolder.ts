@@ -31,6 +31,10 @@ class StudentFolder
 
   public resetPermissions() {
     if (this.meta.active) {
+      lib.Progress.setStatus(
+        'adding advisor as viewer to student folder',
+        this
+      ); // #reset-student-folder-permissions
       if (this.student.advisor) {
         g.DriveApp.Permission.add(
           this.id,
@@ -38,6 +42,10 @@ class StudentFolder
           g.DriveApp.Permission.Role.Reader
         );
       }
+      lib.Progress.setStatus(
+        'adding student as viewer to student folder',
+        this
+      ); // #reset-student-folder-permissions
       g.DriveApp.Permission.add(
         this.id,
         this.student.email,
@@ -52,55 +60,76 @@ class StudentFolder
       !this.meta.permissionsUpdated &&
       this.student.advisor
     ) {
-      lib.Progress.log('updating student folder permissions', this, {
+      lib.Progress.setStatus('updating student folder permissions', this, {
         current: this.student.advisor.email,
-        previous: this.student.previousAdvisor.email
-      });
+        previous: this.student.previousAdvisor?.email
+      }); // #assign-to-current-advisor
       this.resetPermissions();
+      // #assign-to-current-advisor (A: 3)
+      if (this.student.previousAdvisor) {
+        const shortcut = this.student.previousAdvisor.folder.contains(this);
+        if (shortcut) {
+          if (this.student.advisor.folder.contains(this)) {
+            lib.Progress.setStatus(
+              'removing shortcut from previous advisor folder',
+              this
+            ); // (A: 1 of 3)
+            shortcut.setTrashed(true);
+          } else {
+            lib.Progress.setStatus(
+              'moving student folder to current advisor folder',
+              this
+            ); // (A: 2 of 3)
+            shortcut.moveTo(this.student.advisor.folder.driveFolder);
+          }
+        }
+        try {
+          this.driveFolder.removeViewer(this.student.previousAdvisor.email);
+          lib.Progress.setStatus(
+            'removed previous advisor as folder viewer',
+            this
+          ); // #assign-to-current-advisor (B: 1 of 3)
+        } catch (e) {
+          lib.Progress.setStatus(
+            'prevous advisor was not a folder viewer', // (B: 2 of 3)
+            this
+          );
+        }
 
-      lib.Progress.log('moving student folder to current advisor folder', this);
-      const shortcut = this.student.previousAdvisor?.folder.contains(this);
-      if (shortcut) {
-        shortcut.moveTo(this.student.advisor.folder.driveFolder);
+        this.meta.permissionsUpdated = true;
+      } else if (!this.student.advisor.folder.contains(this)) {
+        lib.Progress.setStatus('adding shortcut to advisor folder', this);
+        const shortcut = this.student.advisor.folder.driveFolder.createShortcut(
+          this.id
+        ); // (A: 3 of 3)
+        lib.Progress.progress.incrementValue(); // B (3 of 3)
+        shortcut.setName(this.student.formattedName);
+        this.meta.permissionsUpdated = true;
       }
-      try {
-        this.driveFolder.removeViewer(this.student.previousAdvisor.email);
-      } catch (e) {
-        lib.Progress.log(
-          `${this.student.previousAdvisor.email} was not a student folder viewer`,
-          this
-        );
-      }
-
-      this.meta.permissionsUpdated = true;
-    } else if (
-      this.student.advisor &&
-      !this.student.advisor.folder.contains(this)
-    ) {
-      const shortcut = this.student.advisor.folder.driveFolder.createShortcut(
-        this.id
-      );
-      shortcut.setName(this.student.formattedName);
     }
   }
 
   public deactivate() {
     if (this.meta.inactive && !this.meta.permissionsUpdated) {
-      lib.Progress.log(
+      lib.Progress.setStatus(
         'removing student folder from previous advisor folder',
         this
-      );
-      const shortcut = this.student.advisor.folder.contains(this);
+      ); // #deactivate
+      const shortcut = this.student.previousAdvisor.folder.contains(this);
       if (shortcut) {
         shortcut.setTrashed(true);
       }
       try {
         this.driveFolder.removeViewer(this.student.previousAdvisor.email);
-      } catch (e) {
-        lib.Progress.log(
-          `${this.student.previousAdvisor.email} was not a student folder viewer`,
+        lib.Progress.setStatus(
+          'removed previous advisor as student folder viewer',
           this
-        );
+        ); // #deactivate (1 of 2)
+      } catch (e) {
+        lib.Progress.setStatus(
+          `previous advisor was not a student folder viewer`,
+          this
+        ); // (2 of 2)
       }
       this.meta.permissionsUpdated = true;
     }
@@ -129,8 +158,8 @@ class StudentFolder
         shortcut.setTrashed(true);
       }
     }
-    this.driveFolder.setTrashed(true);
     lib.Progress.log('moving student folder to trash', this);
+    this.driveFolder.setTrashed(true);
     this.inventory.remove(this.key);
   }
 

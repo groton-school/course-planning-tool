@@ -1,16 +1,24 @@
 const fs = require('fs');
 const webpack = require('webpack');
 
-const coursePlanModule = fs
-  .readFileSync('src/Inventory/CoursePlans/CoursePlan.ts')
-  .toString();
+const DEBUGGING = false;
 
-function stepCount(hash) {
-  const count = JSON.stringify(
-    coursePlanModule.match(new RegExp(`#${hash}`, 'g')).length
-  );
-  console.log(`#${hash}: ${count} steps`);
-  return count;
+const COURSE_PLAN = 'src/Inventory/CoursePlans/CoursePlan.ts';
+const STUDENT_FOLDER = 'src/Inventory/StudentFolders/StudentFolder.ts';
+const ADVISOR_FOLDER = 'src/Inventory/AdvisorFolders/AdvisorFolder.ts';
+
+const files = {};
+
+function stepCount(filePaths, hash) {
+  let count = 0;
+  for (const filePath of filePaths) {
+    if (!files[filePath]) {
+      files[filePath] = fs.readFileSync(filePath).toString();
+    }
+    count += files[filePath].match(new RegExp(`//.*${hash}`, 'g'))?.length || 0;
+  }
+  console.log(`${hash}: ${count} steps`);
+  return JSON.stringify(count);
 }
 
 module.exports = require('@battis/gas-lighter/webpack.config')({
@@ -20,14 +28,35 @@ module.exports = require('@battis/gas-lighter/webpack.config')({
       APP_VERSION: JSON.stringify(
         JSON.parse(fs.readFileSync('package.json')).version
       ),
-      CREATE_STEPS: stepCount('create'),
-      UPDATE_HISTORY_STEPS: stepCount('update-history'),
-      UPDATE_COURSES_STEPS: stepCount('update-courses'),
-      DELETE_STEPS: stepCount('delete'),
-      REASSIGN_STEPS: stepCount('reassign'),
-      INACTIVE_STEPS: stepCount('inactive'),
-      RESET_PERMISSIONS_STEPS: stepCount('reset-permissions')
+      CREATE_STEPS: stepCount([COURSE_PLAN, STUDENT_FOLDER], '#create'),
+      UPDATE_ENROLLMENT_HISTORY_STEPS: stepCount(
+        [COURSE_PLAN],
+        '#update-enrollment-history'
+      ),
+      UPDATE_COURSE_LIST_STEPS: stepCount([COURSE_PLAN], '#update-course-list'),
+      DELETE_STUDENT_STEPS: stepCount(
+        [COURSE_PLAN, STUDENT_FOLDER],
+        '#delete-student'
+      ),
+      DELETE_ADVISOR_STEPS: stepCount([ADVISOR_FOLDER], '#delete-advisor'),
+      ASSIGN_TO_CURRENT_ADVISOR_STEPS: stepCount(
+        [COURSE_PLAN, STUDENT_FOLDER],
+        '#assign-to-current-advisor'
+      ),
+      DEACTIVATE_STEPS: stepCount([COURSE_PLAN, STUDENT_FOLDER], '#deactivate'),
+      RESET_COURSE_PLAN_PERMISSIONS_STEPS: stepCount(
+        [COURSE_PLAN, STUDENT_FOLDER],
+        '#reset-course-plan-permissions'
+      ),
+      RESET_STUDENT_FOLDER_PERMISSIONS_STEPS: stepCount(
+        [STUDENT_FOLDER],
+        '#reset-student-folder-permissions'
+      ),
+      RESET_ADVISOR_FOLDER_PERMISSIONS_STEPS: stepCount(
+        [ADVISOR_FOLDER],
+        '#reset-advisor-folder-permissions'
+      )
     })
   ],
-  production: true
+  production: !DEBUGGING
 });

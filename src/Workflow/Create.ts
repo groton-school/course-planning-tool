@@ -1,6 +1,5 @@
 import g from '@battis/gas-lighter';
 import Inventory from '../Inventory';
-import CoursePlan from '../Inventory/CoursePlans/CoursePlan';
 import Role from '../Role';
 import lib from '../lib';
 
@@ -27,7 +26,7 @@ global.c_swcp = c_swcp;
 const createPlanFor = () => 'c_cpf';
 global.c_cpf = (hostId: string, thread: string) => {
   lib.Progress.setThread(thread);
-  lib.Progress.setMax(CoursePlan.stepCount.create);
+  lib.Progress.setMax(parseInt(CREATE_STEPS));
   const plan = Inventory.CoursePlans.get(hostId);
   lib.Progress.setCompleteLink({
     message: `Created course plan for ${plan.student.formattedName}.`,
@@ -67,10 +66,7 @@ global.c_a = (thread = Utilities.getUuid(), step = 0, gradYear?: number) => {
         : Role.Student.all().filter(
           (student) => !Inventory.CoursePlans.has(student.hostId)
         );
-      lib.Progress.setMax(
-        students.length *
-        Inventory.Module.CoursePlans.CoursePlan.stepCount.create
-      );
+      lib.Progress.setMax(students.length * parseInt(CREATE_STEPS));
       return students.slice(step);
     },
     (student) => Inventory.CoursePlans.get(student.hostId),

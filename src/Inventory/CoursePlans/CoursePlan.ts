@@ -4,6 +4,7 @@ import lib from '../../lib';
 import Base from '../Base';
 import Folders from '../Folders';
 import FormFoldersOfCoursePlans from '../FormFoldersOfCoursePlans';
+import StudentFolders from '../StudentFolders';
 import Inventory from './Inventory';
 import Metadata from './Metadata';
 
@@ -13,16 +14,6 @@ class CoursePlan
   g.HtmlService.Element.Picker.Pickable,
   lib.Progress.Contextable,
   lib.Progress.Sourceable {
-  public static stepCount = {
-    create: parseInt(CREATE_STEPS),
-    updateEnrollmentHistory: parseInt(UPDATE_HISTORY_STEPS),
-    updateCourseList: parseInt(UPDATE_COURSES_STEPS),
-    delete: parseInt(DELETE_STEPS),
-    reassign: parseInt(REASSIGN_STEPS),
-    inactive: parseInt(INACTIVE_STEPS),
-    resetPermissions: parseInt(RESET_PERMISSIONS_STEPS)
-  };
-
   private static readonly protectionDescription = {
     NO_EDITS: 'No Edits',
     COMMENTS_FROM_ADVISOR: 'Comments from Faculty Advisor',
@@ -50,13 +41,13 @@ class CoursePlan
   private _student?: Role.Student;
   public get student() {
     if (!this._student) {
-      this._student = Role.Student.get(this.hostId, true);
+      this._student = Role.Student.get(this.hostId);
     }
     return this._student;
   }
   private set student(student: Role.Student) {
     this._student = student;
-    lib.Progress.setStatus('identifying student', this); // #create, #update-history, #update-courses, #delete
+    lib.Progress.setStatus('identifying student', this); // #create, #update-enrollment-history, #update-course-list, #delete-student
   }
   public get hostId() {
     return this.key.toString();
@@ -214,13 +205,20 @@ class CoursePlan
     if (this.meta.newAdvisor && !this.meta.permissionsUpdated && this.advisor) {
       lib.Progress.setStatus(`updating course plan permissions`, this, {
         current: this.advisor.email,
-        previous: this.student.previousAdvisor.email
-      }); // #reassign
-      g.DriveApp.Permission.add(
-        this.file.getId(),
-        this.advisor.email,
-        g.DriveApp.Permission.Role.Writer
-      );
+        previous: this.student.previousAdvisor?.email
+      }); // #assign-to-current-advisor
+      this.setPermissions();
+      this.setCommentEditors(false);
+      this.removePreviousAdvisor(); // FIXME should probably just deactivate and then reassign?
+      this.updateNames();
+      this.meta.permissionsUpdated = true;
+    }
+    this.student.folder.assignToCurrentAdvisor();
+  }
+
+  private removePreviousAdvisor() {
+    if (this.student.previousAdvisor) {
+      lib.Progress.setStatus('removing previous advisor permissions', this); // #assign-to-current-advisor
       const protections = this.planSheet.getProtections(
         SpreadsheetApp.ProtectionType.RANGE
       );
@@ -228,45 +226,42 @@ class CoursePlan
         const editors = protection.getEditors();
         for (const editor of editors) {
           if (editor.getEmail() === this.student.previousAdvisor.email) {
-            protection.addEditor(this.advisor.email);
             protection.removeEditor(this.student.previousAdvisor.email);
           }
         }
       }
       try {
         this.file.removeEditor(this.student.previousAdvisor.email);
-      } catch (e) {
-        lib.Progress.log(
-          `${this.student.previousAdvisor.email} was not a course plan editor`,
+        lib.Progress.setStatus(
+          'removed previous advisor as a course plan editor',
           this
-        );
+        ); // #assign-to-current-advisor (1 of 2)
+      } catch (e) {
+        lib.Progress.setStatus(
+          'previous advisor was not a course plan editor',
+          this
+        ); // (2 of 2)
       }
-
-      this.updateNames();
-
-      this.meta.permissionsUpdated = true;
+    } else {
+      lib.Progress.progress.incrementValue();
     }
-
-    lib.Progress.setStatus('moving into current advisor folder', this); // #reassign
-    this.student.folder.assignToCurrentAdvisor();
   }
 
   public deactivate() {
     if (this.meta.inactive && !this.meta.permissionsUpdated) {
-      lib.Progress.setStatus('removing previous advisor', this); // #inactive
       try {
         this.file.removeEditor(this.student.previousAdvisor.email);
+        lib.Progress.setStatus('removed previous advisor as editor', this); // #deactivate (1 of 2)
       } catch (e) {
-        lib.Progress.log(
-          `${this.student.previousAdvisor.email} as not a course plan editor`,
+        lib.Progress.setStatus(
+          `previous advisor was not a course plan editor`,
           this
-        );
+        ); // (2 of 2)
       }
 
       this.meta.permissionsUpdated = true;
     }
-    lib.Progress.setStatus('remove from advisor folder', this); // #inactive
-    this.student.folder.deactivate();
+    StudentFolders.Inventory.getInstance().get(this.hostId).deactivate();
   }
 
   public resetPermissions() {
@@ -348,7 +343,7 @@ class CoursePlan
   }
 
   private populateEnrollmentHistory(create = true) {
-    lib.Progress.setStatus('calculating enrollment history', this); // #create, #update-history
+    lib.Progress.setStatus('calculating enrollment history', this); // #create, #update-enrollment-history
     const ieh = this.individualEnrollmentHistory;
     ieh
       .getRange(lib.CoursePlanningData.namedRange.IEHHostIdSelector)
@@ -399,7 +394,7 @@ class CoursePlan
 
       this.insertOptionsRows();
     } else {
-      lib.Progress.setStatus('expanding data protection', this); // #update-history
+      lib.Progress.setStatus('expanding data protection', this); // #update-enrollment-history
       const protections = this.planSheet.getProtections(
         SpreadsheetApp.ProtectionType.RANGE
       );
@@ -423,7 +418,7 @@ class CoursePlan
     }
     this.mergeEnrollmentHistoryRows(values[0].length);
 
-    lib.Progress.setStatus('publishing enrollment history', this); // #create, #update-history
+    lib.Progress.setStatus('publishing enrollment history', this); // #create, #update-enrollment-history
     for (let row = 0; row < values.length; row++) {
       const target = this.getAnchorOffset(
         row * this.numOptionsPerDepartment,
@@ -437,7 +432,7 @@ class CoursePlan
   }
 
   private updateNames() {
-    lib.Progress.setStatus('updating advisor on course plan', this); // #create, #reassign
+    lib.Progress.setStatus('updating advisor on course plan', this); // #create, #assign-to-current-advisor
     g.SpreadsheetApp.Value.set(
       this.planSheet,
       lib.CoursePlanTemplate.namedRange.TemplateNames,
@@ -462,7 +457,7 @@ class CoursePlan
 
   private setPermissions() {
     if (this.meta.active) {
-      lib.Progress.setStatus('giving student and advisor access to plan', this); // #create, #reset-permissions
+      lib.Progress.setStatus('giving student and advisor access to plan', this); // #create, #reset-course-plan-permissions, #assign-to-current-advisor (A: 1 of 2)
       g.DriveApp.Permission.add(this.file.getId(), this.student.email);
       if (this.advisor) {
         g.DriveApp.Permission.add(this.file.getId(), this.advisor.email);
@@ -470,10 +465,10 @@ class CoursePlan
       lib.Progress.setStatus(
         'giving student and advisor access to student folder',
         this
-      ); // #create, #reset-permissions
+      ); // #create, #reset-course-plan-permissions, #assign-to-current-advisor (B: 1 of 2)
       this.student.folder.resetPermissions();
     } else {
-      lib.Progress.progress.incrementValue(2);
+      lib.Progress.progress.incrementValue(2); // A, B (2 of 2)
     }
   }
 
@@ -489,7 +484,7 @@ class CoursePlan
   }
 
   private setCommentEditors(create = true) {
-    lib.Progress.setStatus('setting comment editors', this); // #create, #reset-permissions
+    lib.Progress.setStatus('setting comment editors', this); // #create, #reset-course-plan-permissions, #assign-to-current-advisor
     const commentors = [
       {
         name: CoursePlan.protectionDescription.COMMENTS_FROM_ADVISOR,
@@ -537,7 +532,7 @@ class CoursePlan
   }
 
   public updateCourseList() {
-    lib.Progress.setStatus('updating course list', this); // #create, #update-courses
+    lib.Progress.setStatus('updating course list', this); // #create, #update-course-list
     const source = CoursePlan.coursesByDepartment;
     const destination = this.spreadsheet.getSheetByName(
       lib.CoursePlanningData.sheet.CoursesByDepartment
@@ -652,13 +647,13 @@ class CoursePlan
 
   public delete() {
     const file = this.file;
-    lib.Progress.setStatus('removing plan from inventory', this); // #delete
+    lib.Progress.setStatus('removing plan from inventory', this); // #delete-student
     this.inventory.remove(this.hostId);
 
-    lib.Progress.setStatus('moving shortcuts to trash', this); // #delete
+    lib.Progress.setStatus('moving shortcuts to trash', this); // #delete-student
     this.student.folder.delete();
 
-    lib.Progress.setStatus('moving plan to trash', this); // #delete
+    lib.Progress.setStatus('moving plan to trash', this); // #delete-student
     file.setTrashed(true);
   }
 }

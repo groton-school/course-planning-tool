@@ -17,7 +17,7 @@ global.atca_ps = () =>
       message: 'Please select a student to re-assign to their current advisor',
       list: plansWithNewAdvisor(),
       callback: assignStudent(),
-      actionName: 'Re-assign'
+      actionName: 'Assign'
     },
     'Assign to Current Advisor'
   );
@@ -26,9 +26,7 @@ const assignStudent = () => 'atca_as';
 global.atca_as = (hostId: string, thread: string) => {
   lib.Progress.setThread(thread);
   lib.Progress.reset();
-  lib.Progress.setMax(
-    Inventory.Module.CoursePlans.CoursePlan.stepCount.reassign
-  );
+  lib.Progress.setMax(parseInt(ASSIGN_TO_CURRENT_ADVISOR_STEPS));
   const plan = Inventory.CoursePlans.get(hostId);
   plan.assignToCurrentAdvisor();
   lib.Progress.setCompleteLink({
@@ -52,8 +50,7 @@ global.acta_a = (thread = Utilities.getUuid(), step = 0) => {
         (plan) => plan.meta.active && !plan.meta.permissionsUpdated
       );
       lib.Progress.setMax(
-        plans.length *
-        Inventory.Module.CoursePlans.CoursePlan.stepCount.reassign
+        plans.length * parseInt(ASSIGN_TO_CURRENT_ADVISOR_STEPS)
       );
       return plans.slice(step);
     },

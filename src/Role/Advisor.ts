@@ -54,19 +54,23 @@ class Advisor {
     return `${this.firstName} ${this.lastName}`;
   }
 
-  public static get(
-    email: string,
-    sheet = lib.CoursePlanningData.sheet.AdvisorList
-  ) {
+  public static get(email: string, fallbackToPreviousYear = true) {
     if (this.cache[email]) {
       return this.cache[email];
     } else {
-      return new Advisor(
-        Advisor.getData(sheet).find(
+      let row = this.getData(lib.CoursePlanningData.sheet.AdvisorList).find(
+        (row) =>
+          row[lib.CoursePlanningData.column.AdvisorList.AdvisorEmail] == email
+      );
+      if (!row && fallbackToPreviousYear) {
+        row = this.getData(
+          lib.CoursePlanningData.sheet.AdvisorListPreviousYear
+        ).find(
           (row) =>
             row[lib.CoursePlanningData.column.AdvisorList.AdvisorEmail] == email
-        )
-      );
+        );
+      }
+      return (row && new Advisor(row)) || null;
     }
   }
 
@@ -86,9 +90,29 @@ class Advisor {
     ).find(([id]) => id === hostId);
     let student: Student;
     if (row) {
-      student = new Student(
-        row.slice(0, lib.CoursePlanningData.column.StudentList.GradYear)
-      );
+      const [
+        // FIXME unsafely assumes column order
+        hostId,
+        email,
+        firstName,
+        lastName,
+        gradYear,
+        advisorEmail,
+        advisorFirstName,
+        advisorLastName
+      ] = row;
+      student = new Student({
+        hostId,
+        email,
+        firstName,
+        lastName,
+        gradYear,
+        previousAdvisor: {
+          email: advisorEmail,
+          firstName: advisorFirstName,
+          lastName: advisorLastName
+        }
+      });
     }
     return student;
   }

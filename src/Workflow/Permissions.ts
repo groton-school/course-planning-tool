@@ -12,7 +12,9 @@ global.p_rsfp = (thread = Utilities.getUuid(), step = 0) => {
       const folders = Inventory.StudentFolders.all().filter(
         (folder) => folder.meta.active
       );
-      lib.Progress.setMax(folders.length);
+      lib.Progress.setMax(
+        folders.length * parseInt(RESET_STUDENT_FOLDER_PERMISSIONS_STEPS)
+      );
       return folders.slice(step);
     },
     (folder) => {
@@ -40,7 +42,9 @@ global.p_rafp = (thread = Utilities.getUuid(), step = 0) => {
       const folders = Inventory.AdvisorFolders.all().filter(
         (folder) => folder.meta.active
       );
-      lib.Progress.setMax(folders.length);
+      lib.Progress.setMax(
+        folders.length * parseInt(RESET_ADVISOR_FOLDER_PERMISSIONS_STEPS)
+      );
       return folders.slice(step);
     },
     (folder) => {
@@ -68,8 +72,7 @@ global.p_rcpp = (thread = Utilities.getUuid(), step = 0) => {
         (plan) => plan.meta.active
       );
       lib.Progress.setMax(
-        plans.length *
-        Inventory.Module.CoursePlans.CoursePlan.stepCount.resetPermissions
+        plans.length * parseInt(RESET_COURSE_PLAN_PERMISSIONS_STEPS)
       );
       return plans.slice(step);
     },

@@ -15,13 +15,11 @@ const deactivate = () => 'da_d';
 global.da_d = (hostId: string, thread: string) => {
   lib.Progress.setThread(thread);
   lib.Progress.reset();
-  lib.Progress.setMax(
-    Inventory.Module.CoursePlans.CoursePlan.stepCount.inactive
-  );
+  lib.Progress.setMax(parseInt(DEACTIVATE_STEPS));
   const plan = Inventory.CoursePlans.get(hostId);
   plan.deactivate();
   lib.Progress.setCompleteLink({
-    message: `Made course plan for ${plan.student.formattedName} inactive.`,
+    message: `Deactivated inactive course plan for ${plan.student.formattedName}.`,
     url: {
       'Open Plan': plan.url,
       'Open Student Folder': plan.student.folder.url
@@ -34,12 +32,12 @@ global.da_ps = () => {
   g.HtmlService.Element.Picker.showModalDialog(
     SpreadsheetApp,
     {
-      message: 'Please select a student to make inactive',
+      message: 'Please select an inactive student to deactivate',
       list: inactivePlans(),
-      actionName: 'Make Inactive',
+      actionName: 'Deactivate',
       callback: deactivate()
     },
-    'Make Inactive'
+    'Deactivate'
   );
 };
 
@@ -51,12 +49,9 @@ global.da_a = (thread = Utilities.getUuid(), step = 0) => {
     { root: SpreadsheetApp, title: 'Deactivate Inactive Plans' },
     (step) => {
       const plans = Inventory.CoursePlans.all().filter(
-        (plan) => plan.meta.inactive && !plans.meta.permissionsUpdated
+        (plan) => plan.meta.inactive && !plan.meta.permissionsUpdated
       );
-      lib.Progress.setMax(
-        plans.length *
-        Inventory.Module.CoursePlans.CoursePlan.stepCount.inactive
-      );
+      lib.Progress.setMax(plans.length * parseInt(DEACTIVATE_STEPS));
       return plans.slice(step);
     },
     (plan) => plan.deactivate(),

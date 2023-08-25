@@ -6,9 +6,7 @@ const updateCourseListFor = () => 'ucl_uclf';
 global.ucl_uclf = (hostId: string, thread: string) => {
   lib.Progress.setThread(thread);
   lib.Progress.reset();
-  lib.Progress.setMax(
-    Inventory.Module.CoursePlans.CoursePlan.stepCount.updateCourseList
-  );
+  lib.Progress.setMax(parseInt(UPDATE_COURSE_LIST_STEPS));
   const plan = Inventory.CoursePlans.get(hostId);
   plan.updateCourseList();
   lib.Progress.setCompleteLink({
@@ -52,10 +50,7 @@ global.ucl_a = (thread = Utilities.getUuid(), step = 0) => {
         (plan) =>
           plan.meta.active && plan.student.gradYear != lib.currentSchoolYear()
       );
-      lib.Progress.setMax(
-        plans.length *
-        Inventory.Module.CoursePlans.CoursePlan.stepCount.updateCourseList
-      );
+      lib.Progress.setMax(plans.length * parseInt(UPDATE_COURSE_LIST_STEPS));
       return plans.slice(step);
     },
     (plan) => plan.updateCourseList(),

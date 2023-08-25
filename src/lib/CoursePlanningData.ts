@@ -74,6 +74,10 @@ class CoursePlanningData {
       PermissionsUpdated: i('J')
     },
     CoursePlans: {
+      StudentEmail: i('D'),
+      StudentFirstName: i('E'),
+      StudentLastName: i('F'),
+      GradYear: i('G'),
       NumOptionsPerDepartment: i('N'),
       Inactive: i('O'),
       NewAdvisor: i('P'),

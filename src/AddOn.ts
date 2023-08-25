@@ -28,6 +28,12 @@ export function onOpen() {
     .addSeparator()
     .addSubMenu(
       SpreadsheetApp.getUi()
+        .createMenu('Single Advisors')
+        .addItem('Delete…', Workflow.Delete.pickAdvisor())
+    )
+    .addSeparator()
+    .addSubMenu(
+      SpreadsheetApp.getUi()
         .createMenu('Single Course Plan')
         .addItem('Create…', Workflow.Create.pickStudent())
         .addSeparator()
@@ -43,7 +49,7 @@ export function onOpen() {
         .addItem('Deactivate inactive…', Workflow.Deactivate.pickStudent())
         .addItem('Expand comments…', Workflow.ExpandComments.pickStudent())
         .addSeparator()
-        .addItem('Delete…', Workflow.Delete.pickPlan())
+        .addItem('Delete…', Workflow.Delete.pickStudent())
     )
     .addSeparator()
     .addSubMenu(

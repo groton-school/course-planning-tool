@@ -75,6 +75,7 @@ class Student implements g.HtmlService.Element.Picker.Pickable {
   public constructor(data: Student.ConstructorParameter) {
     if (Array.isArray(data)) {
       const [
+        // FIXME assumes column order unsafely
         hostId,
         email,
         firstName,
@@ -128,13 +129,11 @@ class Student implements g.HtmlService.Element.Picker.Pickable {
     return lib.Format.apply(lib.Parameters.nameFormat.student, this);
   }
 
-  public static get(hostId: string, fallbackToPreviousYear = false) {
+  public static get(hostId: string, fallbackToPreviousYear = true) {
     if (!this.cache[hostId]) {
-      const row =
-        this.data.find(
-          (row) =>
-            row[lib.CoursePlanningData.column.StudentList.HostId] == hostId
-        ) || [];
+      const row = this.data.find(
+        (row) => row[lib.CoursePlanningData.column.StudentList.HostId] == hostId
+      );
       if (row) {
         this.cache[hostId] = new Student(row);
       } else if (fallbackToPreviousYear) {

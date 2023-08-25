@@ -1,6 +1,5 @@
 import g from '@battis/gas-lighter';
 import Inventory from '../Inventory';
-import CoursePlan from '../Inventory/CoursePlans/CoursePlan';
 import lib from '../lib';
 
 export const pickPlan = () => 'ueh_pp';
@@ -31,7 +30,7 @@ global.ueh_pl = ueh_pl;
 const updateEnrollmentHistoryFor = () => 'ueh_uehf';
 global.ueh_uehf = (hostId: string, thread: string) => {
   lib.Progress.setThread(thread);
-  lib.Progress.setMax(CoursePlan.stepCount.updateEnrollmentHistory);
+  lib.Progress.setMax(parseInt(UPDATE_ENROLLMENT_HISTORY_STEPS));
   const plan = Inventory.CoursePlans.get(hostId);
   plan.updateEnrollmentHistory();
   lib.Progress.setCompleteLink({
@@ -52,9 +51,7 @@ global.ueh_a = (thread = Utilities.getUuid(), step = 0) => {
           plan.meta.active && plan.student.gradYear != lib.currentSchoolYear()
       );
       lib.Progress.setMax(
-        plans.length *
-        Inventory.Module.CoursePlans.CoursePlan.stepCount
-          .updateEnrollmentHistory
+        plans.length * parseInt(UPDATE_ENROLLMENT_HISTORY_STEPS)
       );
       return plans.slice(step);
     },
