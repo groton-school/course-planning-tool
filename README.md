@@ -19,7 +19,7 @@ All workflows are available from the `Course Planning` menu in the [Course Plann
 
 <table><thead><th>
   
-#### Management
+#### Create
 
 </th></thead><tbody><tr><td>
         
@@ -31,6 +31,13 @@ Creates a new course plan for all students in the Advisor List sheet who do not 
 
 Presents a dialog to choose a form by class year. Upon selection, it will create a new course plan for each student in the form in the Advisor List sheet who do not already have a course plan registered in the Course Plan Inventory sheet, updating permissions and the Course Plan Inventory.
 
+</td></tr></tbody></table>
+<table><thead><th>
+
+#### Update
+
+</th></thead><tbody><tr><td>
+        
 ##### Update all course plan enrollment histories
 
 Updates all course plans in the Course Plan Inventory to reflect updated enrollment history. See note on [Update a single course plan's enrollment history](#update-a-single-course-plans-enrollment-history) below. Note that this likely requires [refreshing Historical Enrollments first](#refresh-historical-enrollments).
@@ -39,28 +46,112 @@ Updates all course plans in the Course Plan Inventory to reflect updated enrollm
 
 Updates the Courses by Department sheet of all course plans in the Course Plan Inventory to match the Courses by Department sheet of the Course Planning Data sheet. Note that this likely requires [refreshing Historical Enrollments first](#refresh-historical-enrollments).
 
+##### Assign all plans to current advisor
+
+Compares advisor assignments from the current Advisor List and the Advisor List (Previous Year) sheet and reassigns course plans to the current advisor if different. Permissions and file shortcuts are updated and moved. Note that this likely requires [Roll-over Student/Advisor Lists](#roll-over-student-advisor-lists).
+
+##### Deactivate all inactive course plans
+
+Using the list of current students, removes shortcuts to inactive students (not enrolled this year) from their advisor folders and updates permissions. Note that this likely requires [Roll-over Student/Advisor Lists](#roll-over-student-advisor-lists).
+
+##### Expand comments in all plans
+
+Reviews all plans in the Course Plan Inventory and makes sure that there are at least as many blanks available for comments as specified for each type of comment on the Parameters sheet. For example, if number of comments is 6, and only 3 faculty advisor comment blanks are left and only 5 college counseling office comment blanks are left, the comment areas are expanded to a total of 9 (6 blank) faculty advisor comments and 7 (6 blank) college counseling office comments. Data protections are expanded to match.
+
 </td></tr></tbody></table>
 <table><thead><th>
   
-#### Troubleshooting
+#### Annual
 
 </th></thead><tbody><tr><td>
 
-##### Create a single course plan…
+##### Roll-over Student/Advisor Lists
+
+Annual command to archive the current student and advisor lists into their (Previous Year) equivalent lists. This command is protected by the Roll-Over Academic Year value in Parameters and will refuse to run if that date is more recent than 11 months previous.
+
+</td></tr></tbody></table>
+<table><thead><th>
+  
+#### Single Advisors
+
+</th></thead><tbody><tr><td>
+
+##### Delete…
+
+Pick an empty advisor folder to delete. Will not delete non-empty advisor folders.
+
+</td></tr></tbody></table>
+<table><thead><th>
+
+#### Single Course Plan
+
+</th></thead><tbody><tr><td>
+
+##### Create…
 
 Presents a dialog to choose a student from the list of students in the Advisor List sheet. Upon selection, it will create a new course plan for that student if there is not one already registered in the Course Plan Inventory sheet, updating permissions and the Course Plan Inventory. At the end, you will be presented with a direct link to the student course plan (either pre-existing or newly created).
 
-##### Update a single course plan's enrollment history…
+##### Update enrollment history…
 
 Updates a specific course plan to reflect updated enrollment history. This does not expand the enrollment history beyond the original scope (i.e., if created in the spring of 2023, and then updated in spring of 2024, it will _not_ add 2024 courses in and will _not_ overwrite plans/comments).
 
-##### Update a single course plan's course list…
+##### Update course list…
 
 Updates a specific course plan's Courses by Department sheet to match the Course Planning Data Courses by Department sheet.
+
+##### Assign to current advisor…
+
+Reassigns a specific course plan to the student's current advisor, updating advisor folder shortcuts and permissions.
+
+##### Deactivate inactive…
+
+Deactivates the course plan of an inactive (not currently enrolled) student by removing the shortcut from the advisor folder and updating permissions. The plan and folder remain in their respective class folders.
+
+##### Expand comments…
+
+Expand comments in a specific course plan so that there are as many blank comments as specified by Number of Comments on the Parameters sheet.
 
 ##### Delete a single course plan…
 
 Select a the student whose course plan to delete. This will leave all containers (student folder, advisor folder, form folders) and shortcuts, deleting only the course plan.
+
+</td></tr></tbody></table>
+<table><thead><th colspan="2">
+
+#### Permissions
+
+</th></thead><tbody><tr><td>
+
+##### Reset a single course plan permissions…
+
+Reset student and advisor access permissions for a single course plan.
+
+##### Reset Course Plan permissions
+
+Reset student and advisor access on all course plans, including data protection access.
+
+##### Reset Student Folder permissions
+
+Reset student and advisor access permissions on all student folders.
+
+##### Reset Advisor Folder permissions
+
+Reset advisor access to all advisor folders.
+
+</td></tr></tbody></table>
+<table><thead><th colspan="2">
+
+#### Folders
+
+</th></thead><tbody><tr><td>
+
+##### Rename all student folders
+
+Update student folders names based on the Student Folder Name Format on the Parameters sheet.
+
+##### Rename a student folder…
+
+Rename a single student folder based on the Student Folder Name Format on the Parameters sheet.
 
 </td></tr></tbody></table>
 <table><thead><th colspan="2">
@@ -117,7 +208,7 @@ Downloads an XLSX file that contains all of the formatting and unctions, but non
 3. Open the current year CSV in Google Sheets
 4. Import the CSV from the other four exports into the same sheet
 5. Create a sheet that gets just the `UNIQUE()` records from that combined CSV export
-6. Copy-and-paste the unique values into the `Historical Enrollment` sheet in Course Planning Data
+6. Copy-and-paste the unique values into the Historical Enrollment sheet in Course Planning Data
 
 ##### Creating new student course plans midsummer
 
