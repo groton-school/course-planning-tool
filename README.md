@@ -108,17 +108,16 @@ Downloads an XLSX file that contains all of the formatting and unctions, but non
 1. Go to the Historical Enrollment list in Academics > Grades > Report card grades list
 2. Adjust the filters and export CSV files of the list for…
 
-- Current year, forms 2, 3, 4, 5
-- 1 year ago, forms 2, 3, 4
-- 2 years ago, forms 2, 3
-- 3 years ago, form 2
+- Current year, forms 2, 3, 4, 5, 6
+- 1 year ago, forms 2, 3, 4, 5
+- 2 years ago, forms 2, 3, 4
+- 3 years ago, form 2, 3
+- 4 years ago, form 2
 
-3. Open the current year CSV in Google Sheets (largest file -- too large to copy and paste)
-4. Paste the data from the other three exports into that same sheet
+3. Open the current year CSV in Google Sheets
+4. Import the CSV from the other four exports into the same sheet
 5. Create a sheet that gets just the `UNIQUE()` records from that combined CSV export
-6. Replace the unique records with a copy-and-paste-by-value to reduce dependency overhead
-7. `IMPORTRANGE()` that list into the Historical Enrollment worksheet in Course Planning Data
-8. Replace the imported range with a copy-and-paste-by-value to reduce dependency overhead
+6. Copy-and-paste the unique values into the `Historical Enrollment` sheet in Course Planning Data
 
 ##### Creating new student course plans midsummer
 
