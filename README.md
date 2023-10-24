@@ -6,10 +6,9 @@
 
 Queries or functions that need to be updated annually are listed here:
 
-1. [Historical Enrollment](#refresh-historical-enrollment) needs to be updated, as noted.
-2. Student List, Advisor List, Course List, and Historical Enrollment sheets in Course Planning Data all need to be updated to current values (recommend using [Blackbaud Lists](https://github.com/groton-school/blackbaud-to-google-lists) add-on)
-3. Available Courses needs to be reviewed for accuracy.
-4. Review `cp-cco`, `cp-ao`, `cp-sc` group memberships for accuracy.
+1. Student List, Advisor List, Course List, and Student Enrollments sheets in Course Planning Data all need to be updated to current values (recommend using [Blackbaud Lists](https://github.com/groton-school/blackbaud-to-google-lists) add-on)
+2. Available Courses needs to be reviewed for accuracy.
+3. Review `cp-cco`, `cp-ao`, `cp-sc` group memberships for accuracy.
 
 ### Workflows
 
@@ -40,11 +39,11 @@ Presents a dialog to choose a form by class year. Upon selection, it will create
         
 ##### Update all course plan enrollment histories
 
-Updates all course plans in the Course Plan Inventory to reflect updated enrollment history. See note on [Update a single course plan's enrollment history](#update-a-single-course-plans-enrollment-history) below. Note that this likely requires [refreshing Historical Enrollments first](#refresh-historical-enrollments).
+Updates all course plans in the Course Plan Inventory to reflect updated enrollment history. See note on [Update a single course plan's enrollment history](#update-a-single-course-plans-enrollment-history) below. Note that this likely requires refreshing Student Enrollments first.
 
 ##### Update all course plan course lists
 
-Updates the Courses by Department sheet of all course plans in the Course Plan Inventory to match the Courses by Department sheet of the Course Planning Data sheet. Note that this likely requires [refreshing Historical Enrollments first](#refresh-historical-enrollments).
+Updates the Courses by Department sheet of all course plans in the Course Plan Inventory to match the Courses by Department sheet of the Course Planning Data sheet. Note that this likely requires refreshing Student Enrollments first.
 
 ##### Assign all plans to current advisor
 
@@ -194,22 +193,6 @@ Downloads an XLSX file that contains all of the formatting and unctions, but non
 
 </th></thead><tbody><tr><td>
 
-##### Refresh Historical Enrollment
-
-1. Go to the Historical Enrollment list in Academics > Grades > Report card grades list
-2. Adjust the filters and export CSV files of the list for…
-
-- Current year, forms 2, 3, 4, 5, 6
-- 1 year ago, forms 2, 3, 4, 5
-- 2 years ago, forms 2, 3, 4
-- 3 years ago, form 2, 3
-- 4 years ago, form 2
-
-3. Open the current year CSV in Google Sheets
-4. Import the CSV from the other four exports into the same sheet
-5. Create a sheet that gets just the `UNIQUE()` records from that combined CSV export
-6. Copy-and-paste the unique values into the Historical Enrollment sheet in Course Planning Data
-
 ##### Creating new student course plans midsummer
 
 …before advisor data is entered in myGroton.
@@ -269,7 +252,7 @@ If they change advisors at another time of year:
 ### Data Sources
 
 - Data in [Course Planning Data](./schema/sheets/Course%20Planning%20Data.xlsx) is pulled from [advanced list queries](./schema/queries) in Blackbaud
-- Historical Enrollment, Advisor List, and Course List sheets each align with an advanced list in the Course Planning category, and can be synced using Seth’s experimental [Blackbaud Lists](https://github.com/groton-school/blackbaud-to-google-lists) Google Workspace Add-on. (Or manually with a lot of copying and pasting.)
+- Student Enrollments, Student List, Faculty List, Advisor List, and Course List sheets each align with an advanced list in the Course Planning category, and can be synced using Seth’s experimental [Blackbaud Lists](https://github.com/groton-school/blackbaud-to-google-lists) Google Workspace Add-on. (Or manually with a lot of copying and pasting.)
 - Other sheets in [Course Planning Data](./schema/sheets/Course%20Planning%20Data.xlsx) are generated from either these data sources or as a result of scripted workflows in the app.
 
 ## Setup
@@ -279,7 +262,7 @@ To rebuild this project from scratch…
 - Create Google Groups to represent CCO and SC (ideally not receiving email, etc. Nothing matters other than membership from the perspective of this script.)
 - Create a shared drive to hold the project (CCO and SC have Viewer access)
 - Create a spreadsheet (doesn’t have to be on the shared drive) from [Course Planning Data schema](./schema/sheets/Course%20Planning%20Data.xlsx) (includes named ranges, sheets, functions, etc.)
-- Populate the Historical Enrollment, Advisor List, and Course Lists sheets of the Course Planning Data sheet from Blackbaud queries of the same name (easiest is to use [Blackbaud to Google Lists](https://github.com/groton-school/blackbaud-to-google-lists), which requires a little setup of its own – at Groton it’s already deployed to the workspace)
+- Populate the Student Enrollments, Student List, Faculty List, Advisor List, and Course Lists sheets of the Course Planning Data sheet from Blackbaud queries of the same name (easiest is to use [Blackbaud to Google Lists](https://github.com/groton-school/blackbaud-to-google-lists), which requires a little setup of its own – at Groton [it’s already deployed to the workspace](https://kb.groton.org/tc/acad-tech/gwao/blackbaud-to-google-lists/))
 - Create a Spreadsheet from the [Course Plan Template schema](./schema/sheets/Course%20Plan%20Template.xlsx) (includes named ranges, again, doesn’t necessarily have to be on the shared drive)
 - Update the Parameters sheet of the Course Planning data spreadsheet with…
   - CCO and SC group emails
