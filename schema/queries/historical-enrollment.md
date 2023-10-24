@@ -6,6 +6,8 @@ A list of Students with their classes (school year, term, course and teacher).
 
 # Columns
 
+![Screenshot](../../images/schema-historical-enrollment-column-order.png)
+
 | Columns (page 1)                                                        | Columns (page 2)                                                        | Columns (page 3)                                                        | Columns (page 4)                                                        | Columns (page 5)                                                        | Coluns (page 6)                                                         |
 | ----------------------------------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------- |
 | ![Screenshot](../../images/schema-historical-enrollments-columns-1.png) | ![Screenshot](../../images/schema-historical-enrollments-columns-2.png) | ![Screenshot](../../images/schema-historical-enrollments-columns-3.png) | ![Screenshot](../../images/schema-historical-enrollments-columns-4.png) | ![Screenshot](../../images/schema-historical-enrollments-columns-5.png) | ![Screenshot](../../images/schema-historical-enrollments-columns-6.png) |
