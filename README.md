@@ -283,4 +283,4 @@ To rebuild this project from scratch…
   npm run deploy
   ```
 
-- Force-refresh the Course Planning Data spreadsheet to reload the newly-deployed script, and you’re all set.
+- Force-refresh (cmd-shift-R) the Course Planning Data spreadsheet to reload the newly-deployed script, and you’re all set.

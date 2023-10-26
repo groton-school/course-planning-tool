@@ -1,7 +1,7 @@
 const i = (col: string) => col.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0);
 
 class CoursePlanningData {
-  private constructor() { }
+  private constructor() {}
 
   /**
    * Master list of sheet names _as they actually exist_ in the Course Planning Data spreadsheet
@@ -20,7 +20,7 @@ class CoursePlanningData {
     AdvisorListPreviousYear: 'Advisor List (Previous Year)',
     CourseList: 'Course List',
     CoursesByDepartment: 'Courses by Department',
-    HistoricalEnrollment: 'Historical Enrollment',
+    HistoricalEnrollment: 'Student Enrollments',
     IndividualEnrollmentHistory: 'Individual Enrollment History'
   };
 

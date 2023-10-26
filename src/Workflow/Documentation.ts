@@ -21,7 +21,7 @@ global.d_decpd = () => {
     [lib.CoursePlanningData.sheet.AdvisorList]: 8,
     [lib.CoursePlanningData.sheet.AdvisorListPreviousYear]: 8,
     [lib.CoursePlanningData.sheet.CourseList]: 5,
-    [lib.CoursePlanningData.sheet.HistoricalEnrollment]: 14
+    [lib.CoursePlanningData.sheet.HistoricalEnrollment]: 19
   };
   lib.Progress.setMax(
     3 + Object.keys(inventories).length + Object.keys(imports).length
@@ -106,8 +106,8 @@ global.d_decpd = () => {
                 class="btn btn-primary"
                 target="_blank"
                 href="${cleanCopy
-        .getUrl()
-        .replace(/\/edit.*/, '/export?format=xlsx')}"
+                  .getUrl()
+                  .replace(/\/edit.*/, '/export?format=xlsx')}"
             >
                 Download ${cleanCopy.getName()}
             </a>
@@ -144,8 +144,8 @@ global.d_decpt = () => {
                     class="btn btn-primary"
                     target="_blank"
                     href="${template
-        .getUrl()
-        .replace(/\/edit.*/, '/export?format=xlsx')}"
+                      .getUrl()
+                      .replace(/\/edit.*/, '/export?format=xlsx')}"
                 >
                     Download ${template.getName()}
                 </a>
