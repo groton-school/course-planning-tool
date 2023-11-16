@@ -3407,7 +3407,7 @@ packages:
     engines: {node: '>=14.0.0'}
     dependencies:
       escape-html: 1.0.3
-      sharp: 0.32.5
+      sharp: 0.32.6
       xml2js: 0.6.2
     dev: true
 
@@ -7363,8 +7363,8 @@ packages:
     dependencies:
       kind-of: 6.0.3
 
-  /sharp@0.32.5:
-    resolution: {integrity: sha512-0dap3iysgDkNaPOaOL4X/0akdu0ma62GcdC2NBQ+93eqpePdDdr2/LM0sFdDSMmN7yS+odyZtPsb7tx/cYBKnQ==}
+  /sharp@0.32.6:
+    resolution: {integrity: sha512-KyLTWwgcR9Oe4d9HwCwNM2l7+J0dUQwn/yf7S0EnTtb0eVS4RxO0eUSvxPtzT4F3SY+C4K6fqdv/DO27sJ/v/w==}
     engines: {node: '>=14.15.0'}
     requiresBuild: true
     dependencies:
