@@ -1,10 +1,10 @@
-import g from '@battis/gas-lighter';
 import Inventory from '../Inventory';
 import CoursePlan from '../Inventory/CoursePlans/CoursePlan';
 import StudentFolder from '../Inventory/StudentFolders/StudentFolder';
 import lib from '../lib';
 import Advisor from './Advisor';
 import Form from './Form';
+import g from '@battis/gas-lighter';
 
 class Student implements g.HtmlService.Element.Picker.Pickable {
   private static _data: any[][];
@@ -170,16 +170,16 @@ namespace Student {
   export type ConstructorParameter =
     | any[]
     | {
-      hostId: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-      gradYear: number;
-      advisor?: Advisor.ConstructorParameter;
-      previousAdvisor?: Advisor.ConstructorParameter;
-      previousAdvisorLastName?: boolean;
-      newAdvisor?: boolean;
-    };
+        hostId: string;
+        email: string;
+        firstName: string;
+        lastName: string;
+        gradYear: number;
+        advisor?: Advisor.ConstructorParameter;
+        previousAdvisor?: Advisor.ConstructorParameter;
+        previousAdvisorLastName?: boolean;
+        newAdvisor?: boolean;
+      };
 }
 
 export { Student as default };
