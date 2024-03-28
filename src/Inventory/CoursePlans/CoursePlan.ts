@@ -1,4 +1,3 @@
-import g from '@battis/gas-lighter';
 import Role from '../../Role';
 import lib from '../../lib';
 import Base from '../Base';
@@ -7,17 +6,20 @@ import FormFoldersOfCoursePlans from '../FormFoldersOfCoursePlans';
 import StudentFolders from '../StudentFolders';
 import Inventory from './Inventory';
 import Metadata from './Metadata';
+import g from '@battis/gas-lighter';
 
 class CoursePlan
   extends Base.Item
   implements
-  g.HtmlService.Element.Picker.Pickable,
-  lib.Progress.Contextable,
-  lib.Progress.Sourceable {
+    g.HtmlService.Element.Picker.Pickable,
+    lib.Progress.Contextable,
+    lib.Progress.Sourceable
+{
   private static readonly protectionDescription = {
     NO_EDITS: 'No Edits',
     COMMENTS_FROM_ADVISOR: 'Comments from Faculty Advisor',
-    COMMENTS_FROM_CCO: 'Comments from College Counseling Office'
+    COMMENTS_FROM_CCO: 'Comments from College Counseling Office',
+    COURSE_SELECTION: 'Course selection by student and advisor'
   };
 
   private static _coursesByDepartment: any[][];
@@ -398,12 +400,50 @@ class CoursePlan
       const protections = this.planSheet.getProtections(
         SpreadsheetApp.ProtectionType.RANGE
       );
+
+      let courseSelectionProtection = false;
+      for (const protection of protections) {
+        if (
+          protection.getDescription() ===
+          CoursePlan.protectionDescription.COURSE_SELECTION
+        ) {
+          courseSelectionProtection = true;
+          if (values[0].length < 5) {
+            protection.setRange(
+              this.getAnchorOffset(
+                0,
+                values[0].length,
+                this.numDepartments * this.numOptionsPerDepartment,
+                5 - values[0].length
+              )
+            );
+          } else {
+            protection.remove();
+          }
+        }
+      }
+      if (!courseSelectionProtection) {
+        const protection = this.getAnchorOffset(
+          0,
+          values[0].length,
+          this.numDepartments * this.numOptionsPerDepartment,
+          5 - values[0].length
+        ).protect();
+        g.SpreadsheetApp.Protection.clearEditors(protection);
+        protection.setDescription(
+          CoursePlan.protectionDescription.COURSE_SELECTION
+        );
+        protection.addEditors([this.advisor.email, this.student.email]);
+      }
+
       for (const protection of protections) {
         if (
           protection.getRange().getRow() ===
-          this.getAnchorOffset(0, 0).getRow() &&
+            this.getAnchorOffset(0, 0).getRow() &&
           protection.getRange().getColumn() ===
-          this.getAnchorOffset(0, 0).getColumn()
+            this.getAnchorOffset(0, 0).getColumn() &&
+          protection.getDescription() !==
+            CoursePlan.protectionDescription.COURSE_SELECTION
         ) {
           protection.setRange(
             this.getAnchorOffset(
@@ -599,6 +639,7 @@ class CoursePlan
       history.getA1Notation(),
       lib.CoursePlanTemplate.namedRange.ProtectLeftMargin,
       lib.CoursePlanTemplate.namedRange.ProtectTopMargin,
+      lib.CoursePlanTemplate.namedRange.ProtectAboveComments,
       lib.CoursePlanTemplate.namedRange.ProtectBetweenComments
     ]) {
       const protection = this.planSheet
@@ -606,6 +647,21 @@ class CoursePlan
         .protect()
         .setDescription(CoursePlan.protectionDescription.NO_EDITS);
       g.SpreadsheetApp.Protection.clearEditors(protection);
+    }
+    if (historyWidth < 5) {
+      const protection = this.planSheet
+        .getRange(
+          this.getAnchorOffset(
+            0,
+            historyWidth,
+            historyHeight,
+            5 - historyWidth
+          ).getA1Notation()
+        )
+        .protect()
+        .setDescription(CoursePlan.protectionDescription.COURSE_SELECTION);
+      g.SpreadsheetApp.Protection.clearEditors(protection);
+      protection.addEditors([this.advisor.email, this.student.email]);
     }
   }
 
@@ -658,6 +714,6 @@ class CoursePlan
   }
 }
 
-namespace CoursePlan { }
+namespace CoursePlan {}
 
 export { CoursePlan as default };
