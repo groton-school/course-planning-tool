@@ -401,13 +401,11 @@ class CoursePlan
         SpreadsheetApp.ProtectionType.RANGE
       );
 
-      let courseSelectionProtection = false;
       for (const protection of protections) {
         if (
           protection.getDescription() ===
           CoursePlan.protectionDescription.COURSE_SELECTION
         ) {
-          courseSelectionProtection = true;
           if (values[0].length < 5) {
             protection.setRange(
               this.getAnchorOffset(
@@ -422,29 +420,6 @@ class CoursePlan
           }
         }
       }
-
-      /*
-       * TODO #109
-       * Remove this section after all course plans have been updated
-       */
-      if (!courseSelectionProtection) {
-        const protection = this.getAnchorOffset(
-          0,
-          values[0].length,
-          this.numDepartments * this.numOptionsPerDepartment,
-          5 - values[0].length
-        ).protect();
-        g.SpreadsheetApp.Protection.clearEditors(protection);
-        protection.setDescription(
-          CoursePlan.protectionDescription.COURSE_SELECTION
-        );
-        protection.addEditors([this.advisor.email, this.student.email]);
-      }
-      this.meta.version = APP_VERSION;
-      lib.Progress.setStatus('updated course plan version', this); // #update-enrollment-history
-      /*
-       * END remove section
-       */
 
       for (const protection of protections) {
         if (
