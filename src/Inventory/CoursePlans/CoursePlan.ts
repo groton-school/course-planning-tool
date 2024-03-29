@@ -422,6 +422,11 @@ class CoursePlan
           }
         }
       }
+
+      /*
+       * TODO #109
+       * Remove this section after all course plans have been updated
+       */
       if (!courseSelectionProtection) {
         const protection = this.getAnchorOffset(
           0,
@@ -435,6 +440,11 @@ class CoursePlan
         );
         protection.addEditors([this.advisor.email, this.student.email]);
       }
+      this.meta.version = APP_VERSION;
+      lib.Progress.setStatus('updated course plan version', this); // #update-enrollment-history
+      /*
+       * END remove section
+       */
 
       for (const protection of protections) {
         if (
