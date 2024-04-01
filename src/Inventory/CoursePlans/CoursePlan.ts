@@ -675,7 +675,10 @@ class CoursePlan
   }
 
   public toOption(): g.HtmlService.Element.Picker.Option {
-    return { name: this.student.formattedName, value: this.hostId };
+    return {
+      name: (this.student && this.student.formattedName) || this.hostId,
+      value: this.hostId
+    };
   }
 
   public toSourceString(): string {

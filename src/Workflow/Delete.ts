@@ -1,9 +1,9 @@
-import g from '@battis/gas-lighter';
 import Inventory from '../Inventory';
 import lib from '../lib';
+import g from '@battis/gas-lighter';
 
 export const pickStudent = () => 'd_ps';
-global.d_pp = () =>
+global.d_ps = () =>
   g.HtmlService.Element.Picker.showModalDialog(
     SpreadsheetApp,
     {

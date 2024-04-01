@@ -1,17 +1,18 @@
-import g from '@battis/gas-lighter';
 import Role from '../../Role';
 import lib from '../../lib';
 import CoursePlans from '../CoursePlans';
 import Folders from '../Folders';
 import StudentFolders from '../StudentFolders';
 import Metadata from './/Metadata';
+import g from '@battis/gas-lighter';
 
 class AdvisorFolder
   extends Folders.Folder
   implements
-  lib.Progress.Contextable,
-  lib.Progress.Sourceable,
-  g.HtmlService.Element.Picker.Pickable {
+    lib.Progress.Contextable,
+    lib.Progress.Sourceable,
+    g.HtmlService.Element.Picker.Pickable
+{
   public meta: Metadata;
 
   private _advisor?: Role.Advisor;
@@ -71,10 +72,13 @@ class AdvisorFolder
   }
 
   public toOption(): g.HtmlService.Element.Picker.Option {
-    return { name: this.advisor.formattedName, value: this.key.toString() };
+    return {
+      name: (this.advisor && this.advisor.formattedName) || this.key.toString(),
+      value: this.key.toString()
+    };
   }
 }
 
-namespace AdvisorFolder { }
+namespace AdvisorFolder {}
 
 export { AdvisorFolder as default };
