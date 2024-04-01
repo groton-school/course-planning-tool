@@ -440,27 +440,6 @@ class CoursePlan
           );
         }
       }
-
-      try {
-        this.planSheet.getRange(
-          lib.CoursePlanTemplate.namedRange.ProtectAboveComments
-        );
-      } catch {
-        const advisorComments = this.planSheet.getRange(
-          lib.CoursePlanTemplate.namedRange.ProtectAdvisor
-        );
-        const protectAboveComments = advisorComments.offset(-3, 0, 3, 5);
-        this.spreadsheet.setNamedRange(
-          lib.CoursePlanTemplate.namedRange.ProtectAboveComments,
-          protectAboveComments
-        );
-        g.SpreadsheetApp.Protection.clearEditors(
-          protectAboveComments
-            .protect()
-            .setDescription(CoursePlan.protectionDescription.NO_EDITS)
-        );
-        this.meta.version = APP_VERSION;
-      }
     }
     this.mergeEnrollmentHistoryRows(values[0].length);
 
