@@ -32,14 +32,15 @@ class AdvisorFolder
     );
   }
 
-  public delete() {
+  public delete(): boolean {
     if (this.driveFolder.getFiles().hasNext()) {
       lib.Progress.setStatus('not empty and will not be deleted', this); // #delete-advisor (1 of 2)
-      return;
+      return false;
     }
     lib.Progress.log('moving advisor folder to trash', this); // (2 of 2)
     this.driveFolder.setTrashed(true);
     this.inventory.remove(this.key);
+    return true;
   }
 
   public contains(
@@ -68,7 +69,7 @@ class AdvisorFolder
   }
 
   public toSourceString(): string {
-    return this.advisor.formattedName;
+    return (this.advisor && this.advisor.formattedName) || this.key.toString();
   }
 
   public toOption(): g.HtmlService.Element.Picker.Option {

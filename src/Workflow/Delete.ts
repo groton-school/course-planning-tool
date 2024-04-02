@@ -59,6 +59,15 @@ global.d_da = (email: string, thread: string) => {
   lib.Progress.setThread(thread);
   lib.Progress.reset();
   lib.Progress.setMax(parseInt(DELETE_ADVISOR_STEPS));
-  Inventory.AdvisorFolders.get(email).delete();
-  lib.Progress.setComplete(true);
+  const folder = Inventory.AdvisorFolders.get(email);
+  if (folder.delete()) {
+    lib.Progress.setComplete(true);
+  } else {
+    lib.Progress.setComplete({
+      html: `${
+        (folder.advisor && folder.advisor.formattedName) ||
+        folder.key.toString()
+      }'s advisor folder cannot be deleted because it is not empty.`
+    });
+  }
 };

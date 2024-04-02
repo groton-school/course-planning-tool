@@ -682,7 +682,7 @@ class CoursePlan
   }
 
   public toSourceString(): string {
-    return this.student.formattedName;
+    return (this.student && this.student.formattedName) || this.key.toString();
   }
 
   public toContext(): { [key: string]: any } {

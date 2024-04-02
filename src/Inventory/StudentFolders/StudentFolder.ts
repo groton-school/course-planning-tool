@@ -1,14 +1,15 @@
-import g from '@battis/gas-lighter';
 import Role from '../../Role';
 import lib from '../../lib';
 import Folders from '../Folders';
 import FormFoldersOfStudentFolders from '../FormFoldersOfStudentFolders';
 import Inventory from './Inventory';
 import Metadata from './Metadata';
+import g from '@battis/gas-lighter';
 
 class StudentFolder
   extends Folders.Folder
-  implements lib.Progress.Contextable, lib.Progress.Sourceable {
+  implements lib.Progress.Contextable, lib.Progress.Sourceable
+{
   public meta = new Metadata(this.inventory as Inventory, this.key);
 
   private _student?: Role.Student;
@@ -168,7 +169,7 @@ class StudentFolder
   }
 
   public toSourceString(): string {
-    return this.student.formattedName;
+    return (this.student && this.student.formattedName) || this.key.toString();
   }
 
   public toContext(): { [key: string]: any } {
@@ -176,6 +177,6 @@ class StudentFolder
   }
 }
 
-namespace StudentFolder { }
+namespace StudentFolder {}
 
 export { StudentFolder as default };
