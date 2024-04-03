@@ -6,6 +6,7 @@ const DEBUGGING = false;
 const COURSE_PLAN = 'src/Inventory/CoursePlans/CoursePlan.ts';
 const STUDENT_FOLDER = 'src/Inventory/StudentFolders/StudentFolder.ts';
 const ADVISOR_FOLDER = 'src/Inventory/AdvisorFolders/AdvisorFolder.ts';
+const DOCUMENTATION = 'src/Workflow/Documentation.ts';
 
 const files = {};
 
@@ -55,6 +56,10 @@ module.exports = require('@battis/gas-lighter/webpack.config')({
       RESET_ADVISOR_FOLDER_PERMISSIONS_STEPS: stepCount(
         [ADVISOR_FOLDER],
         '#reset-advisor-folder-permissions'
+      ),
+      DOCUMENTATION_COURSE_PLAN_DATA_STEPS: stepCount(
+        [DOCUMENTATION],
+        '#doc-course-plan-data'
       )
     })
   ],

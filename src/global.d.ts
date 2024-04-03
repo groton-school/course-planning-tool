@@ -10,3 +10,4 @@ declare const DEACTIVATE_STEPS: string;
 declare const RESET_COURSE_PLAN_PERMISSIONS_STEPS: string;
 declare const RESET_STUDENT_FOLDER_PERMISSIONS_STEPS: string;
 declare const RESET_ADVISOR_FOLDER_PERMISSIONS_STEPS: string;
+declare const DOCUMENTATION_COURSE_PLAN_DATA_STEPS: string;

@@ -10,6 +10,7 @@ class CoursePlanningData {
     Legend: 'Legend',
     Parameters: 'Parameters',
     AvailableCourses: 'Available Courses',
+    CrossRegisteredCourses: 'Cross-registered Courses',
     CoursePlanInventory: 'Course Plan Inventory',
     StudentFolderInventory: 'Student Folder Inventory',
     AdvisorFolderInventory: 'Advisor Folder Inventory',
@@ -53,6 +54,7 @@ class CoursePlanningData {
     CleanParams: 'Clean_Params',
     CleanInventoryRoot: 'A2:C2',
     CleanAvailableCourses: 'Clean_AvailableCourses',
+    CleanCrossRegisteredCourses: 'Clean_CrossRegisteredCourses',
     CleanIEH: 'Clean_IEH'
   };
 

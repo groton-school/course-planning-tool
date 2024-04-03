@@ -1,5 +1,5 @@
-import g from '@battis/gas-lighter';
 import lib from '../lib';
+import g from '@battis/gas-lighter';
 
 export const downloadEmptyCoursePlanningData = () => 'd_decpd';
 global.d_decpd = () => {
@@ -10,24 +10,22 @@ global.d_decpd = () => {
   );
 
   const inventories = {
-    [lib.CoursePlanningData.sheet.CoursePlanInventory]: false,
-    [lib.CoursePlanningData.sheet.StudentFolderInventory]: false,
-    [lib.CoursePlanningData.sheet.AdvisorFolderInventory]: true,
-    [lib.CoursePlanningData.sheet.PlansFormFolderInventory]: true,
-    [lib.CoursePlanningData.sheet.FoldersFormFolderInventory]: true
+    [lib.CoursePlanningData.sheet.CoursePlanInventory]: false, // #doc-course-plan-data
+    [lib.CoursePlanningData.sheet.StudentFolderInventory]: false, // #doc-course-plan-data
+    [lib.CoursePlanningData.sheet.AdvisorFolderInventory]: true, // #doc-course-plan-data
+    [lib.CoursePlanningData.sheet.PlansFormFolderInventory]: true, // #doc-course-plan-data
+    [lib.CoursePlanningData.sheet.FoldersFormFolderInventory]: true // #doc-course-plan-data
   };
   const imports = {
-    [lib.CoursePlanningData.sheet.StudentList]: 5,
-    [lib.CoursePlanningData.sheet.AdvisorList]: 8,
-    [lib.CoursePlanningData.sheet.AdvisorListPreviousYear]: 8,
-    [lib.CoursePlanningData.sheet.CourseList]: 5,
-    [lib.CoursePlanningData.sheet.HistoricalEnrollment]: 19
+    [lib.CoursePlanningData.sheet.StudentList]: 5, // #doc-course-plan-data
+    [lib.CoursePlanningData.sheet.AdvisorList]: 8, // #doc-course-plan-data
+    [lib.CoursePlanningData.sheet.AdvisorListPreviousYear]: 8, // #doc-course-plan-data
+    [lib.CoursePlanningData.sheet.CourseList]: 5, // #doc-course-plan-data
+    [lib.CoursePlanningData.sheet.HistoricalEnrollment]: 19 // #doc-course-plan-data
   };
-  lib.Progress.setMax(
-    3 + Object.keys(inventories).length + Object.keys(imports).length
-  );
+  lib.Progress.setMax(parseInt(DOCUMENTATION_COURSE_PLAN_DATA_STEPS));
 
-  lib.Progress.setStatus('Making clean copy…');
+  lib.Progress.setStatus('Making clean copy…'); // #doc-course-plan-data
   const original = SpreadsheetApp.getActive();
   const cleanCopyFile = DriveApp.getFileById(original.getId()).makeCopy(
     DriveApp.getRootFolder()
@@ -37,7 +35,7 @@ global.d_decpd = () => {
 
   lib.Progress.setStatus(
     `Expunging ${lib.CoursePlanningData.sheet.Parameters} values…`
-  );
+  ); // #doc-course-plan-data
   cleanCopy
     .getSheetByName(lib.CoursePlanningData.sheet.Parameters)
     .getRange(lib.CoursePlanningData.namedRange.CleanParams)
@@ -80,15 +78,26 @@ global.d_decpd = () => {
   );
   const available = cleanCopy.getSheetByName(
     lib.CoursePlanningData.sheet.AvailableCourses
-  );
+  ); // #doc-course-plan-data
   available.deleteRows(4, available.getMaxRows() - 3);
   available
     .getRange(lib.CoursePlanningData.namedRange.CleanAvailableCourses)
     .setValue('');
 
   lib.Progress.setStatus(
-    `Clearing student from ${lib.CoursePlanningData.sheet.IndividualEnrollmentHistory}…`
+    `Clearing ${lib.CoursePlanningData.sheet.CrossRegisteredCourses}…`
+  ); // #doc-course-plan-data
+  const crossRegistered = cleanCopy.getSheetByName(
+    lib.CoursePlanningData.sheet.CrossRegisteredCourses
   );
+  crossRegistered.deleteRows(4, crossRegistered.getMaxRows() - 3);
+  crossRegistered
+    .getRange(lib.CoursePlanningData.namedRange.CleanCrossRegisteredCourses)
+    .setValue([[''], [''], ['']]);
+
+  lib.Progress.setStatus(
+    `Clearing student from ${lib.CoursePlanningData.sheet.IndividualEnrollmentHistory}…`
+  ); // #doc-course-plan-data
   const ieh = cleanCopy.getSheetByName(
     lib.CoursePlanningData.sheet.IndividualEnrollmentHistory
   );
