@@ -25,6 +25,7 @@ class CoursePlan
   private static _coursesByDepartment: any[][];
   private static get coursesByDepartment(): string[][] {
     if (!this._coursesByDepartment) {
+      CoursePlan.trimCourseList();
       this._coursesByDepartment = g.SpreadsheetApp.Value.getSheetDisplayValues(
         SpreadsheetApp.getActive().getSheetByName(
           lib.CoursePlanningData.sheet.CoursesByDepartment
@@ -32,6 +33,25 @@ class CoursePlan
       );
     }
     return this._coursesByDepartment;
+  }
+
+  private static trimCourseList() {
+    const sheet = SpreadsheetApp.getActive().getSheetByName(
+      lib.CoursePlanningData.sheet.CoursesByDepartment
+    );
+    const lists = g.SpreadsheetApp.Value.getSheetDisplayValues(sheet);
+    let row = 0;
+    let blankRows = 0;
+    for (row = 0; blankRows < 2 && row < lists.length; row++) {
+      let rowIsBlank = true;
+      for (let col = 0; col < lists[row].length; col++) {
+        rowIsBlank = rowIsBlank && lists[row][col] == '';
+      }
+      blankRows = rowIsBlank ? blankRows + 1 : 0;
+    }
+    if (blankRows === 2) {
+      sheet.deleteRows(row - blankRows, sheet.getMaxRows() - (row - blankRows));
+    }
   }
 
   public meta = new Metadata(this.inventory as Inventory, this.key);
