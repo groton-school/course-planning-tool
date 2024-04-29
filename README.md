@@ -209,7 +209,8 @@ If they change advisors at the "normal" time of year (right as the Roll-Over Aca
 If they change advisors at another time of year:
 
 1. Copy their current row from the `Advisors List` sheet to replace their row (if present -- add a row if not) in `Advisors List (Previous Year`.
-2. Run an update on their course plan (e.g. Update Course Listing) to automatically reset permissions, aliases, etc. for their course plan.
+2. Clear the "Permissions Updated" checkbox for their course plan in the Course Plan Inventory
+3. Run Single Course Plan > Assign to Current Advisor.
 
 </td></tr></tbody></table>
 
