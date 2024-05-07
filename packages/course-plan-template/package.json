@@ -1,0 +1,25 @@
+{
+  "name": "@groton/course-plan-template",
+  "version": "0.1.0",
+  "author": {
+    "name": "Seth Battis",
+    "url": "https://github.com/groton-school"
+  },
+  "license": "GPL-3.0",
+  "main": "src/index.ts",
+  "homepage": "https://github.com/groton-school/course-planning-tool",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/groton-school/course-planning-tool.git",
+    "directory": "packages/course-planning-tool"
+  },
+  "bugs": {
+    "url": "https://github.com/groton-school/course-planning-tool/issues"
+  },
+  "scripts": {
+    "build": "webpack",
+    "deploy": "run-s deploy:*",
+    "deploy:build": "npm run build",
+    "deploy:push": "clasp push --force"
+  }
+}
