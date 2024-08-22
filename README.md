@@ -2,13 +2,26 @@
 
 ## How to Use
 
-### Annual Updates
+### Annual Update
 
-Queries or functions that need to be updated annually are listed here:
+The full annual update workflow is:
 
-1. Student List, Advisor List, Course List, and Student Enrollments sheets in Course Planning Data all need to be updated to current values (recommend using [Blackbaud Lists](https://github.com/groton-school/blackbaud-to-google-lists) add-on)
-2. Available Courses needs to be reviewed for accuracy.
-3. Review `cp-cco`, `cp-ao`, `cp-sc` group memberships for accuracy.
+1. [ ] [Roll over Student/Advisor lists](#roll-over-studentadvisor-lists)
+2. [ ] The following sheets in Course Planning Data all need to be updated to current values (recommend using [Blackbaud Lists](https://github.com/groton-school/blackbaud-to-google-lists) add-on)
+   - [ ] Student List
+   - [ ] Advisor List
+   - [ ] Course List
+   - [ ] Student Enrollments
+3. [ ] `Available Courses` needs to be reviewed for accuracy.
+4. [ ] Review `cp-cco`, `cp-ao`, `cp-sc` group memberships for accuracy.
+5. [ ] [Deactivate Inactive](#deactivate-inactive)
+6. [ ] [Assign all plans to current advisor](#assign-all-plans-to-current-advisor)
+7. [ ] [Update all course plan course lists](#update-all-course-plan-course-lists)
+8. [ ] [Update all course plan enrollment histories](#update-all-course-plan-enrollment-histories)
+9. [ ] [Expand comments in all plans](#expand-comments-in-all-plans)
+10. [ ] [Create all (missing) course plans](https://github.com/groton-school/course-planning-tool?tab=readme-ov-file#create-all-course-plans)
+11. [ ] Notify advisors of their advisee course plan folder links
+12. [ ] Notify students of their course plan folder links
 
 ### Workflows
 
