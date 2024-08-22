@@ -7,11 +7,12 @@
 The full annual update workflow is:
 
 1. [ ] [Roll over Student/Advisor lists](#roll-over-studentadvisor-lists)
-2. [ ] The following sheets in Course Planning Data all need to be updated to current values (recommend using [Blackbaud Lists](https://github.com/groton-school/blackbaud-to-google-lists) add-on)
-   - [ ] Student List
-   - [ ] Advisor List
-   - [ ] Course List
-   - [ ] Student Enrollments
+2. [ ] The following sheets in `Course Planning Data` all need to be updated to current values (recommend using [Blackbaud Lists](https://github.com/groton-school/blackbaud-to-google-lists) add-on)
+   - [ ] `Student List`
+   - [ ] `Faculty List`
+   - [ ] `Advisor List`
+   - [ ] `Course List`
+   - [ ] `Student Enrollments`
 3. [ ] `Available Courses` needs to be reviewed for accuracy.
 4. [ ] Review `cp-cco`, `cp-ao`, `cp-sc` group memberships for accuracy.
 5. [ ] [Deactivate Inactive](#deactivate-inactive)
