@@ -1,21 +1,21 @@
 {
   "name": "@groton/course-planning-tool",
   "version": "0.2.7",
-  "author": {
-    "name": "Seth Battis",
-    "url": "https://github.com/groton-school"
-  },
-  "license": "GPL-3.0",
-  "main": "src/index.ts",
   "homepage": "https://github.com/groton-school/course-planning-tool",
+  "bugs": {
+    "url": "https://github.com/groton-school/course-planning-tool/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/groton-school/course-planning-tool.git",
     "directory": "packages/course-planning-tool"
   },
-  "bugs": {
-    "url": "https://github.com/groton-school/course-planning-tool/issues"
+  "license": "GPL-3.0",
+  "author": {
+    "name": "Seth Battis",
+    "url": "https://github.com/groton-school"
   },
+  "main": "src/index.ts",
   "scripts": {
     "build": "webpack",
     "deploy": "run-s deploy:*",
@@ -26,5 +26,14 @@
     "@battis/gas-lighter": "^0.5.2",
     "@types/semver": "^7.5.8",
     "semver": "^7.6.3"
+  },
+  "devDependencies": {
+    "add-peer-dependencies": "^0.1.7",
+    "ajv": "^6.12.6",
+    "browserslist": "^4.24.2",
+    "inquirer": "^12.2.0",
+    "typescript": "^5.7.2",
+    "webpack": "5.97.1",
+    "webpack-cli": "5.1.4"
   }
 }
