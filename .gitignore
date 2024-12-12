@@ -2,5 +2,5 @@
 .env
 .env.*
 !.env.example
-node_modules
-build
+**/node_modules/
+**/build/
