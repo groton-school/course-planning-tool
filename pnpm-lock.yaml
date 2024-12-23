@@ -18,8 +18,8 @@ importers:
         specifier: latest
         version: 1.5.5(typescript@5.7.2)
       '@battis/qui-cli':
-        specifier: ^0.8.4
-        version: 0.8.4
+        specifier: ^0.8.5
+        version: 0.8.5
       '@changesets/cli':
         specifier: ^2.27.11
         version: 2.27.11
@@ -171,8 +171,8 @@ packages:
   '@battis/qui-cli.root@0.8.2':
     resolution: {integrity: sha512-QOW5urXUQsHp0pDvH3WDvsMIw8qqpg6/J0MZeRXQo08dRZYwt9cOGih8YP3fieHj4YgQ/qBa1KnmLOZCxnxfvw==}
 
-  '@battis/qui-cli.shell@0.8.2':
-    resolution: {integrity: sha512-6B7d4OBMWPGy9pMzfJ5gle97peunQcChtfYt3ul3VtFYCF931rCTLiriGW5X4ruzgBPKhVl4LLrUR49NxvLOCg==}
+  '@battis/qui-cli.shell@0.8.3':
+    resolution: {integrity: sha512-jB4vbFn0AZHE9JD5TlQ91lKl4ULkbfHbmSMApeix5lqrPNwrCtdct+70iuT0lVrAck05M+ITJs7E6xq8SAGVRw==}
 
   '@battis/qui-cli.validators@0.8.2':
     resolution: {integrity: sha512-KI+qLAyxMvMN9niB8i5o/DfhuOxENX3Wwalc11nep++1FMzSLUVVMmNptIvOde2ca2lhC7E3DGX8/TuZo1UlOQ==}
@@ -181,8 +181,8 @@ packages:
     resolution: {integrity: sha512-IiSLPNjSQ7HH8+kQwjEOTWhzJpXpiU4mxc1Jn5Prko/RUyzR5Gcahe/Y2sGy/N9TRXjNHjiQtErOaypw6OAMQw==}
     engines: {node: '>=12.17'}
 
-  '@battis/qui-cli@0.8.4':
-    resolution: {integrity: sha512-VKDugEnm17NHwWn593T/nknEZWXb14AsFEblERsBTb3zCiNmr5zgmqv+cfin0rJwLoMsuJBwImnd/CRSGwAWiQ==}
+  '@battis/qui-cli@0.8.5':
+    resolution: {integrity: sha512-wlVdp50i1meO6CIigHc+nLPNQyxn5sGE7h3J+tbQj3mUm8F6psJGHT3q1g78+ep+G9YmiUYMrm9kWmTlEs94sQ==}
     engines: {node: '>=12.17'}
 
   '@battis/typescript-tricks@0.4.3':
@@ -3479,7 +3479,7 @@ snapshots:
       '@battis/qui-cli.plugin': 0.1.2
       app-root-path: 3.1.0
 
-  '@battis/qui-cli.shell@0.8.2':
+  '@battis/qui-cli.shell@0.8.3':
     dependencies:
       '@battis/qui-cli.colors': 0.8.2
       '@battis/qui-cli.log': 0.8.2
@@ -3512,7 +3512,7 @@ snapshots:
       strip-ansi: 7.1.0
       winston: 3.17.0
 
-  '@battis/qui-cli@0.8.4':
+  '@battis/qui-cli@0.8.5':
     dependencies:
       '@battis/qui-cli.colors': 0.8.2
       '@battis/qui-cli.core': 0.8.4
@@ -3520,7 +3520,7 @@ snapshots:
       '@battis/qui-cli.log': 0.8.2
       '@battis/qui-cli.plugin': 0.1.2
       '@battis/qui-cli.root': 0.8.2
-      '@battis/qui-cli.shell': 0.8.2
+      '@battis/qui-cli.shell': 0.8.3
       '@battis/qui-cli.validators': 0.8.2
       '@inquirer/prompts': 2.3.1
       ora: 6.3.1
