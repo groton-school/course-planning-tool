@@ -42,8 +42,8 @@ importers:
         version: 7.6.3
     devDependencies:
       add-peer-dependencies:
-        specifier: ^0.1.7
-        version: 0.1.7
+        specifier: ^0.1.10
+        version: 0.1.10
       ajv:
         specifier: ^8.17.1
         version: 8.17.1
@@ -142,8 +142,8 @@ packages:
     resolution: {integrity: sha512-3om0sfgttwqLs7sW+pu07VQy9EBZMMFYZVZ1diSC5DmGUp91q6AqH2XT6jeMkh3NgfoKGHbZvyzkVax3C7pO8A==}
     engines: {node: '>=12.17'}
 
-  '@battis/import-package-json@0.1.5':
-    resolution: {integrity: sha512-grPpd2FE/ory60gmB1TuWn/aWHrB1jYZzpg9rNzf7J+d//gTGeydvdHs0n5l3EF2jd+Xkbi49rY8BffrMyafhQ==}
+  '@battis/import-package-json@0.1.7':
+    resolution: {integrity: sha512-fDefeLqvjimxCcO3EvZbJg7WpZ6CqJLqFKIIbUEDC1Y//EaiK8hT6dwiYnn/nKCngeLIUw7lAw/LhNgWXZhvQA==}
 
   '@battis/partly-gcloudy@0.6.0':
     resolution: {integrity: sha512-BndLD/Z/vjxEmg50Osc3FiZnMLM5+Jxgh5hMhvpg4UJ6dMI1/Sms56lVlg3ie4Hz5dAP23o82TIYGVzE30QOog==}
@@ -747,8 +747,8 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
-  add-peer-dependencies@0.1.7:
-    resolution: {integrity: sha512-FWmLPvdxpE3Mk/vuByK6YYK851INMkR2l/xG/6svLv7XHP1T/NFv2HGKFOrNpWrCqjpOjYV786WXJVodh1NOYw==}
+  add-peer-dependencies@0.1.10:
+    resolution: {integrity: sha512-fnyFjsJwqmPbQLs5jbVnXVGbm3UqIl+TxZfw79EcCYiO0EcB5+t29YZYVGwIU/vPgL7xF8VwCqooS6zyDqCXbg==}
     hasBin: true
 
   agent-base@6.0.2:
@@ -3415,7 +3415,7 @@ snapshots:
       - webpack-bundle-analyzer
       - webpack-dev-server
 
-  '@battis/import-package-json@0.1.5':
+  '@battis/import-package-json@0.1.7':
     dependencies:
       node-fetch: 3.3.2
       semver: 7.6.3
@@ -4361,10 +4361,10 @@ snapshots:
 
   acorn@8.14.0: {}
 
-  add-peer-dependencies@0.1.7:
+  add-peer-dependencies@0.1.10:
     dependencies:
-      '@battis/import-package-json': 0.1.5
-      '@battis/qui-cli': 0.4.2
+      '@battis/import-package-json': 0.1.7
+      '@battis/qui-cli': 0.8.5
 
   agent-base@6.0.2:
     dependencies:
