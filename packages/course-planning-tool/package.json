@@ -25,7 +25,7 @@
   "dependencies": {
     "@battis/gas-lighter": "^0.5.2",
     "@types/semver": "^7.5.8",
-    "semver": "^7.6.3"
+    "semver": "^7.7.0"
   },
   "devDependencies": {
     "add-peer-dependencies": "^0.1.10",
