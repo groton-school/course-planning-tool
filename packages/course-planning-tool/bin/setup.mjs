@@ -2,8 +2,8 @@ import gcloud from '@battis/partly-gcloudy';
 import cli from '@battis/qui-cli';
 
 (async () => {
-  const args = gcloud.init({
-    options: {
+  const args = await cli.init({
+    opt: {
       name: { short: 'n', description: 'Name of Google Cloud project' }
     }
   });

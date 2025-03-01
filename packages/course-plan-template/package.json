@@ -20,6 +20,10 @@
     "build": "webpack",
     "deploy": "run-s deploy:*",
     "deploy:build": "npm run build",
-    "deploy:push": "clasp push --force"
+    "deploy:push": "clasp push --force",
+    "release":"commit-and-tag-version"
+  },
+  "devDependencies": {
+    "commit-and-tag-version": "^12.5.0"
   }
 }
