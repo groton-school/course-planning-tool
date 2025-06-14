@@ -33,10 +33,6 @@ repos:
     rev: 3.0.5
     hooks:
       - id: sqlfluff-lint
-  - repo: https://github.com/hija/clean-dotenv
-    rev: v0.0.7
-    hooks:
-      - id: clean-dotenv
   - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
     rev: v9.20.0
     hooks:
