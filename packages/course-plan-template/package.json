@@ -20,10 +20,13 @@
     "build": "webpack",
     "deploy": "run-s deploy:*",
     "deploy:build": "npm run build",
+    "deploy:inject": "op inject -i ./.clasp.json.tpl -o ./.clasp.json",
     "deploy:push": "clasp push --force",
+    "deploy:cleanup":"del ./.clasp.json",
     "release": "commit-and-tag-version"
   },
   "devDependencies": {
-    "commit-and-tag-version": "^12.5.1"
+    "commit-and-tag-version": "^12.5.1",
+    "del-cli": "^6.0.0"
   }
 }
