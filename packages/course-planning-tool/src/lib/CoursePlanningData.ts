@@ -17,6 +17,7 @@ class CoursePlanningData {
     PlansFormFolderInventory: 'Plans Form Folder Inventory',
     FoldersFormFolderInventory: 'Folders Form Folder Inventory',
     StudentList: 'Student List',
+    FacultyList:'Faculty List',
     AdvisorList: 'Advisor List',
     AdvisorListPreviousYear: 'Advisor List (Previous Year)',
     CourseList: 'Course List',
