@@ -58,7 +58,6 @@ class StudentFolder
   public assignToCurrentAdvisor() {
     if (
       this.meta.newAdvisor &&
-      !this.meta.permissionsUpdated &&
       this.student.advisor
     ) {
       lib.Progress.setStatus('updating student folder permissions', this, {
@@ -97,7 +96,6 @@ class StudentFolder
           );
         }
 
-        this.meta.permissionsUpdated = true;
       } else if (!this.student.advisor.folder.contains(this)) {
         lib.Progress.setStatus('adding shortcut to advisor folder', this);
         const shortcut = this.student.advisor.folder.driveFolder.createShortcut(
@@ -105,13 +103,12 @@ class StudentFolder
         ); // (A: 3 of 3)
         lib.Progress.progress.incrementValue(); // B (3 of 3)
         shortcut.setName(this.student.formattedName);
-        this.meta.permissionsUpdated = true;
       }
     }
   }
 
   public deactivate() {
-    if (this.meta.inactive && !this.meta.permissionsUpdated) {
+    if (this.meta.inactive) {
       lib.Progress.setStatus(
         'removing student folder from previous advisor folder',
         this
@@ -132,7 +129,6 @@ class StudentFolder
           this
         ); // (2 of 2)
       }
-      this.meta.permissionsUpdated = true;
     }
   }
 

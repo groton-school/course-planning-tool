@@ -1,1 +1,8 @@
-export { default as default } from '@battis/eslint-config';
+import config from '@battis/eslint-config';
+
+export default {
+  ...config,
+  rules: {
+    'no-explicit-any': 'off'
+  }
+};

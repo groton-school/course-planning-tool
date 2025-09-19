@@ -23,19 +23,6 @@ class Metadata extends Folders.Metadata {
       lib.CoursePlanningData.column.StudentFolders.NewAdvisor
     );
   }
-  public get permissionsUpdated() {
-    return this.inventory.getMetadata(
-      this.k,
-      lib.CoursePlanningData.column.StudentFolders.PermissionsUpdated
-    );
-  }
-  public set permissionsUpdated(permissionsUpdated: boolean) {
-    this.inventory.setMetadata(
-      this.k,
-      lib.CoursePlanningData.column.StudentFolders.PermissionsUpdated,
-      permissionsUpdated
-    );
-  }
 }
 
 namespace Metadata { }

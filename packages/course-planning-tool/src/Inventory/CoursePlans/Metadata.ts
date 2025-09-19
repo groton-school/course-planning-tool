@@ -34,21 +34,6 @@ class Metadata extends Base.Metadata {
     );
   }
 
-  public get permissionsUpdated() {
-    return this.inventory.getMetadata(
-      this.k,
-      lib.CoursePlanningData.column.CoursePlans.PermissionsUpdated
-    );
-  }
-
-  public set permissionsUpdated(permissionsUpdated: boolean) {
-    this.inventory.setMetadata(
-      this.k,
-      lib.CoursePlanningData.column.CoursePlans.PermissionsUpdated,
-      permissionsUpdated
-    );
-  }
-
   public get version() {
     return this.inventory.getMetadata(
       this.k,

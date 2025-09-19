@@ -73,17 +73,18 @@ class CoursePlanningData {
     StudentFolders: {
       Inactive: i('H'),
       NewAdvisor: i('I'),
-      PermissionsUpdated: i('J')
+      CurrentAdvisor: i('J')
     },
     CoursePlans: {
       StudentEmail: i('D'),
       StudentFirstName: i('E'),
       StudentLastName: i('F'),
       GradYear: i('G'),
+      FolderId: i('H'),
       NumOptionsPerDepartment: i('N'),
       Inactive: i('O'),
       NewAdvisor: i('P'),
-      PermissionsUpdated: i('Q'),
+      CurrentAdvisor: i('Q'),
       Version: i('R'),
       Incomplete: i('S')
     },
@@ -93,10 +94,7 @@ class CoursePlanningData {
       FirstName: i('C'),
       Lastname: i('D'),
       GradYear: i('E'),
-      CurrentAdvisorEmail: i('F'),
-      PreviousAdvisorEmail: i('I'),
-      NewAdvisor: i('M'),
-      HasPlan: i('N')
+      HasPlan: i('F')
     },
     AdvisorList: {
       HostId: i('A'),
@@ -104,9 +102,13 @@ class CoursePlanningData {
       StudentFirstName: i('C'),
       StudentLastName: i('D'),
       GradYear: i('E'),
-      AdvisorEmail: i('F'),
-      AdvisorFirstName: i('G'),
-      AdvisorLastName: i('H')
+      BeginDate: i('F'),
+      AdvisorEmail: i('G'),
+      AdvisorFirstName: i('H'),
+      AdvisorLastName: i('I'),
+      CurrentAdvisor: i('J'),
+      MostLikelyAdvisor: i('K'),
+      AdvisorOnCoursePlan: i('L')
     }
   };
 }

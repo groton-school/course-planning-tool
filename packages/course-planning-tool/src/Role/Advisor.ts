@@ -43,7 +43,7 @@ class Advisor {
 
   public constructor(data: Advisor.ConstructorParameter) {
     if (Array.isArray(data)) {
-      const [, , , , , email, firstName, lastName] = data;
+      const [, , , , , , email, firstName, lastName] = data;
       data = { email, firstName, lastName };
     }
     Object.assign(this, data);
