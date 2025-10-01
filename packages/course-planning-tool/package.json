@@ -35,7 +35,7 @@
     "@battis/qui-cli": "^2.1.6",
     "add-peer-dependencies": "^0.1.13",
     "ajv": "^8.17.1",
-    "browserslist": "^4.25.4",
+    "browserslist": "^4.26.2",
     "commit-and-tag-version": "^12.6.0",
     "del-cli": "^6.0.0",
     "inquirer": "^12.9.4",
