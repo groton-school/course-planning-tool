@@ -54,7 +54,7 @@ class Advisor {
     return `${this.firstName} ${this.lastName}`;
   }
 
-  public static get(email: string, fallbackToPreviousYear = true) {
+  public static get(email: string) {
     if (this.cache[email]) {
       return this.cache[email];
     } else {
@@ -62,14 +62,6 @@ class Advisor {
         (row) =>
           row[lib.CoursePlanningData.column.AdvisorList.AdvisorEmail] == email
       );
-      if (!row && fallbackToPreviousYear) {
-        row = this.getData(
-          lib.CoursePlanningData.sheet.AdvisorListPreviousYear
-        ).find(
-          (row) =>
-            row[lib.CoursePlanningData.column.AdvisorList.AdvisorEmail] == email
-        );
-      }
       return (row && new Advisor(row)) || null;
     }
   }
@@ -85,6 +77,7 @@ class Advisor {
   }
 
   public static getPreviousYearStudent(hostId: string) {
+    /*
     const row = this.getData(
       lib.CoursePlanningData.sheet.AdvisorListPreviousYear
     ).find(([id]) => id === hostId);
@@ -115,6 +108,8 @@ class Advisor {
       });
     }
     return student;
+    */
+   return null;
   }
 }
 

@@ -1,7 +1,7 @@
 const fs = require('fs');
 const webpack = require('webpack');
 
-const DEBUGGING = false;
+const DEBUGGING = true;
 
 const COURSE_PLAN = 'src/Inventory/CoursePlans/CoursePlan.ts';
 const STUDENT_FOLDER = 'src/Inventory/StudentFolders/StudentFolder.ts';

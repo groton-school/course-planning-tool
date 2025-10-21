@@ -21,11 +21,6 @@ export function onOpen() {
     .addItem('Deactivate all inactive course plans', Workflow.Deactivate.all())
     .addItem('Expand comments in all plans', Workflow.ExpandComments.all())
     .addSeparator()
-    .addItem(
-      'Roll-over Student/Advisor Lists',
-      Workflow.Annual.rolloverAcademicYear()
-    )
-    .addSeparator()
     .addSubMenu(
       SpreadsheetApp.getUi()
         .createMenu('Single Advisors')

@@ -61,15 +61,8 @@ class Student implements g.HtmlService.Element.Picker.Pickable {
     return this._advisor;
   }
 
-  private _previousAdvisor?: Advisor;
   public get previousAdvisor() {
-    if (!this._previousAdvisor) {
-      this._previousAdvisor = Advisor.for(
-        this.hostId,
-        lib.CoursePlanningData.sheet.AdvisorListPreviousYear
-      );
-    }
-    return this._previousAdvisor;
+    return undefined;
   }
 
   public constructor(data: Student.ConstructorParameter) {
@@ -81,43 +74,9 @@ class Student implements g.HtmlService.Element.Picker.Pickable {
         firstName,
         lastName,
         gradYear,
-        advisorEmail,
-        advisorFirstName,
-        advisorLastName,
-        previousAdvisorEmail,
-        previousAdvisorFirstName,
-        previousAdvisorLastName
       ] = data;
       data = { hostId, email, firstName, lastName, gradYear };
-      if (advisorEmail && advisorFirstName && advisorLastName) {
-        data.advisor = {
-          email: advisorEmail,
-          firstName: advisorFirstName,
-          lastName: advisorLastName
-        };
-      }
-      if (
-        previousAdvisorEmail &&
-        previousAdvisorFirstName &&
-        previousAdvisorLastName
-      ) {
-        data.previousAdvisor = {
-          email: previousAdvisorEmail,
-          firstName: previousAdvisorFirstName,
-          lastName: previousAdvisorLastName
-        };
-      }
     }
-    if (data.advisor) {
-      this._advisor = new Advisor(data.advisor);
-    }
-    delete data.advisor;
-
-    if (data.previousAdvisor) {
-      this._previousAdvisor = new Advisor(data.previousAdvisor);
-    }
-    delete data.previousAdvisor;
-
     Object.assign(this, {
       ...data,
       abbrevGradYear: data.gradYear - 2000

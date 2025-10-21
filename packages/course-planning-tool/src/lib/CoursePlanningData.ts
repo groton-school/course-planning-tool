@@ -19,7 +19,6 @@ class CoursePlanningData {
     StudentList: 'Student List',
     FacultyList:'Faculty List',
     AdvisorList: 'Advisor List',
-    AdvisorListPreviousYear: 'Advisor List (Previous Year)',
     CourseList: 'Course List',
     CoursesByDepartment: 'Courses by Department',
     HistoricalEnrollment: 'Student Enrollments',
@@ -41,16 +40,12 @@ class CoursePlanningData {
     ParamStudiesCommittee: 'Param_StudiesCommittee',
     ParamCollegeCounseling: 'Param_CollegeCounselingOffice',
     ParamCoursePlanTemplate: 'Param_CoursePlanTemplate',
-    ParamRollOverAcademicYear: 'Param_RollOverAcademicYear',
 
     IEHHostIdSelector: 'IEH_HostID_Selector',
     IEHEnrollmentHistory: 'IEH_EnrollmentHistory',
     IEHDepartments: 'IEH_Departments',
     IEHNumericalYears: 'IEH_NumericalYears',
     IEHYears: 'IEH_Years',
-
-    RollOverStudentFolderPermissions: 'RollOver_StudentFolderPermissions',
-    RollOverCoursePlanPermissoons: 'RollOver_CoursePlanPermissions',
 
     CleanParams: 'Clean_Params',
     CleanInventoryRoot: 'A2:C2',
@@ -68,26 +63,37 @@ class CoursePlanningData {
       Id: i('B'),
       Url: i('C')
     },
-    AdvisorFolders: {
-      Inactive: i('F')
-    },
-    StudentFolders: {
-      Inactive: i('H'),
-      NewAdvisor: i('I'),
-      CurrentAdvisor: i('J')
-    },
     CoursePlans: {
       StudentEmail: i('D'),
       StudentFirstName: i('E'),
       StudentLastName: i('F'),
       GradYear: i('G'),
       FolderId: i('H'),
-      NumOptionsPerDepartment: i('N'),
-      Inactive: i('O'),
-      NewAdvisor: i('P'),
-      CurrentAdvisor: i('Q'),
-      Version: i('R'),
-      Incomplete: i('S')
+      AdvisorEmail: i('I'),
+      AdvisorLastName: i('J'),
+      AdvisorFolderId:i('K'),
+      FormFolderId: i('L'),
+      NumOptionsPerDepartment: i('M'),
+      Inactive: i('N'),
+      NewAdvisor: i('O'),
+      CurrentAdvisor: i('P'),
+      Version: i('Q'),
+      Incomplete: i('R')
+    },
+    StudentFolders: {
+      StudentEmail: i('D'),
+      StudentFirstName: i('E'),
+      StudentLastName: i('F'),
+      GradYear:i('G'),
+      Inactive: i('H'),
+      NewAdvisor: i('I'),
+      CurrentAdvisor: i('J'),
+      CurrentShortcutLocation: i('K')
+    },
+    AdvisorFolders: {
+      AdvisorEmail: i('D'),
+      AdvisorLastName: i('E'),
+      Inactive: i('F')
     },
     StudentList: {
       HostId: i('A'),
@@ -95,7 +101,9 @@ class CoursePlanningData {
       FirstName: i('C'),
       Lastname: i('D'),
       GradYear: i('E'),
-      HasPlan: i('F')
+      HasPlan: i('F'),
+      Inactive: i('G'),
+      MenuListing: i('H')
     },
     AdvisorList: {
       HostId: i('A'),
@@ -109,7 +117,8 @@ class CoursePlanningData {
       AdvisorLastName: i('I'),
       CurrentAdvisor: i('J'),
       MostLikelyAdvisor: i('K'),
-      AdvisorOnCoursePlan: i('L')
+      AdvisorOnCoursePlan: i('L'),
+      AdvisorFolderUrl: i('M')
     }
   };
 }

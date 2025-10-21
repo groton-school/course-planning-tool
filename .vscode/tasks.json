@@ -1,0 +1,13 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "deploy",
+      "path": "packages/course-planning-tool",
+      "problemMatcher": [],
+      "label": "npm: deploy - packages/course-planning-tool",
+      "detail": "run-s deploy:*"
+    }
+  ]
+}

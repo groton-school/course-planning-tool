@@ -101,19 +101,6 @@ class Config {
     return this.getParam(CoursePlanningData.namedRange.ParamCoursePlanTemplate);
   }
 
-  public static get rollOverAcademicYearDate() {
-    return new Date(
-      this.getParam(CoursePlanningData.namedRange.ParamRollOverAcademicYear) ||
-      0
-    );
-  }
-
-  public static set rollOverAcademicYearDate(rollOverDate: Date) {
-    this.setParam(
-      CoursePlanningData.namedRange.ParamRollOverAcademicYear,
-      rollOverDate.toISOString()
-    );
-  }
 }
 
 namespace Config { }
