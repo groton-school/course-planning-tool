@@ -10,6 +10,7 @@ export function onOpen() {
       'Update all course plan enrollment histories',
       Workflow.UpdateEnrollmentHistory.all()
     )
+    .addItem('Update all course plan enrollment histories from…', Workflow.UpdateEnrollmentHistory.pickFrom())
     .addItem(
       'Update all course plan course lists',
       Workflow.UpdateCourseList.all()

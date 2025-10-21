@@ -1,6 +1,7 @@
 import g from '@battis/gas-lighter';
 import Inventory from '../Inventory';
 import lib from '../lib';
+//import { SpreadsheetApp } from '@battis/gas-lighter/dist/g';
 
 export const pickPlan = () => 'ueh_pp';
 global.ueh_pp = () =>
@@ -60,3 +61,41 @@ global.ueh_a = (thread = Utilities.getUuid(), step = 0) => {
     step
   );
 };
+
+
+export const pickFrom = () => 'ueh_pf';
+global.ueh_pf = () =>
+  g.HtmlService.Element.Picker.showModalDialog(
+    SpreadsheetApp,
+    {
+      list: planList(),
+      message:
+        'Please choose the student from whom to start updating all enrollment histories',
+      actionName: 'Update Enrollment Histories',
+      callback: allFrom()
+    },
+    'Update Enrollment History'
+  );
+
+export const allFrom = () => 'ueh_af';
+global.ueh_af = (hostId:string, thread = Utilities.getUuid(), step = 0) => {
+  lib.Progress.setThread(thread);
+  new g.HtmlService.Element.Progress.Paged(
+    thread,
+    { root: SpreadsheetApp, title: 'Update Enrollment Histories' },
+    (step) => {
+      let plans = Inventory.CoursePlans.all().filter(
+        (plan) =>
+          plan.meta.active && plan.student.gradYear != lib.currentSchoolYear()
+      );
+      plans = plans.slice(plans.findIndex((plan) => plan.hostId === hostId))
+      lib.Progress.setMax(
+        plans.length * parseInt(UPDATE_ENROLLMENT_HISTORY_STEPS)
+      );
+      return plans.slice(step);
+    },
+    (plan) => plan.updateEnrollmentHistory(),
+    allFrom(),
+    step
+  );
+}
